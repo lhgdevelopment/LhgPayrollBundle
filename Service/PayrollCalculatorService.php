@@ -43,8 +43,7 @@ class PayrollCalculatorService
 
         return [
             'total_hours' => $totalHours,
-            'total_earnings' => $totalEarnings,
-            'timesheets' => $timesheets
+            'total_earnings' => $totalEarnings, 
         ];
     }
 
