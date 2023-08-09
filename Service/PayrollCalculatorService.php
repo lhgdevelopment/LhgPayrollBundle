@@ -160,6 +160,7 @@ class PayrollCalculatorService
                             'end' => $timesheet->getEnd()->format('H:i'),
                             'error' => \array_key_exists($date, $errors) ? $errors[$date] : [],
                             'duration' => $timesheet->getDuration(),
+                            'duration_in_hour' => $timesheet->getDuration( / 3600,
                             'rate' => $timesheet->getRate(),
                             'customerName' => $timesheet->getProject()->getCustomer()->getName(),
                             'projectName' => $timesheet->getProject()->getName(),
