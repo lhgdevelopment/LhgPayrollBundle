@@ -25,14 +25,17 @@ class LhgPayrollController extends AbstractController
     private $session;
     private $security; 
     private $payrollCalculatorService;
+    private $logger;
 
     public function __construct(SessionInterface $session, 
     Security $security, 
-    PayrollCalculatorService $payrollCalculatorService)
+    PayrollCalculatorService $payrollCalculatorService, 
+    LoggerInterface $logger)
     { 
         $this->session = $session;
         $this->security = $security; 
         $this->payrollCalculatorService = $payrollCalculatorService;
+        $this->logger = $logger;
     }
 
     /**
@@ -139,6 +142,11 @@ class LhgPayrollController extends AbstractController
         // Calculate biweekly payroll data
         // $payrollData = $this->payrollCalculatorService->calculateBiweeklyPayroll($user, $biweeklyStart, $biweeklyEnd);
         [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($user, $biweeklyStart, $biweeklyEnd);
+        $this->logger->error('I just got the logger');
+        echo '<pre>';
+        print_r($timesheets);
+        echo '</pre>';
+        exit();
         
         $totalHours = 0;
         $totalEarnings = 0;
