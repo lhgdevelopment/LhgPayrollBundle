@@ -9,40 +9,68 @@
         <p>Total Hours: {{ payrollData.total_hours }}</p>
         <p>Total Earnings: {{ payrollData.total_earnings }}</p>
 
-        {% for projectId, projectData in projectWiseData %}
-            <div class="project">
-                <div class="project-name">{{ projectData.projectName }}</div>
-                <div class="project-info">
-                    Total Duration: {{ projectData.totalDuration }} hours
-                    Total Amount: {{ projectData.totalAmount }} USD
-                </div>
-                <div class="timesheets">
-                    {% for date, timesheetData in projectData.timesheetsByDate %}
-                        <div class="date">Date: {{ date }}</div>
-                        <div class="timesheet-info">
-                            Total Duration: {{ timesheetData.totalDuration }} hours
-                            Total Amount: {{ timesheetData.totalAmount }} USD
-                        </div>
-                        <div class="timesheets">
-                            {% for timesheet in timesheetData.timesheets %}
-                                <div class="timesheet">
-                                    <div>Begin: {{ timesheet.begin }}</div>
-                                    <div>End: {{ timesheet.end }}</div>
-                                    <div class="error">
-                                        {% for errorMessage in timesheet.error %}
-                                            - {{ errorMessage }}<br>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Project</th>
+                    <th>Total Duration</th>
+                    <th>Total Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for projectId, projectData in projectWiseData %}
+                    <tr>
+                        <td>{{ projectData.projectName }}</td>
+                        <td>{{ projectData.totalDuration }} hours</td>
+                        <td>{{ projectData.totalAmount }} USD</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <table class="sub-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Total Duration</th>
+                                        <th>Total Amount</th>
+                                        <th>Begin</th>
+                                        <th>End</th>
+                                        <th>Description</th>
+                                        <th>Error</th>
+                                        <th>Rate</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for date, timesheetData in projectData.timesheetsByDate %}
+                                        <tr>
+                                            <td>{{ date }}</td>
+                                            <td>{{ timesheetData.totalDuration }} hours</td>
+                                            <td>{{ timesheetData.totalAmount }} USD</td>
+                                        </tr>
+                                        {% for timesheet in timesheetData.timesheets %}
+                                            <tr>
+                                                <td>{{ timesheet.date }}</td>
+                                                <td>{{ timesheet.duration_in_hour }} hours</td>
+                                                <td>{{ timesheet.rate }} USD</td>
+                                                <td>{{ timesheet.begin }}</td>
+                                                <td>{{ timesheet.end }}</td>
+                                                <td>{{ timesheet.description }}</td>
+                                                <td>
+                                                    <ul>
+                                                        {% for errorMessage in timesheet.error %}
+                                                            <li>{{ errorMessage }}</li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                </td>
+                                            </tr>
                                         {% endfor %}
-                                    </div>
-                                    <div>Description: {{ timesheet.description }}</div>
-                                    <div>Duration: {{ timesheet.duration_in_hour }} hours</div>
-                                    <div>Rate: {{ timesheet.rate }} USD</div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endfor %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
     {% endblock %}
 
