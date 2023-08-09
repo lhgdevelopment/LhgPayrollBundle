@@ -134,45 +134,45 @@ class PayrollCalculatorService
         $timesheets = $this->timesheetRepository->getTimesheetsForQuery($timesheetQuery);
         $errors = $this->breakTimeCheckToolGER->checkBreakTime($timesheets);
 
-        $totalHours = 0;
-        $totalEarnings = 0;
+        // $totalHours = 0;
+        // $totalEarnings = 0;
 
-        foreach ($timesheets as $timesheet) {
-            $totalHours += $timesheet->getDuration() / 3600; // Converted to hrs
-            $totalEarnings += $timesheet->getRate();
-        }
-
-        return [
-            'total_hours' => $totalHours,
-            'total_earnings' => $totalEarnings, 
-            'timesheets' => $timesheets
-        ];
+        // foreach ($timesheets as $timesheet) {
+        //     $totalHours += $timesheet->getDuration() / 3600; // Converted to hrs
+        //     $totalEarnings += $timesheet->getRate();
+        // }
 
         // return [
-        //     array_reduce(
-        //         $timesheets,
-        //         function ($result, Timesheet $timesheet) use ($errors) {
-        //             $date = $timesheet->getBegin()->format('Y-m-d');
-        //             if ($timesheet->getEnd()) {
-        //                 $result[] = [
-        //                     'date' => $date,
-        //                     'begin' => $timesheet->getBegin()->format('H:i'),
-        //                     'end' => $timesheet->getEnd()->format('H:i'),
-        //                     'error' => \array_key_exists($date, $errors) ? $errors[$date] : [],
-        //                     'duration' => $timesheet->getDuration(),
-        //                     'customerName' => $timesheet->getProject()->getCustomer()->getName(),
-        //                     'projectName' => $timesheet->getProject()->getName(),
-        //                     'activityName' => $timesheet->getActivity()->getName(),
-        //                     'description' => $timesheet->getDescription()
-        //                 ];
-        //             }
-
-        //             return $result;
-        //         },
-        //         []
-        //     ),
-        //     $errors
+        //     'total_hours' => $totalHours,
+        //     'total_earnings' => $totalEarnings, 
+        //     'timesheets' => $timesheets
         // ];
+
+        return [
+            array_reduce(
+                $timesheets,
+                function ($result, Timesheet $timesheet) use ($errors) {
+                    $date = $timesheet->getBegin()->format('Y-m-d');
+                    if ($timesheet->getEnd()) {
+                        $result[] = [
+                            'date' => $date,
+                            'begin' => $timesheet->getBegin()->format('H:i'),
+                            'end' => $timesheet->getEnd()->format('H:i'),
+                            'error' => \array_key_exists($date, $errors) ? $errors[$date] : [],
+                            'duration' => $timesheet->getDuration(),
+                            'customerName' => $timesheet->getProject()->getCustomer()->getName(),
+                            'projectName' => $timesheet->getProject()->getName(),
+                            'activityName' => $timesheet->getActivity()->getName(),
+                            'description' => $timesheet->getDescription()
+                        ];
+                    }
+
+                    return $result;
+                },
+                []
+            ),
+            $errors
+        ];
     }
 
 

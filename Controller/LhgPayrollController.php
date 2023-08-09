@@ -131,28 +131,32 @@ class LhgPayrollController extends AbstractController
 
     public function biweeklyPayrollAction(Request $request)
     {
-
-        // 07.17.2023 - 07.30.2023 => Latest 
-        // 07.31.2023 - 08.13.2023 => Next 
-        // Get the current date 
-        
-        $dates = $this->payrollCalculatorService->calculateBiweeklyPeriod(new DateTime());
-
-        // Calculate the biweekly start and end dates based on the current date
+        $dates = $this->payrollCalculatorService->calculateBiweeklyPeriod(new DateTime()); 
         $biweeklyStart = $dates['start'];        
-        $biweeklyEnd = $dates['end']; 
-        // print_r($dates);
-        // exit;
-        // Fetch the logged-in user
+        $biweeklyEnd = $dates['end'];  
         $user = $this->getUser();
 
         // Calculate biweekly payroll data
         // $payrollData = $this->payrollCalculatorService->calculateBiweeklyPayroll($user, $biweeklyStart, $biweeklyEnd);
-        $payrollData = $this->payrollCalculatorService->getTimesheets($user, $biweeklyStart, $biweeklyEnd); 
+        [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($user, $biweeklyStart, $biweeklyEnd);
+        
+        $totalHours = 0;
+        $totalEarnings = 0;
+
+        foreach ($timesheets as $timesheet) {
+            $totalHours += $timesheet->getDuration() / 3600; // Converted to hrs
+            $totalEarnings += $timesheet->getRate();
+        }
+
+        $payrollData =  [
+            'total_hours' => $totalHours,
+            'total_earnings' => $totalEarnings
+        ];
 
         // Render the template with payroll data
         return $this->render('@LhgPayroll/payroll/biweekly.html.twig', [
             'payrollData' => $payrollData,
+            'timesheets' => $timesheets
         ]);
     }
 }
