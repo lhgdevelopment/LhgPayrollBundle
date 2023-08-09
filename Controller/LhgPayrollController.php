@@ -148,9 +148,74 @@ class LhgPayrollController extends AbstractController
         // echo '</pre>';
 
         // Prepare Projectwise data 
+
+        $projectWiseData = [];
+
+        // Loop through each work log
+        foreach ($timesheets as $timesheet) {
+            $projectId = $timesheet['projectId'];
+            $projectName = $timesheet['projectName'];
+            $durationInHours = $timesheet['duration_in_hour'];
+
+            // Check if the project exists in the $projectWiseData array
+            if (!isset($projectWiseData[$projectId])) {
+                $projectWiseData[$projectId] = [
+                    'projectName' => $projectName,
+                    'totalDuration' => 0,
+                    'totalAmount' => 0,
+                    'timesheetsByDate' => [], // Initialize an empty array for timesheets by date
+                ];
+            }
+
+            // Update total duration and amount for the project
+            $projectWiseData[$projectId]['totalDuration'] += $durationInHours;
+            $projectWiseData[$projectId]['totalAmount'] += ($durationInHours * $timesheet['rate']);
+
+            // Group timesheets by date
+            $date = $timesheet['date'];
+            if (!isset($projectWiseData[$projectId]['timesheetsByDate'][$date])) {
+                $projectWiseData[$projectId]['timesheetsByDate'][$date] = [
+                    'totalDuration' => 0,
+                    'totalAmount' => 0,
+                    'timesheets' => [], // Initialize an empty array for timesheets
+                ];
+            }
+
+            // Update total duration and amount for the date
+            $projectWiseData[$projectId]['timesheetsByDate'][$date]['totalDuration'] += $durationInHours;
+            $projectWiseData[$projectId]['timesheetsByDate'][$date]['totalAmount'] += ($durationInHours * $timesheet['rate']);
+
+            // Add the timesheet entry to the date
+            $projectWiseData[$projectId]['timesheetsByDate'][$date]['timesheets'][] = [
+                'duration' => $durationInHours,
+                'rate' => $timesheet['rate'],
+                'amount' => ($durationInHours * $timesheet['rate']),
+            ];
+        }
+
+        // Display the project-wise data
+        foreach ($projectWiseData as $projectId => $projectData) {
+            echo "Project: {$projectData['projectName']}\n";
+            echo "Total Duration: {$projectData['totalDuration']} hours\n";
+            echo "Total Amount: {$projectData['totalAmount']} USD\n";
+
+            // Display timesheets grouped by date for the project
+            echo "Timesheets by Date:\n";
+            foreach ($projectData['timesheetsByDate'] as $date => $dateData) {
+                echo "- Date: {$date}\n";
+                echo "  Total Duration: {$dateData['totalDuration']} hours\n";
+                echo "  Total Amount: {$dateData['totalAmount']} USD\n";
+                
+                foreach ($dateData['timesheets'] as $timesheet) {
+                    echo "  - Duration: {$timesheet['duration']} hours, Rate: {$timesheet['rate']} USD, Amount: {$timesheet['amount']} USD\n";
+                }
+            }
+
+            echo "-------------------\n";
+        }
         
         echo '<pre>';
-        print_r(json_encode($timesheets)); 
+        print_r(json_encode($projectWiseData)); 
         echo '</pre>';
         // exit();
         
