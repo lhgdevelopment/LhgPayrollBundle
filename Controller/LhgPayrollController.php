@@ -146,14 +146,14 @@ class LhgPayrollController extends AbstractController
         echo '<pre>';
         print_r($timesheets);
         echo '</pre>';
-        exit();
+        // exit();
         
         $totalHours = 0;
         $totalEarnings = 0;
 
         foreach ($timesheets as $timesheet) {
-            $totalHours += $timesheet->getDuration() / 3600; // Converted to hrs
-            $totalEarnings += $timesheet->getRate();
+            $totalHours += $timesheet['duration'] / 3600; // Converted to hrs
+            $totalEarnings += $timesheet['rate'];
         }
 
         $payrollData =  [
