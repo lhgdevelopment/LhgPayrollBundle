@@ -24,10 +24,11 @@ class PayrollCalculatorService
         $query = $timesheetRepository->createQueryBuilder('t')
             ->where('t.user = :user')
             ->andWhere('t.begin >= :biweeklyStart')
+            ->andWhere('t.begin <= :biweeklyEnd')
             // ->andWhere('t.end <= :biweeklyEnd')
             ->setParameter('user', $user)
             ->setParameter('biweeklyStart', $biweeklyStart)
-            // ->setParameter('biweeklyEnd', $biweeklyEnd)
+            ->setParameter('biweeklyEnd', $biweeklyEnd)
             ->getQuery();
 
         $timesheets = $query->getResult();
