@@ -235,7 +235,8 @@ class LhgPayrollController extends AbstractController
             'projectWiseData' => $projectWiseData,
             'selectedDate' => $selectedDate,
             'selectedUserName' => $selectedUser->getUsername(),
-            'selectedUserId' => $selectedUser->getId()
+            'selectedUserId' => $selectedUser->getId(),
+            'payrollDates' => $dates
         ]);
     }
 }
