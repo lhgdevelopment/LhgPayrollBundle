@@ -123,6 +123,7 @@ class PayrollCalculatorService
     function getTimesheets(?User $selectedUser, DateTime $start, DateTime $end)
     {
         $timesheetQuery = new TimesheetQuery();
+        $timesheetQuery->isStopped();
         $timesheetQuery->setUser($selectedUser);
         $dateRange = new DateRange();
         $dateRange->setBegin($start);
