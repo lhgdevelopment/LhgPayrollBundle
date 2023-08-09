@@ -3,9 +3,9 @@
 namespace KimaiPlugin\LhgPayrollBundle\Controller;
 
 use App\Entity\User;
-use DateInterval;
-use DateTime;
-use DateTimeImmutable;
+use App\Repository\UserRepository;
+use DateTime; 
+use Doctrine\ORM\EntityManagerInterface;
 use KimaiPlugin\LhgPayrollBundle\Service\PayrollCalculatorService;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,16 +26,19 @@ class LhgPayrollController extends AbstractController
     private $security; 
     private $payrollCalculatorService;
     private $logger;
+    private $userRepository;
 
     public function __construct(SessionInterface $session, 
     Security $security, 
     PayrollCalculatorService $payrollCalculatorService, 
+    UserRepository $userRepository, 
     LoggerInterface $logger)
     { 
         $this->session = $session;
         $this->security = $security; 
         $this->payrollCalculatorService = $payrollCalculatorService;
         $this->logger = $logger;
+        $this->userRepository = $userRepository;
     }
 
     /**
@@ -145,7 +148,12 @@ class LhgPayrollController extends AbstractController
 
         // Get the date and user input from the request
         $selectedDate = $request->query->get('date', new DateTime());
-        $selectedUser = $request->query->get('user', $this->getUser());
+        if($request->query->get('user')){
+            $selectedUser = $this->userRepository->find($request->query->get('user'));
+        }
+        if(!$selectedUser){
+            $selectedUser = $this->getUser();
+        }
 
         $dates = $this->payrollCalculatorService->calculateBiweeklyPeriod($selectedDate);
         $biweeklyStart = $dates['start'];
