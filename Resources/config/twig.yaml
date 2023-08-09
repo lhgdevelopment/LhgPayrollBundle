@@ -1,0 +1,6 @@
+twig:
+    # ...
+    paths:
+        # '%kernel.project_dir%/vendor/acme/foo-bar/templates': foo_bar
+        '"%kernel.root_dir%/../var/plugins/LhgPayrollBundle/Resources/views': LhgPayroll
+        # "%kernel.root_dir%/../var/plugins/DemoBundle/Entity/"

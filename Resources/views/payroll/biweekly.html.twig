@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+{% import "macros/widgets.html.twig" as widgets %}
+
+{% block page_title %}{{ 'LHG Payroll'|trans }}{% endblock %} 
+
+{% block main %}
+
+    {% block content %}
+        <h1>Biweekly Payroll</h1>
+        <p>Total Hours: {{ payrollData.total_hours }}</p>
+        <p>Total Earnings: {{ payrollData.total_earnings }}</p>
+    {% endblock %}
+
+{% endblock %}  
