@@ -166,7 +166,7 @@ class LhgPayrollController extends AbstractController
             }
         }
         echo '<pre>';
-        print_r($projectWisedata);
+        print_r(json_encode($projectWisedata));
         echo '</pre>';
         // exit();
         
