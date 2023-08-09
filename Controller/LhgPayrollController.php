@@ -134,14 +134,25 @@ class LhgPayrollController extends AbstractController
 
     public function biweeklyPayrollAction(Request $request)
     {
-        $dates = $this->payrollCalculatorService->calculateBiweeklyPeriod(new DateTime()); 
-        $biweeklyStart = $dates['start'];        
-        $biweeklyEnd = $dates['end'];  
-        $user = $this->getUser();
+        // $dates = $this->payrollCalculatorService->calculateBiweeklyPeriod(new DateTime()); 
+        // $biweeklyStart = $dates['start'];        
+        // $biweeklyEnd = $dates['end'];  
+        // $user = $this->getUser();
+
+        // // Calculate biweekly payroll data
+        // // $payrollData = $this->payrollCalculatorService->calculateBiweeklyPayroll($user, $biweeklyStart, $biweeklyEnd);
+        // [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($user, $biweeklyStart, $biweeklyEnd); 
+
+        // Get the date and user input from the request
+        $selectedDate = $request->query->get('date', new DateTime());
+        $selectedUser = $request->query->get('user', $this->getUser());
+
+        $dates = $this->payrollCalculatorService->calculateBiweeklyPeriod($selectedDate);
+        $biweeklyStart = $dates['start'];
+        $biweeklyEnd = $dates['end'];
 
         // Calculate biweekly payroll data
-        // $payrollData = $this->payrollCalculatorService->calculateBiweeklyPayroll($user, $biweeklyStart, $biweeklyEnd);
-        [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($user, $biweeklyStart, $biweeklyEnd); 
+        [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($selectedUser, $biweeklyStart, $biweeklyEnd);
 
         // Prepare Projectwise data 
 
@@ -207,7 +218,9 @@ class LhgPayrollController extends AbstractController
         return $this->render('@LhgPayroll/payroll/biweekly.html.twig', [
             'payrollData' => $payrollData,
             'timesheets' => $timesheets, 
-            'projectWiseData' => $projectWiseData
+            'projectWiseData' => $projectWiseData,
+            'selectedDate' => $selectedDate,
+            'selectedUser' => $selectedUser
         ]);
     }
 }
