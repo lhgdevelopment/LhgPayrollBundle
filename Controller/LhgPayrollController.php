@@ -143,8 +143,30 @@ class LhgPayrollController extends AbstractController
         // $payrollData = $this->payrollCalculatorService->calculateBiweeklyPayroll($user, $biweeklyStart, $biweeklyEnd);
         [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($user, $biweeklyStart, $biweeklyEnd);
         $this->logger->error('I just got the logger');
+        // echo '<pre>';
+        // print_r($timesheets);
+        // echo '</pre>';
+
+        // Prepare Projectwise data 
+        $projectWisedata = [];
+        foreach ($timesheets as $timesheet) {
+            if(!isset($projectWisedata[$timesheet['projectId']])){
+                $projectWisedata[$timesheet['projectId']] = [
+                    'projectName' => $timesheet['projectName'], 
+                    'dateWisedata' => []
+                    
+                ];
+            }
+
+            if(!isset($projectWisedata[$timesheet['projectId']['dateWisedata'][$timesheet['date']]])){
+                $projectWisedata[$timesheet['projectId']['dateWisedata'][$timesheet['date']]][] = $timesheet;
+            }
+            else{
+                array_push($projectWisedata[$timesheet['projectId']['dateWisedata'][$timesheet['date']]], $timesheet);
+            }
+        }
         echo '<pre>';
-        print_r($timesheets);
+        print_r($projectWisedata);
         echo '</pre>';
         // exit();
         
