@@ -5,16 +5,29 @@ namespace KimaiPlugin\LhgPayrollBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Timesheet;
+use App\Entity\User;
+use App\Form\Model\DateRange;
+use App\Repository\Query\BaseQuery;
+use App\Repository\Query\TimesheetQuery;
+use App\Repository\TimesheetRepository;
 use DateInterval;
 use DateTime;
+use KimaiPlugin\ApprovalBundle\Toolbox\BreakTimeCheckToolGER;
 
 class PayrollCalculatorService
 {
     private $entityManager;
+    private $timesheetRepository;
+    private $breakTimeCheckToolGER;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(
+        EntityManagerInterface $entityManager, 
+        TimesheetRepository $timesheetRepository,
+        BreakTimeCheckToolGER $breakTimeCheckToolGER,)
     {
         $this->entityManager = $entityManager;
+        $this->timesheetRepository = $timesheetRepository;
+        $this->breakTimeCheckToolGER = $breakTimeCheckToolGER;
     }
 
     public function calculateBiweeklyPayroll($user, $biweeklyStart, $biweeklyEnd)
@@ -102,6 +115,50 @@ class PayrollCalculatorService
         }
 
         return $projectWisedata;
+    }
+
+    /**
+     * @throws Exception
+     */
+    function getTimesheets(?User $selectedUser, DateTime $start, DateTime $end)
+    {
+        $timesheetQuery = new TimesheetQuery();
+        $timesheetQuery->setUser($selectedUser);
+        $dateRange = new DateRange();
+        $dateRange->setBegin($start);
+        $dateRange->setEnd($end);
+        $timesheetQuery->setDateRange($dateRange);
+        $timesheetQuery->setOrderBy('date');
+        $timesheetQuery->setOrder(BaseQuery::ORDER_ASC);
+
+        $timesheets = $this->timesheetRepository->getTimesheetsForQuery($timesheetQuery);
+        $errors = $this->breakTimeCheckToolGER->checkBreakTime($timesheets);
+
+        return [
+            array_reduce(
+                $timesheets,
+                function ($result, Timesheet $timesheet) use ($errors) {
+                    $date = $timesheet->getBegin()->format('Y-m-d');
+                    if ($timesheet->getEnd()) {
+                        $result[] = [
+                            'date' => $date,
+                            'begin' => $timesheet->getBegin()->format('H:i'),
+                            'end' => $timesheet->getEnd()->format('H:i'),
+                            'error' => \array_key_exists($date, $errors) ? $errors[$date] : [],
+                            'duration' => $timesheet->getDuration(),
+                            'customerName' => $timesheet->getProject()->getCustomer()->getName(),
+                            'projectName' => $timesheet->getProject()->getName(),
+                            'activityName' => $timesheet->getActivity()->getName(),
+                            'description' => $timesheet->getDescription()
+                        ];
+                    }
+
+                    return $result;
+                },
+                []
+            ),
+            $errors
+        ];
     }
 
 

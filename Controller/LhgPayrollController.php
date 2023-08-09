@@ -148,8 +148,9 @@ class LhgPayrollController extends AbstractController
 
         // Calculate biweekly payroll data
         $payrollData = $this->payrollCalculatorService->calculateBiweeklyPayroll($user, $biweeklyStart, $biweeklyEnd);
-        // print_r($payrollData);
-        // exit;
+        [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($user, $biweeklyStart, $biweeklyEnd);
+        print_r($timesheets);
+        exit;
 
         // Render the template with payroll data
         return $this->render('@LhgPayroll/payroll/biweekly.html.twig', [
