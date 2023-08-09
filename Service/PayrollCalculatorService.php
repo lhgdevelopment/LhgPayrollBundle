@@ -44,6 +44,7 @@ class PayrollCalculatorService
         return [
             'total_hours' => $totalHours,
             'total_earnings' => $totalEarnings,
+            'timesheets' => $this->generateViewDataFromTimesheets($timesheets)
         ];
     }
 
@@ -76,5 +77,35 @@ class PayrollCalculatorService
 
         return $dates;
     }
+
+    function generateViewDataFromTimesheets(array $timesheets = []): array
+    {
+        $projectWisedata = [];
+
+        foreach ($timesheets as $timesheet) {
+            $projectId = $timesheet->getProject()->getId();
+            $projectName = $timesheet->getProject()->getName();
+            $date = $timesheet->getBegin()->format('d-m-Y');
+            $duration = $timesheet->getDuration();
+
+            if (!isset($projectWisedata[$projectId])) {
+                $projectWisedata[$projectId] = [
+                    'project' => $projectName,
+                    'timesheet' => [],
+                    'dates' => [],
+                ];
+            }
+
+            $projectWisedata[$projectId]['timesheet'][] = $timesheet;
+
+            $projectWisedata[$projectId]['dates'][$date] ??= 0;
+            $projectWisedata[$projectId]['dates'][$date] += $duration;
+        }
+
+        return $projectWisedata;
+    }
+
+
+
 
 }
