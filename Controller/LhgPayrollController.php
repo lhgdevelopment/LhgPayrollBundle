@@ -154,7 +154,7 @@ class LhgPayrollController extends AbstractController
                 array_push($projectWisedata[$timesheet[projectId]['tasks']], $timesheet);
             }
             else{
-                $projectWisedata[$timesheet[projectId]['tasks'][] = $timesheet;
+                $projectWisedata[$timesheet[projectId]['tasks']] = [$timesheet];
             }
         }
         echo '<pre>';
