@@ -1,13 +1,49 @@
 {% extends 'base.html.twig' %}
 {% import "macros/widgets.html.twig" as widgets %}
 
-{% block page_title %}{{ 'LHG Payroll'|trans }}{% endblock %} 
+{% block page_title %}{{ 'LHG Payroll'|trans }}{% endblock %}
 
 {% block main %}
 
-    {% block content %} 
+    {% block content %}
         <p>Total Hours: {{ payrollData.total_hours }}</p>
         <p>Total Earnings: {{ payrollData.total_earnings }}</p>
+
+        {% for projectId, projectData in projectWiseData %}
+            <div class="project">
+                <div class="project-name">{{ projectData.projectName }}</div>
+                <div class="project-info">
+                    Total Duration: {{ projectData.totalDuration }} hours
+                    Total Amount: {{ projectData.totalAmount }} USD
+                </div>
+                <div class="timesheets">
+                    {% for date, timesheetData in projectData.timesheetsByDate %}
+                        <div class="date">Date: {{ date }}</div>
+                        <div class="timesheet-info">
+                            Total Duration: {{ timesheetData.totalDuration }} hours
+                            Total Amount: {{ timesheetData.totalAmount }} USD
+                        </div>
+                        <div class="timesheets">
+                            {% for timesheet in timesheetData.timesheets %}
+                                <div class="timesheet">
+                                    <div>Begin: {{ timesheet.begin }}</div>
+                                    <div>End: {{ timesheet.end }}</div>
+                                    <div class="error">
+                                        {% for errorMessage in timesheet.error %}
+                                            - {{ errorMessage }}<br>
+                                        {% endfor %}
+                                    </div>
+                                    <div>Description: {{ timesheet.description }}</div>
+                                    <div>Duration: {{ timesheet.duration_in_hour }} hours</div>
+                                    <div>Rate: {{ timesheet.rate }} USD</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+
     {% endblock %}
 
-{% endblock %}  
+{% endblock %}
