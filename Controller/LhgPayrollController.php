@@ -148,18 +148,9 @@ class LhgPayrollController extends AbstractController
         // echo '</pre>';
 
         // Prepare Projectwise data 
-        $projectWisedata = [];
-        foreach ($timesheets as $timesheet) {
-            if(isset($projectWisedata[$timesheet[projectId]['tasks']])){
-                array_push($projectWisedata[$timesheet[projectId]['tasks']], $timesheet);
-            }
-            else{
-                $projectWisedata[$timesheet[projectId]['tasks']] = [$timesheet];
-            }
-        }
+        
         echo '<pre>';
-        // print_r(json_encode($timesheets));
-        print_r(json_encode($projectWisedata));
+        print_r(json_encode($timesheets)); 
         echo '</pre>';
         // exit();
         
