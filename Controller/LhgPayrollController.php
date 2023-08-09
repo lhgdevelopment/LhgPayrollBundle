@@ -169,7 +169,7 @@ class LhgPayrollController extends AbstractController
 
             // Update total duration and amount for the project
             $projectWiseData[$projectId]['totalDuration'] += $durationInHours;
-            $projectWiseData[$projectId]['totalAmount'] += ($durationInHours * $timesheet['rate']);
+            $projectWiseData[$projectId]['totalAmount'] += $timesheet['rate'];
 
             // Group timesheets by date
             $date = $timesheet['date'];
@@ -183,14 +183,10 @@ class LhgPayrollController extends AbstractController
 
             // Update total duration and amount for the date
             $projectWiseData[$projectId]['timesheetsByDate'][$date]['totalDuration'] += $durationInHours;
-            $projectWiseData[$projectId]['timesheetsByDate'][$date]['totalAmount'] += ($durationInHours * $timesheet['rate']);
+            $projectWiseData[$projectId]['timesheetsByDate'][$date]['totalAmount'] += $timesheet['rate'];
 
             // Add the timesheet entry to the date
-            $projectWiseData[$projectId]['timesheetsByDate'][$date]['timesheets'][] = [
-                'duration' => $durationInHours,
-                'rate' => $timesheet['rate'],
-                'amount' => ($durationInHours * $timesheet['rate']),
-            ];
+            $projectWiseData[$projectId]['timesheetsByDate'][$date]['timesheets'][] = $timesheet;
         }
 
         // Display the project-wise data
