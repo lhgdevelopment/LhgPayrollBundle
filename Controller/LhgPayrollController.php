@@ -141,11 +141,7 @@ class LhgPayrollController extends AbstractController
 
         // Calculate biweekly payroll data
         // $payrollData = $this->payrollCalculatorService->calculateBiweeklyPayroll($user, $biweeklyStart, $biweeklyEnd);
-        [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($user, $biweeklyStart, $biweeklyEnd);
-        $this->logger->error('I just got the logger');
-        // echo '<pre>';
-        // print_r($timesheets);
-        // echo '</pre>';
+        [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($user, $biweeklyStart, $biweeklyEnd); 
 
         // Prepare Projectwise data 
 
@@ -187,32 +183,11 @@ class LhgPayrollController extends AbstractController
 
             // Add the timesheet entry to the date
             $projectWiseData[$projectId]['timesheetsByDate'][$date]['timesheets'][] = $timesheet;
-        }
-
-        // Display the project-wise data
-        foreach ($projectWiseData as $projectId => $projectData) {
-            echo "Project: {$projectData['projectName']}\n";
-            echo "Total Duration: {$projectData['totalDuration']} hours\n";
-            echo "Total Amount: {$projectData['totalAmount']} USD\n";
-
-            // Display timesheets grouped by date for the project
-            echo "Timesheets by Date:\n";
-            foreach ($projectData['timesheetsByDate'] as $date => $dateData) {
-                echo "- Date: {$date}\n";
-                echo "  Total Duration: {$dateData['totalDuration']} hours\n";
-                echo "  Total Amount: {$dateData['totalAmount']} USD\n";
-                
-                foreach ($dateData['timesheets'] as $timesheet) {
-                    echo "  - Duration: {$timesheet['duration']} hours, Rate: {$timesheet['rate']} USD, Amount: {$timesheet['amount']} USD\n";
-                }
-            }
-
-            echo "-------------------\n";
-        }
+        } 
         
-        echo '<pre>';
-        print_r(json_encode($projectWiseData)); 
-        echo '</pre>';
+        // echo '<pre>';
+        // print_r(json_encode($projectWiseData)); 
+        // echo '</pre>';
         // exit();
         
         $totalHours = 0;
@@ -231,7 +206,8 @@ class LhgPayrollController extends AbstractController
         // Render the template with payroll data
         return $this->render('@LhgPayroll/payroll/biweekly.html.twig', [
             'payrollData' => $payrollData,
-            'timesheets' => $timesheets
+            'timesheets' => $timesheets, 
+            'projectWiseData' => $projectWiseData
         ]);
     }
 }
