@@ -149,7 +149,7 @@ class LhgPayrollController extends AbstractController
         // Get the date and user input from the request
         $selectedDate = $request->query->get('date', new DateTime());
         if($request->query->get('user')){
-            $selectedUser = $this->userRepository->find($request->query->get('user'));
+            $selectedUser = $this->userRepository->getUserById($request->query->get('user'));
         }
         if(!$selectedUser){
             $selectedUser = $this->getUser();
@@ -228,7 +228,8 @@ class LhgPayrollController extends AbstractController
             'timesheets' => $timesheets, 
             'projectWiseData' => $projectWiseData,
             'selectedDate' => $selectedDate,
-            'selectedUser' => $selectedUser
+            'selectedUserName' => $selectedUser->getUsername(),
+            'selectedUserId' => $selectedUser->getId()
         ]);
     }
 }
