@@ -148,6 +148,12 @@ class LhgPayrollController extends AbstractController
 
         // Get the date and user input from the request
         $selectedDate = $request->query->get('date', new DateTime());
+        if($request->query->get('date')){
+            $selectedDate = new DateTime($request->query->get('date'));
+        }
+        else{
+            $selectedDate = new DateTime();
+        }
         if($request->query->get('user')){
             $selectedUser = $this->userRepository->getUserById($request->query->get('user'));
         }
