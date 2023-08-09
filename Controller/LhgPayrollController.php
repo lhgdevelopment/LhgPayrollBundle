@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Repository\UserRepository;
 use DateTime; 
 use Doctrine\ORM\EntityManagerInterface;
+use DoctrineExtensions\Query\Mysql\Format;
 use KimaiPlugin\LhgPayrollBundle\Service\PayrollCalculatorService;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -154,12 +155,11 @@ class LhgPayrollController extends AbstractController
         else{
             $selectedDate = new DateTime();
         }
+        $selectedUser = $this->getUser();
         if($request->query->get('user')){
             $selectedUser = $this->userRepository->getUserById($request->query->get('user'));
         }
-        if(!$selectedUser){
-            $selectedUser = $this->getUser();
-        }
+        
 
         $dates = $this->payrollCalculatorService->calculateBiweeklyPeriod($selectedDate);
         $biweeklyStart = $dates['start'];
@@ -236,7 +236,10 @@ class LhgPayrollController extends AbstractController
             'selectedDate' => $selectedDate,
             'selectedUserName' => $selectedUser->getUsername(),
             'selectedUserId' => $selectedUser->getId(),
-            'payrollDates' => $dates
+            'payrollDates' => [
+                'start' => $dates['start']->format('m-d-y'),
+                'end' => $dates['end']->format('m-d-y')
+            ]
         ]);
     }
 }
