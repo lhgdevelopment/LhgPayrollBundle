@@ -36,8 +36,8 @@ class PayrollCalculatorService
         $totalEarnings = 0;
 
         foreach ($timesheets as $timesheet) {
-            $totalHours += $timesheet->getDuration();
-            $totalEarnings += $timesheet->getDuration() * $timesheet->getRate();
+            $totalHours += $timesheet->getDuration() / 3600; // Converted to hrs
+            $totalEarnings += $timesheet->getRate();
         }
 
         return [
