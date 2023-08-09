@@ -27,7 +27,7 @@ class PayrollCalculatorService
             // ->andWhere('t.end <= :biweeklyEnd')
             ->setParameter('user', $user)
             ->setParameter('biweeklyStart', $biweeklyStart)
-            ->setParameter('biweeklyEnd', $biweeklyEnd)
+            // ->setParameter('biweeklyEnd', $biweeklyEnd)
             ->getQuery();
 
         $timesheets = $query->getResult();
