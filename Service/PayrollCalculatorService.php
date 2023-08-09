@@ -23,7 +23,7 @@ class PayrollCalculatorService
     public function __construct(
         EntityManagerInterface $entityManager, 
         TimesheetRepository $timesheetRepository,
-        BreakTimeCheckToolGER $breakTimeCheckToolGER,)
+        BreakTimeCheckToolGER $breakTimeCheckToolGER)
     {
         $this->entityManager = $entityManager;
         $this->timesheetRepository = $timesheetRepository;
@@ -134,31 +134,44 @@ class PayrollCalculatorService
         $timesheets = $this->timesheetRepository->getTimesheetsForQuery($timesheetQuery);
         $errors = $this->breakTimeCheckToolGER->checkBreakTime($timesheets);
 
-        return [
-            array_reduce(
-                $timesheets,
-                function ($result, Timesheet $timesheet) use ($errors) {
-                    $date = $timesheet->getBegin()->format('Y-m-d');
-                    if ($timesheet->getEnd()) {
-                        $result[] = [
-                            'date' => $date,
-                            'begin' => $timesheet->getBegin()->format('H:i'),
-                            'end' => $timesheet->getEnd()->format('H:i'),
-                            'error' => \array_key_exists($date, $errors) ? $errors[$date] : [],
-                            'duration' => $timesheet->getDuration(),
-                            'customerName' => $timesheet->getProject()->getCustomer()->getName(),
-                            'projectName' => $timesheet->getProject()->getName(),
-                            'activityName' => $timesheet->getActivity()->getName(),
-                            'description' => $timesheet->getDescription()
-                        ];
-                    }
+        $totalHours = 0;
+        $totalEarnings = 0;
 
-                    return $result;
-                },
-                []
-            ),
-            $errors
+        foreach ($timesheets as $timesheet) {
+            $totalHours += $timesheet->getDuration() / 3600; // Converted to hrs
+            $totalEarnings += $timesheet->getRate();
+        }
+
+        return [
+            'total_hours' => $totalHours,
+            'total_earnings' => $totalEarnings, 
         ];
+
+        // return [
+        //     array_reduce(
+        //         $timesheets,
+        //         function ($result, Timesheet $timesheet) use ($errors) {
+        //             $date = $timesheet->getBegin()->format('Y-m-d');
+        //             if ($timesheet->getEnd()) {
+        //                 $result[] = [
+        //                     'date' => $date,
+        //                     'begin' => $timesheet->getBegin()->format('H:i'),
+        //                     'end' => $timesheet->getEnd()->format('H:i'),
+        //                     'error' => \array_key_exists($date, $errors) ? $errors[$date] : [],
+        //                     'duration' => $timesheet->getDuration(),
+        //                     'customerName' => $timesheet->getProject()->getCustomer()->getName(),
+        //                     'projectName' => $timesheet->getProject()->getName(),
+        //                     'activityName' => $timesheet->getActivity()->getName(),
+        //                     'description' => $timesheet->getDescription()
+        //                 ];
+        //             }
+
+        //             return $result;
+        //         },
+        //         []
+        //     ),
+        //     $errors
+        // ];
     }
 
 
