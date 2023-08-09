@@ -21,8 +21,8 @@
                 {% for projectId, projectData in projectWiseData %}
                     <tr>
                         <td>{{ projectData.projectName }}</td>
-                        <td>{{ projectData.totalDuration }} hours</td>
-                        <td>{{ projectData.totalAmount }} USD</td>
+                        <td>{{ projectData.totalDuration|number_format(3) }} hours</td>
+                        <td>{{ projectData.totalAmount|number_format(3) }} USD</td>
                     </tr>
                     <tr>
                         <td colspan="3">
@@ -43,14 +43,14 @@
                                     {% for date, timesheetData in projectData.timesheetsByDate %}
                                         <tr>
                                             <td>{{ date }}</td>
-                                            <td>{{ timesheetData.totalDuration }} hours</td>
-                                            <td>{{ timesheetData.totalAmount }} USD</td>
+                                            <td>{{ timesheetData.totalDuration|number_format(3) }} hours</td>
+                                            <td>{{ timesheetData.totalAmount|number_format(3) }} USD</td>
                                         </tr>
                                         {% for timesheet in timesheetData.timesheets %}
                                             <tr>
                                                 <td>{{ timesheet.date }}</td>
-                                                <td>{{ timesheet.duration_in_hour }} hours</td>
-                                                <td>{{ timesheet.rate }} USD</td>
+                                                <td>{{ timesheet.duration_in_hour|number_format(3) }} hours</td>
+                                                <td>{{ timesheet.rate|number_format(3) }} USD</td>
                                                 <td>{{ timesheet.begin }}</td>
                                                 <td>{{ timesheet.end }}</td>
                                                 <td>{{ timesheet.description }}</td>
