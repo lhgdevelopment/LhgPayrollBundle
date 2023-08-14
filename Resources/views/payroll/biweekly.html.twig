@@ -105,15 +105,16 @@
     <script>
             document.addEventListener("DOMContentLoaded", function() {
             // Get the buttons by their IDs
-            const prevButton = document.getElementById("prev_btn");
-            const nextButton = document.getElementById("next_btn");
+            const prevButton = document.getElementById("next_btn");
+            const nextButton = document.getElementById("prev_btn");
             const dateInput = document.getElementById("payroll_date");
 
             // Add click event listeners to the buttons
             prevButton.addEventListener("click", function() { 
                 const currentDate = new Date(dateInput.value);
-                const previousStartDate = moment(startDate).subtract(2, 'weeks').startOf('isoWeek');
-                dateInput.value = previousStartDate.toISOString().slice(0, 10);
+                currentDate.setDate(currentDate.getDate() - 14); 
+                dateInput.value = currentDate.toISOString().slice(0, 10);
+                console.log(currentDate.toISOString().slice(0, 10));
                 
                 // Submit the form
                 //document.querySelector("form").submit();
@@ -121,8 +122,9 @@
 
             nextButton.addEventListener("click", function() { 
                 const currentDate = new Date(dateInput.value);
-                const nextStartDate = calculateNextBiweeklyPeriod(currentDate);
-                dateInput.value = nextStartDate.toISOString().slice(0, 10);
+                currentDate.setDate(currentDate.getDate() + 14); 
+                dateInput.value = currentDate.toISOString().slice(0, 10);
+                console.log(currentDate.toISOString().slice(0, 10));
                 
                 // Submit the form
                 //document.querySelector("form").submit();
