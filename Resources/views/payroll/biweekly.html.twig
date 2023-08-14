@@ -16,14 +16,16 @@
                     </select>
                 </div>
                 <input type="hidden" name="date" class="form-control" id="payroll_date" value={{ selectedDate }} placeholder="">  
+                <input type="hidden" name="date" class="form-control" id="payroll_start_date" value={{ payrollDates.start }} placeholder="">  
+                <input type="hidden" name="date" class="form-control" id="payroll_end_date" value={{ payrollDates.end }} placeholder="">  
 
-                <button id="next_btn" type="button" class="btn btn-default">
+                <button id="prev_btn" type="button" class="btn btn-default">
                     <i class="fas fa-arrow-left"></i> Previous
                 </button>
 
                 <button type="button" class="btn btn-default mb-2">{{ payrollDates.start }} to {{ payrollDates.end }}</button>
 
-                <button id="prev_btn" type="button" class="btn btn-default">
+                <button id="next_btn" type="button" class="btn btn-default">
                     Next <i class="fas fa-arrow-right"></i>
                 </button>
                  
@@ -105,26 +107,30 @@
     <script>
             document.addEventListener("DOMContentLoaded", function() {
             // Get the buttons by their IDs
-            const prevButton = document.getElementById("next_btn");
-            const nextButton = document.getElementById("prev_btn");
+            const prevButton = document.getElementById("prev_btn");
+            const nextButton = document.getElementById("next_btn");
+
             const dateInput = document.getElementById("payroll_date");
+
+            const startDate = document.getElementById("payroll_start_date");
+            const endDate = document.getElementById("payroll_end_date");
 
             // Add click event listeners to the buttons
             prevButton.addEventListener("click", function() { 
-                const currentDate = new Date(dateInput.value);
-                currentDate.setDate(currentDate.getDate() - 14); 
-                dateInput.value = currentDate.toISOString().slice(0, 10);
-                console.log(currentDate.toISOString().slice(0, 10));
+                const payrollEnddate = new Date(endDate.value);
+                payrollEnddate.setDate(payrollEnddate.getDate() - 1); 
+                dateInput.value = payrollEnddate.toISOString().slice(0, 10);
+                console.log(payrollEnddate.toISOString().slice(0, 10));
                 
                 // Submit the form
                 document.querySelector("form").submit();
             });
 
             nextButton.addEventListener("click", function() { 
-                const currentDate = new Date(dateInput.value);
-                currentDate.setDate(currentDate.getDate() + 14); 
-                dateInput.value = currentDate.toISOString().slice(0, 10);
-                console.log(currentDate.toISOString().slice(0, 10));
+                const payrollEnddate = new Date(endDate.value);
+                payrollEnddate.setDate(payrollEnddate.getDate() +15); 
+                dateInput.value = payrollEnddate.toISOString().slice(0, 10);
+                console.log(payrollEnddate.toISOString().slice(0, 10));
                 
                 // Submit the form
                 document.querySelector("form").submit();
