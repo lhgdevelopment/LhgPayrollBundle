@@ -15,30 +15,22 @@
                         {% endfor %}
                     </select>
                 </div>
-                {# <div class="form-group mb-2">
-                    <input type="date" name="date" value=={{ selectedDate }} class="form-control" id="date" placeholder="">
-                </div>
+                <input type="hidden" name="date" class="form-control" id="date" value={{ selectedDate }} placeholder="">  
 
-                <button type="submit" class="btn btn-primary mb-2">Apply Filters</button> #}
-
-                <button type="submit" class="btn btn-default">
+                <button type="button" class="btn btn-default">
                     <i class="fas fa-arrow-left"></i> Previous
                 </button>
 
-                <button type="button" class="btn btn-default mb-2">{{ payrollDates.start }} -- {{ payrollDates.end }}</button>
+                <button type="button" class="btn btn-default mb-2">{{ payrollDates.start }} to {{ payrollDates.end }}</button>
 
-                <button type="submit" class="btn btn-default">
+                <button type="button" class="btn btn-default">
                     Next <i class="fas fa-arrow-right"></i>
                 </button>
                  
             </form> 
-
-
-            <p>User: {{ selectedUserName }}</p>
-            <p>Start date: {{ payrollDates.start }}</p> 
-            <p>End date: {{ payrollDates.end }}</p> 
-            <p>Total Hours: {{ payrollData.total_hours }}</p>
-            <p>Total Earnings: {{ payrollData.total_earnings }}</p>
+            
+            <p>Total Hours: {{ payrollData.total_hours|number_format(3) }}</p>
+            <p>Total Earnings: {{ payrollData.total_earnings|number_format(3) }}</p>
 
             <div class="table-responsive mt-4">
                 <table class="table table-bordered">
