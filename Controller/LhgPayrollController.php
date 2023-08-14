@@ -106,7 +106,7 @@ class LhgPayrollController extends AbstractController
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function exitUserAction(Request $request): Response
-    {
+    { 
         $userRepository = $this->getDoctrine()->getRepository(User::class);
 
         // echo $this->session->get('INTERACTIVE_LOGIN_ORIGINAL');
@@ -136,8 +136,12 @@ class LhgPayrollController extends AbstractController
      * @return \Symfony\Component\HttpFoundation\Response
      */
 
-    public function biweeklyPayrollAction(Request $request)
+    public function biweeklyPayrollAction(Request $request, AuthorizationCheckerInterface $auth)
     {
+
+        if(!$auth->isGranted('ROLE_SUPER_ADMIN')){
+            return new Response('Access denied', Response::HTTP_FORBIDDEN);
+        }
         $users = $this->userRepository->findAll();
 
         // Get the date and user input from the request
