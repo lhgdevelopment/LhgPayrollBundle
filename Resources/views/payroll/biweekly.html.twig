@@ -16,8 +16,8 @@
                     </select>
                 </div>
                 <input type="hidden" name="date" class="form-control" id="payroll_date" value={{ selectedDate }} placeholder="">  
-                <input type="hidden" name="date" class="form-control" id="payroll_start_date" value={{ payrollDates.start }} placeholder="">  
-                <input type="hidden" name="date" class="form-control" id="payroll_end_date" value={{ payrollDates.end }} placeholder="">  
+                <input type="hidden" name="payroll_start_date" class="form-control" id="payroll_start_date" value={{ payrollDates.start }} placeholder="">  
+                <input type="hidden" name="payroll_end_date" class="form-control" id="payroll_end_date" value={{ payrollDates.end }} placeholder="">  
 
                 <button id="prev_btn" type="button" class="btn btn-default">
                     <i class="fas fa-arrow-left"></i> Previous
@@ -109,11 +109,17 @@
             // Get the buttons by their IDs
             const prevButton = document.getElementById("prev_btn");
             const nextButton = document.getElementById("next_btn");
+            const payRollUser = document.getElementById("payroll_user");
 
             const dateInput = document.getElementById("payroll_date");
 
             const startDate = document.getElementById("payroll_start_date");
             const endDate = document.getElementById("payroll_end_date");
+
+            payRollUser.addEventListener("change", function() {                
+                // Submit the form
+                document.querySelector("form").submit();
+            });
 
             // Add click event listeners to the buttons
             prevButton.addEventListener("click", function() { 
@@ -128,7 +134,7 @@
 
             nextButton.addEventListener("click", function() { 
                 const payrollEnddate = new Date(endDate.value);
-                payrollEnddate.setDate(payrollEnddate.getDate() +15); 
+                payrollEnddate.setDate(payrollEnddate.getDate() + 17); 
                 dateInput.value = payrollEnddate.toISOString().slice(0, 10);
                 console.log(payrollEnddate.toISOString().slice(0, 10));
                 
