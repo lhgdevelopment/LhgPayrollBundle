@@ -10,7 +10,8 @@
             <div class="mt-4">
                 <form method="GET" action="{{ path('biweekly-payroll') }}" class="form-inline">                 
                     <div class="form-group mb-2">
-                        <select name="user" class="form-control select2" id="payroll_user">
+                        {# <select name="user" class="form-control select2" id="payroll_user"> #}
+                        <select name="user" id="payroll_user" class="selectpicker form-control select2 " >
                             {% for user in users %}
                                 <option {% if selectedUserId == user.id %} {{ 'selected' }} {% endif %} value="{{ user.id }}">{{ user.alias ?? user.username }}</option>
                             {% endfor %}

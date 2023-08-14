@@ -5,6 +5,12 @@ services:
         public: false
         bind:
     
+    KimaiPlugin\LhgPayrollBundle\Migrations\:
+        resource: '../../Migrations'
+
+    KimaiPlugin\LhgPayrollBundle\Entity\:
+        resource: '../../Entity'
+    
     KimaiPlugin\LhgPayrollBundle\Service\PayrollCalculatorService:
         arguments:
             $entityManager: '@doctrine.orm.entity_manager'
@@ -16,5 +22,6 @@ services:
     KimaiPlugin\LhgPayrollBundle\Controller\:
         resource: '../../Controller'
         tags: ['controller.service_arguments']
+ 
         # arguments:
         #     $dataDirectory: "%kimai.data_dir%" 
