@@ -9,21 +9,21 @@
         <div class="mt-4"> 
             <form method="GET" action="{{ path('biweekly-payroll') }}" class="form-inline">                 
                 <div class="form-group mb-2">
-                    <select name="user" class="form-control select2" id="user">
+                    <select name="user" class="form-control select2" id="payroll_user">
                         {% for user in users %}
                             <option {% if selectedUserId == user.id %} {{ 'selected' }} {% endif %} value="{{ user.id }}">{{ user.alias ?? user.username }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <input type="hidden" name="date" class="form-control" id="date" value={{ selectedDate }} placeholder="">  
+                <input type="hidden" name="date" class="form-control" id="payroll_date" value={{ selectedDate }} placeholder="">  
 
-                <button type="button" class="btn btn-default">
+                <button id="next_btn" type="button" class="btn btn-default">
                     <i class="fas fa-arrow-left"></i> Previous
                 </button>
 
                 <button type="button" class="btn btn-default mb-2">{{ payrollDates.start }} to {{ payrollDates.end }}</button>
 
-                <button type="button" class="btn btn-default">
+                <button id="prev_btn" type="button" class="btn btn-default">
                     Next <i class="fas fa-arrow-right"></i>
                 </button>
                  
@@ -98,5 +98,36 @@
             </div>
         </div>
     {% endblock %}
+
+{% endblock %}
+
+{% block javascripts %} 
+    <script>
+            document.addEventListener("DOMContentLoaded", function() {
+            // Get the buttons by their IDs
+            const prevButton = document.getElementById("prev_btn");
+            const nextButton = document.getElementById("next_btn");
+            const dateInput = document.getElementById("payroll_date");
+
+            // Add click event listeners to the buttons
+            prevButton.addEventListener("click", function() { 
+                const currentDate = new Date(dateInput.value);
+                const previousStartDate = moment(startDate).subtract(2, 'weeks').startOf('isoWeek');
+                dateInput.value = previousStartDate.toISOString().slice(0, 10);
+                
+                // Submit the form
+                //document.querySelector("form").submit();
+            });
+
+            nextButton.addEventListener("click", function() { 
+                const currentDate = new Date(dateInput.value);
+                const nextStartDate = calculateNextBiweeklyPeriod(currentDate);
+                dateInput.value = nextStartDate.toISOString().slice(0, 10);
+                
+                // Submit the form
+                //document.querySelector("form").submit();
+            });
+        });
+    </script>
 
 {% endblock %}
