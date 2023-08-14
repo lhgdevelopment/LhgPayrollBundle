@@ -10,17 +10,26 @@
             <form method="GET" action="{{ path('biweekly-payroll') }}" class="form-inline">                 
                 <div class="form-group mb-2">
                     <select name="user" class="form-control select2" id="user">
-                        <option>1</option>
-                        <option>2</option>
-                        <option>3</option>
-                        <option>4</option>
-                        <option>5</option>
+                        {% for user in users %}
+                            <option {% if selectedUserId == user.id %} {{ 'selected' }} {% endif %} value="{{ user.id }}">{{ user.alias ?? user.username }}</option>
+                        {% endfor %}
                     </select>
                 </div>
-                <div class="form-group mb-2">
-                    <input type="date" name="date" class="form-control" id="date" placeholder="Password">
+                {# <div class="form-group mb-2">
+                    <input type="date" name="date" value=={{ selectedDate }} class="form-control" id="date" placeholder="">
                 </div>
-                <button type="submit" class="btn btn-primary mb-2">Apply Filters</button>
+
+                <button type="submit" class="btn btn-primary mb-2">Apply Filters</button> #}
+
+                <button type="submit" class="btn btn-default">
+                    <i class="fas fa-arrow-left"></i> Previous
+                </button>
+
+                <button type="button" class="btn btn-default mb-2">{{ payrollDates.start }} -- {{ payrollDates.end }}</button>
+
+                <button type="submit" class="btn btn-default">
+                    Next <i class="fas fa-arrow-right"></i>
+                </button>
                  
             </form> 
 

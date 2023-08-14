@@ -138,14 +138,7 @@ class LhgPayrollController extends AbstractController
 
     public function biweeklyPayrollAction(Request $request)
     {
-        // $dates = $this->payrollCalculatorService->calculateBiweeklyPeriod(new DateTime()); 
-        // $biweeklyStart = $dates['start'];        
-        // $biweeklyEnd = $dates['end'];  
-        // $user = $this->getUser();
-
-        // // Calculate biweekly payroll data
-        // // $payrollData = $this->payrollCalculatorService->calculateBiweeklyPayroll($user, $biweeklyStart, $biweeklyEnd);
-        // [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($user, $biweeklyStart, $biweeklyEnd); 
+        $users = $this->userRepository->findAll();
 
         // Get the date and user input from the request
         $selectedDate = $request->query->get('date', new DateTime());
@@ -230,15 +223,16 @@ class LhgPayrollController extends AbstractController
 
         // Render the template with payroll data
         return $this->render('@LhgPayroll/payroll/biweekly.html.twig', [
+            'users' => $users,
             'payrollData' => $payrollData,
             'timesheets' => $timesheets, 
             'projectWiseData' => $projectWiseData,
-            'selectedDate' => $selectedDate,
-            'selectedUserName' => $selectedUser->getUsername(),
+            'selectedDate' => $selectedDate->format('Y-m-d'),
+            'selectedUserName' => $selectedUser->getAlias() ?? $selectedUser->getUsername(),
             'selectedUserId' => $selectedUser->getId(),
             'payrollDates' => [
-                'start' => $dates['start']->format('m-d-y'),
-                'end' => $dates['end']->format('m-d-y')
+                'start' => $dates['start']->format('M-d-y'),
+                'end' => $dates['end']->format('M-d-y')
             ]
         ]);
     }
