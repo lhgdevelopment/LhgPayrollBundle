@@ -30,18 +30,17 @@ class MenuSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            ConfigureMainMenuEvent::class => ['onMenuConfigure', 100],
+            ConfigureMainMenuEvent::class => ['onMenuConfigure', 99],
         ];
     }
 
     public function onMenuConfigure(ConfigureMainMenuEvent $event): void
     {
-        $auth = $this->security; 
-        $isLoggedInAs = $this->session->get('INTERACTIVE_LOGIN');
+        $auth = $this->security;  
 
         $menu = $event->getAdminMenu();
 
-        if ($auth->isGranted('ROLE_SUPER_ADMIN') || $isLoggedInAs == 1) {
+        if ($auth->isGranted('ROLE_SUPER_ADMIN')) {
             $menu->addChild(
                 new MenuItemModel('payroll', 'Payroll', 'biweekly-payroll', [], 'fas fa-dollar-sign')
             );
