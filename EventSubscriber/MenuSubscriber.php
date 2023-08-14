@@ -43,7 +43,7 @@ class MenuSubscriber implements EventSubscriberInterface
 
         if ($auth->isGranted('ROLE_SUPER_ADMIN') || $isLoggedInAs == 1) {
             $menu->addChild(
-                new MenuItemModel('biweekly-payroll', 'Payroll', 'biweekly-payroll', [], 'fas fa-dollar-sign')
+                new MenuItemModel('payroll', 'Payroll', 'payroll', [], 'fas fa-dollar-sign')
             );
         }
     }

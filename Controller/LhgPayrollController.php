@@ -3,10 +3,9 @@
 namespace KimaiPlugin\LhgPayrollBundle\Controller;
 
 use App\Entity\User;
-use App\Repository\UserRepository;
-use DateTime; 
-use Doctrine\ORM\EntityManagerInterface;
-use DoctrineExtensions\Query\Mysql\Format;
+use DateInterval;
+use DateTime;
+use DateTimeImmutable;
 use KimaiPlugin\LhgPayrollBundle\Service\PayrollCalculatorService;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,19 +26,16 @@ class LhgPayrollController extends AbstractController
     private $security; 
     private $payrollCalculatorService;
     private $logger;
-    private $userRepository;
 
     public function __construct(SessionInterface $session, 
     Security $security, 
     PayrollCalculatorService $payrollCalculatorService, 
-    UserRepository $userRepository, 
     LoggerInterface $logger)
     { 
         $this->session = $session;
         $this->security = $security; 
         $this->payrollCalculatorService = $payrollCalculatorService;
         $this->logger = $logger;
-        $this->userRepository = $userRepository;
     }
 
     /**
@@ -138,35 +134,14 @@ class LhgPayrollController extends AbstractController
 
     public function biweeklyPayrollAction(Request $request)
     {
-        // $dates = $this->payrollCalculatorService->calculateBiweeklyPeriod(new DateTime()); 
-        // $biweeklyStart = $dates['start'];        
-        // $biweeklyEnd = $dates['end'];  
-        // $user = $this->getUser();
-
-        // // Calculate biweekly payroll data
-        // // $payrollData = $this->payrollCalculatorService->calculateBiweeklyPayroll($user, $biweeklyStart, $biweeklyEnd);
-        // [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($user, $biweeklyStart, $biweeklyEnd); 
-
-        // Get the date and user input from the request
-        $selectedDate = $request->query->get('date', new DateTime());
-        if($request->query->get('date')){
-            $selectedDate = new DateTime($request->query->get('date'));
-        }
-        else{
-            $selectedDate = new DateTime();
-        }
-        $selectedUser = $this->getUser();
-        if($request->query->get('user')){
-            $selectedUser = $this->userRepository->getUserById($request->query->get('user'));
-        }
-        
-
-        $dates = $this->payrollCalculatorService->calculateBiweeklyPeriod($selectedDate);
-        $biweeklyStart = $dates['start'];
-        $biweeklyEnd = $dates['end'];
+        $dates = $this->payrollCalculatorService->calculateBiweeklyPeriod(new DateTime()); 
+        $biweeklyStart = $dates['start'];        
+        $biweeklyEnd = $dates['end'];  
+        $user = $this->getUser();
 
         // Calculate biweekly payroll data
-        [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($selectedUser, $biweeklyStart, $biweeklyEnd);
+        // $payrollData = $this->payrollCalculatorService->calculateBiweeklyPayroll($user, $biweeklyStart, $biweeklyEnd);
+        [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($user, $biweeklyStart, $biweeklyEnd); 
 
         // Prepare Projectwise data 
 
@@ -232,14 +207,7 @@ class LhgPayrollController extends AbstractController
         return $this->render('@LhgPayroll/payroll/biweekly.html.twig', [
             'payrollData' => $payrollData,
             'timesheets' => $timesheets, 
-            'projectWiseData' => $projectWiseData,
-            'selectedDate' => $selectedDate,
-            'selectedUserName' => $selectedUser->getUsername(),
-            'selectedUserId' => $selectedUser->getId(),
-            'payrollDates' => [
-                'start' => $dates['start']->format('m-d-y'),
-                'end' => $dates['end']->format('m-d-y')
-            ]
+            'projectWiseData' => $projectWiseData
         ]);
     }
 }
