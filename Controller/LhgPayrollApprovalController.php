@@ -1,10 +1,6 @@
 <?php
 
-namespace KimaiPlugin\LhgPayrollBundle\Controller;
-
-// src/Controller/LhgPayrollApprovalController.php
-
-namespace KimaiPlugin\LhgPayrollBundle\Controller;
+namespace KimaiPlugin\LhgPayrollBundle\Controller;  
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,7 +15,7 @@ use KimaiPlugin\LhgPayrollBundle\Form\LhgPayrollApprovalType;
 class LhgPayrollApprovalController extends AbstractController
 {
     /**
-     * @Route(path="", name="payroll", methods={"GET", "POST"})
+     * @Route(path="", name="payroll-approval", methods={"GET", "POST"})
      *
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
@@ -45,7 +41,7 @@ class LhgPayrollApprovalController extends AbstractController
             $entityManager->persist($approval);
             $entityManager->flush();
 
-            return $this->redirectToRoute('lhg_payroll_approval_index');
+            return $this->redirectToRoute('payroll-approval');
         }
 
         return $this->render('@LhgPayroll/approval/new.html.twig', [
