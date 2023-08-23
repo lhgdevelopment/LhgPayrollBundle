@@ -129,6 +129,7 @@ class PayrollCalculatorService
         $dateRange->setEnd($end);
         $timesheetQuery->setDateRange($dateRange);
         $timesheetQuery->setOrderBy('date');
+        $timesheetQuery->setState(TimesheetQuery::STATE_STOPPED);
         $timesheetQuery->setOrder(BaseQuery::ORDER_ASC);
 
         $timesheets = $this->timesheetRepository->getTimesheetsForQuery($timesheetQuery);
