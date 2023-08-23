@@ -33,9 +33,9 @@
                             Next <i class="fas fa-arrow-right"></i>
                         </button>
                         
-                    </form> 
+                    </form>  
                 {% endif %}
-                
+                <p><strong>User</strong>: {{ selectedUserName }}</p>
                 <p class="mt-6" style="margin-tp: 10px;"><strong>Total Hours</strong>: {{ payrollData.total_hours|number_format(3) }} hrs</p>
                 <p><strong>Total Earnings</strong>: ${{ payrollData.total_earnings|number_format(3) }}</p>
             </div>
