@@ -139,9 +139,9 @@ class LhgPayrollController extends AbstractController
     public function biweeklyPayrollAction(Request $request, AuthorizationCheckerInterface $auth)
     {
 
-        if(!$auth->isGranted('ROLE_SUPER_ADMIN')){
-            return new Response('Access denied', Response::HTTP_FORBIDDEN);
-        }
+        // if(!$auth->isGranted('ROLE_SUPER_ADMIN')){
+        //     return new Response('Access denied', Response::HTTP_FORBIDDEN);
+        // }
         $users = $this->userRepository->findAll();
 
         // Get the date and user input from the request
@@ -155,6 +155,10 @@ class LhgPayrollController extends AbstractController
         $selectedUser = $this->getUser();
         if($request->query->get('user')){
             $selectedUser = $this->userRepository->getUserById($request->query->get('user'));
+        }
+
+        if(!$auth->isGranted('ROLE_SUPER_ADMIN')){
+            $selectedUser = $this->getUser();
         }
         
 
@@ -228,6 +232,7 @@ class LhgPayrollController extends AbstractController
 
         // Render the template with payroll data
         return $this->render('@LhgPayroll/payroll/biweekly.html.twig', [
+            'auth' => $auth,
             'users' => $users,
             'payrollData' => $payrollData,
             'timesheets' => $timesheets, 

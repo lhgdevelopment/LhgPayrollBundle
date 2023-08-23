@@ -7,35 +7,39 @@
 
     {% block content %}
         <div class="mt-4"> 
+        
             <div class="mt-4">
-                <form method="GET" action="{{ path('biweekly-payroll') }}" class="form-inline">                 
-                    <div class="form-group mb-2">
-                        {# <select name="user" class="form-control select2" id="payroll_user"> #}
-                        <select name="user" id="payroll_user" class="selectpicker form-control select2 " >
-                            {% for user in users %}
-                                <option {% if selectedUserId == user.id %} {{ 'selected' }} {% endif %} value="{{ user.id }}">{{ user.alias ?? user.username }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <input type="hidden" name="date" class="form-control" id="payroll_date" value={{ selectedDate }} placeholder="">  
-                    {# <input type="hidden" name="payroll_start_date" class="form-control" id="payroll_start_date" value={{ payrollDates.start }} placeholder="">  
-                    <input type="hidden" name="payroll_end_date" class="form-control" id="payroll_end_date" value={{ payrollDates.end }} placeholder="">   #}
+            {% if is_granted('ROLE_SUPER_ADMIN') %}
+                    <form method="GET" action="{{ path('biweekly-payroll') }}" class="form-inline">                 
+                        <div class="form-group mb-2">
+                            {# <select name="user" class="form-control select2" id="payroll_user"> #}
+                            <select name="user" id="payroll_user" class="selectpicker form-control select2 " >
+                                {% for user in users %}
+                                    <option {% if selectedUserId == user.id %} {{ 'selected' }} {% endif %} value="{{ user.id }}">{{ user.alias ?? user.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <input type="hidden" name="date" class="form-control" id="payroll_date" value={{ selectedDate }} placeholder="">  
+                        {# <input type="hidden" name="payroll_start_date" class="form-control" id="payroll_start_date" value={{ payrollDates.start }} placeholder="">  
+                        <input type="hidden" name="payroll_end_date" class="form-control" id="payroll_end_date" value={{ payrollDates.end }} placeholder="">   #}
 
-                    <button id="prev_btn" type="button" class="btn btn-default">
-                        <i class="fas fa-arrow-left"></i> Previous
-                    </button>
+                        <button id="prev_btn" type="button" class="btn btn-default">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
 
-                    <button type="button" class="btn btn-default mb-2">{{ payrollDates.start }} to {{ payrollDates.end }}</button>
+                        <button type="button" class="btn btn-default mb-2">{{ payrollDates.start }} to {{ payrollDates.end }}</button>
 
-                    <button id="next_btn" type="button" class="btn btn-default">
-                        Next <i class="fas fa-arrow-right"></i>
-                    </button>
-                    
-                </form> 
+                        <button id="next_btn" type="button" class="btn btn-default">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+                        
+                    </form> 
+                {% endif %}
                 
                 <p class="mt-6" style="margin-tp: 10px;"><strong>Total Hours</strong>: {{ payrollData.total_hours|number_format(3) }} hrs</p>
                 <p><strong>Total Earnings</strong>: ${{ payrollData.total_earnings|number_format(3) }}</p>
             </div>
+        
 
             <div class="table-responsive mt-4">
                 <table class="table table-bordered">
