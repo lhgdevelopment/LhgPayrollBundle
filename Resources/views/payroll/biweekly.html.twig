@@ -8,16 +8,17 @@
     {% block content %}
         <div class="mt-4"> 
         
-            <div class="mt-4">
-            {% if is_granted('ROLE_SUPER_ADMIN') %}
+            <div class="mt-4"> 
                     <form method="GET" action="{{ path('biweekly-payroll') }}" class="form-inline">                 
                         <div class="form-group mb-2">
                             {# <select name="user" class="form-control select2" id="payroll_user"> #}
-                            <select name="user" id="payroll_user" class="selectpicker form-control select2 " >
-                                {% for user in users %}
-                                    <option {% if selectedUserId == user.id %} {{ 'selected' }} {% endif %} value="{{ user.id }}">{{ user.alias ?? user.username }}</option>
-                                {% endfor %}
-                            </select>
+                            {% if is_granted('ROLE_SUPER_ADMIN') %}
+                                <select name="user" id="payroll_user" class="selectpicker form-control select2 " >
+                                    {% for user in users %}
+                                        <option {% if selectedUserId == user.id %} {{ 'selected' }} {% endif %} value="{{ user.id }}">{{ user.alias ?? user.username }}</option>
+                                    {% endfor %}
+                                </select>
+                            {% endif %}
                         </div>
                         <input type="hidden" name="date" class="form-control" id="payroll_date" value={{ selectedDate }} placeholder="">  
                         {# <input type="hidden" name="payroll_start_date" class="form-control" id="payroll_start_date" value={{ payrollDates.start }} placeholder="">  
@@ -34,7 +35,7 @@
                         </button> 
                         
                     </form>  
-                {% endif %}
+                
                 <p><strong>User</strong>: {{ selectedUserName }}</p>
                 <p class="mt-6" style="margin-tp: 10px;"><strong>Total Hours</strong>: {{ payrollData.total_hours|number_format(3) }} hrs</p>
                 <p><strong>Total Earnings</strong>: ${{ payrollData.total_earnings|number_format(3) }}</p>
