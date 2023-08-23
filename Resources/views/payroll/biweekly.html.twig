@@ -129,38 +129,40 @@
             //const startDate = document.getElementById("payroll_start_date");
             //const endDate = document.getElementById("payroll_end_date");
 
-            if(payRollUser){
+            if(payRollUser != null){
                 payRollUser.addEventListener("change", function() {                
                     // Submit the form
                     document.querySelector("form").submit();
                 });
             }
 
-            submitBtn.addEventListener("click", function() {
-                console.log("Submitted");
-                const url =  "{{ path('lhg_payroll_approval_new') }}";
-                const data = {
-                    startDate: '{{ payrollDates.start }}',
-                    endDate: '{{ payrollDates.end }}',
-                    userId: {{ selectedUserId }}
-                };
+            if(submitBtn != null){
+                submitBtn.addEventListener("click", function() {
+                    console.log("Submitted");
+                    const url =  "{{ path('lhg_payroll_approval_new') }}";
+                    const data = {
+                        startDate: '{{ payrollDates.start }}',
+                        endDate: '{{ payrollDates.end }}',
+                        userId: {{ selectedUserId }}
+                    };
 
-                // Make a POST request using fetch
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Payroll approval submitted successfully:', data); 
-                })
-                .catch(error => {
-                    console.error('Error submitting payroll approval:', error); 
+                    // Make a POST request using fetch
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Payroll approval submitted successfully:', data); 
+                    })
+                    .catch(error => {
+                        console.error('Error submitting payroll approval:', error); 
+                    });
                 });
-            });
+            }
 
             // Add click event listeners to the buttons
             prevButton.addEventListener("click", function() { 
