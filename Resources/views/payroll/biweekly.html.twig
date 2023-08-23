@@ -129,17 +129,20 @@
             //const startDate = document.getElementById("payroll_start_date");
             //const endDate = document.getElementById("payroll_end_date");
 
-            payRollUser.addEventListener("change", function() {                
-                // Submit the form
-                document.querySelector("form").submit();
-            });
+            if(payRollUser){
+                payRollUser.addEventListener("change", function() {                
+                    // Submit the form
+                    document.querySelector("form").submit();
+                });
+            }
 
             submitBtn.addEventListener("click", function() {
-                const url =  "{{ path('lhg_payroll_approval_new') }}",
+                console.log("Submitted");
+                const url =  "{{ path('lhg_payroll_approval_new') }}";
                 const data = {
-                    start_date: '{{ payrollDates.start }}',
-                    end_date: '{{ payrollDates.end }}',
-                    user_id: {{ selectedUserId }}
+                    startDate: '{{ payrollDates.start }}',
+                    endDate: '{{ payrollDates.end }}',
+                    userId: {{ selectedUserId }}
                 };
 
                 // Make a POST request using fetch

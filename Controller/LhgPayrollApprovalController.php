@@ -1,19 +1,30 @@
 <?php
 
-namespace KimaiPlugin\LhgPayrollBundle\Controller;  
+namespace KimaiPlugin\LhgPayrollBundle\Controller;
 
+use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use KimaiPlugin\LhgPayrollBundle\Entity\LhgPayrollApproval;
 use KimaiPlugin\LhgPayrollBundle\Form\LhgPayrollApprovalType;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * @Route(path="/admin/payroll-approval")
  */
 class LhgPayrollApprovalController extends AbstractController
 {
+
+    private $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+
     /**
      * @Route(path="", name="payroll-approval", methods={"GET", "POST"})
      *
@@ -32,22 +43,27 @@ class LhgPayrollApprovalController extends AbstractController
      */
     public function new(Request $request): Response
     {
+        // Decode the JSON content of the request body
+        $requestData = json_decode($request->getContent(), true); 
+
+        // Create an instance of LhgPayrollApproval entity
         $approval = new LhgPayrollApproval();
-        $form = $this->createForm(LhgPayrollApprovalType::class, $approval);
-        $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($approval);
-            $entityManager->flush();
+        // Set properties using request data
+        $user = $this->entityManager->getRepository(User::class)->find($requestData['userId']);
+        $approval
+            ->setUser($user)
+            ->setStartDate(new \DateTime($requestData['startDate']))
+            ->setEndDate(new \DateTime($requestData['endDate']))
+            ->setStatus(1) // Set your desired status
+            ->setExpectedDuration(0)
+            ->setCreationDate(new \DateTime());
 
-            return $this->redirectToRoute('payroll-approval');
-        }
+        // Persist and flush the entity
+        $this->entityManager->persist($approval);
+        $this->entityManager->flush();
 
-        return $this->render('@LhgPayroll/approval/new.html.twig', [
-            'approval' => $approval,
-            'form' => $form->createView(),
-        ]);
+        return new JsonResponse(['message' => 'Payroll approval submitted successfully']);
     }
 
      
