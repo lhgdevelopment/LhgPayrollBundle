@@ -39,11 +39,14 @@ class MenuSubscriber implements EventSubscriberInterface
         $auth = $this->security;  
 
         $menu = $event->getAdminMenu();
+        $menu->addChild(
+            new MenuItemModel('payroll', 'Payroll', 'biweekly-payroll', [], 'fas fa-dollar-sign')
+        );
 
-        if ($auth->isGranted('ROLE_SUPER_ADMIN')) {
-            $menu->addChild(
-                new MenuItemModel('payroll', 'Payroll', 'biweekly-payroll', [], 'fas fa-dollar-sign')
-            );
-        }
+        // if ($auth->isGranted('ROLE_SUPER_ADMIN')) {
+        //     $menu->addChild(
+        //         new MenuItemModel('payroll', 'Payroll', 'biweekly-payroll', [], 'fas fa-dollar-sign')
+        //     );
+        // }
     }
 }
