@@ -8,6 +8,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use DoctrineExtensions\Query\Mysql\Format;
 use KimaiPlugin\LhgPayrollBundle\Service\PayrollCalculatorService;
+use KimaiPlugin\LhgPayrollBundle\Service\TeamLeadAndFinanceService;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,6 +27,7 @@ class LhgPayrollController extends AbstractController
     private $session;
     private $security; 
     private $payrollCalculatorService;
+    private $teamLeadAndFinanceService;
     private $logger;
     private $userRepository;
 
@@ -33,11 +35,13 @@ class LhgPayrollController extends AbstractController
     Security $security, 
     PayrollCalculatorService $payrollCalculatorService, 
     UserRepository $userRepository, 
-    LoggerInterface $logger)
+    LoggerInterface $logger, 
+    TeamLeadAndFinanceService $teamLeadAndFinanceService)
     { 
         $this->session = $session;
         $this->security = $security; 
         $this->payrollCalculatorService = $payrollCalculatorService;
+        $this->teamLeadAndFinanceService = $teamLeadAndFinanceService;
         $this->logger = $logger;
         $this->userRepository = $userRepository;
     }
@@ -142,7 +146,8 @@ class LhgPayrollController extends AbstractController
         // if(!$auth->isGranted('ROLE_SUPER_ADMIN')){
         //     return new Response('Access denied', Response::HTTP_FORBIDDEN);
         // }
-        $users = $this->userRepository->findAll();
+        // $users = $this->userRepository->findAll();
+        $users = $this->teamLeadAndFinanceService->getTeamUsers();
 
         // Get the date and user input from the request
         $selectedDate = $request->query->get('date', new DateTime());
@@ -152,14 +157,41 @@ class LhgPayrollController extends AbstractController
         else{
             $selectedDate = new DateTime();
         }
+
         $selectedUser = $this->getUser();
+        
         if($request->query->get('user')){
-            $selectedUser = $this->userRepository->getUserById($request->query->get('user'));
+            if($auth->isGranted('ROLE_SUPER_ADMIN')){
+                $selectedUser = $this->userRepository->getUserById($request->query->get('user'));
+            }
+
+            else if($this->teamLeadAndFinanceService->isTeamLead()){ 
+                if($this->teamLeadAndFinanceService->isInTeam($request->query->get('user'))){ 
+                    $selectedUser = $this->userRepository->getUserById($request->query->get('user'));
+                }
+                else{
+                    $selectedUser = $this->getUser(); 
+                }
+            }
+            else{
+                $selectedUser = $this->getUser(); 
+            }
         }
 
-        if(!$auth->isGranted('ROLE_SUPER_ADMIN')){
-            $selectedUser = $this->getUser();
-        }
+        
+
+        // if(!$auth->isGranted('ROLE_SUPER_ADMIN')){ 
+        //     if($this->teamLeadAndFinanceService->isTeamLead()){
+        //         dump('Team Lead');
+        //         if($this->teamLeadAndFinanceService->isInTeam($request->query->get('user'))){
+        //             dump('In Team');
+        //             $selectedUser = $this->userRepository->getUserById($request->query->get('user'));
+        //         }
+        //     }
+        //     else{
+        //         $selectedUser = $this->getUser(); 
+        //     }
+        // }
         
 
         $dates = $this->payrollCalculatorService->calculateBiweeklyPeriod($selectedDate);
