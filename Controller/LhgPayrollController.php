@@ -273,8 +273,8 @@ class LhgPayrollController extends AbstractController
             'selectedUserName' => $selectedUser->getAlias() ?? $selectedUser->getUsername(),
             'selectedUserId' => $selectedUser->getId(),
             'payrollDates' => [
-                'start' => $dates['start']->format('M-d-y'),
-                'end' => $dates['end']->format('M-d-y')
+                'start' => $dates['start']->format('M-d-Y'),
+                'end' => $dates['end']->format('M-d-Y')
             ]
         ]);
     }
