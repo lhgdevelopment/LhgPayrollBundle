@@ -5,197 +5,184 @@
 
 {% block main %}
     {% block content %}
-        <!-- Nav tabs -->
-        <ul class="nav nav-tabs" id="myTabs" role="tablist">
-            <li class="nav-item active">
-                <a class="nav-link active" id="myPayrollTab" data-toggle="tab" href="#myPayroll" role="tab" aria-controls="myPayroll" aria-selected="true">My Payroll</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="toApproveTab" data-toggle="tab" href="#toApprove" role="tab" aria-controls="toApprove" aria-selected="false">To Approve</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="approvedTab" data-toggle="tab" href="#approved" role="tab" aria-controls="approved" aria-selected="false">Approved</a>
-            </li>
+        <ul class="nav nav-tabs">
+        <li class="active"><a data-toggle="tab" href="#myPayroll">My Payroll</a></li>
+        <li><a data-toggle="tab" href="#toApprove">To Approve</a></li>
+        <li><a data-toggle="tab" href="#approved">Approved</a></li>
         </ul>
-        
-        <!-- Tab panes -->
-        <div class="tab-content" id="myTabsContent">
-            <div class="tab-pane fade show active in" id="myPayroll" role="tabpanel" aria-labelledby="myPayrollTab">
+
+        <div class="tab-content">
+        <div id="myPayroll" class="tab-pane fade in active">
+            <div class="mt-4">
                 <div class="mt-4">
+                    <form method="GET" action="{{ path('biweekly-payroll') }}" class="form-inline">
+                        <div class="form-group mb-2">
+                            {# <select name="user" class="form-control select2" id="payroll_user"> #}
+                                {% if users|length > 0 %}
+                                <select name="user" id="payroll_user" class="selectpicker form-control select2 ">
+                                    {% for user in users %}
+                                    <option {% if selectedUserId==user.id %} {{ 'selected' }} {% endif %} value="{{ user.id }}">{{
+                                        user.alias ?? user.username }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% endif %}
+                        </div>
+                        <input type="hidden" name="date" class="form-control" id="payroll_date" value={{ selectedDate }}
+                            placeholder="">
+                        {# <input type="hidden" name="payroll_start_date" class="form-control" id="payroll_start_date" value={{
+                            payrollDates.start }} placeholder="">
+                        <input type="hidden" name="payroll_end_date" class="form-control" id="payroll_end_date" value={{
+                            payrollDates.end }} placeholder=""> #}
 
-                    <div class="mt-4">
-                        <form method="GET" action="{{ path('biweekly-payroll') }}" class="form-inline">
-                            <div class="form-group mb-2">
-                                {# <select name="user" class="form-control select2" id="payroll_user"> #}
-                                    {% if users|length > 0 %}
-                                    <select name="user" id="payroll_user" class="selectpicker form-control select2 ">
-                                        {% for user in users %}
-                                        <option {% if selectedUserId==user.id %} {{ 'selected' }} {% endif %} value="{{ user.id }}">{{
-                                            user.alias ?? user.username }}</option>
-                                        {% endfor %}
-                                    </select>
-                                    {% endif %}
-                            </div>
-                            <input type="hidden" name="date" class="form-control" id="payroll_date" value={{ selectedDate }}
-                                placeholder="">
-                            {# <input type="hidden" name="payroll_start_date" class="form-control" id="payroll_start_date" value={{
-                                payrollDates.start }} placeholder="">
-                            <input type="hidden" name="payroll_end_date" class="form-control" id="payroll_end_date" value={{
-                                payrollDates.end }} placeholder=""> #}
-
-                            <button id="prev_btn" type="button" class="btn btn-default">
-                                <i class="fas fa-arrow-left"></i> Previous
-                            </button>
-
-                            <button type="button" class="btn btn-default mb-2">{{ payrollDates.start }} to {{ payrollDates.end
-                                }}</button>
-
-                            <button id="next_btn" type="button" class="btn btn-default">
-                                Next <i class="fas fa-arrow-right"></i>
-                            </button>
-
-                        </form>
-
-                        <p><strong>User</strong>: {{ selectedUserName }}</p>
-                        <p class="mt-6" style="margin-tp: 10px;"><strong>Total Hours</strong>: {{
-                            payrollData.total_hours|number_format(3) }} hrs</p>
-                        <p><strong>Total Earnings</strong>: ${{ payrollData.total_earnings|number_format(3) }}</p>
-                    </div>
-
-
-                    <div class="table-responsive mt-4">
-                        <table class="table table-bordered">
-                            <thead class="thead-dark">
-                                <tr>
-                                    <th>Project</th>
-                                    <th>Total Duration</th>
-                                    <th>Total Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for projectId, projectData in projectWiseData %}
-                                <tr>
-                                    <td>{{ projectData.projectName }}</td>
-                                    <td>{{ projectData.totalDuration|number_format(3) }} hr</td>
-                                    <td>${{ projectData.totalAmount|number_format(3) }}</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="3">
-                                        <table class="sub-table table table-striped">
-                                            <thead>
-                                                <tr>
-                                                    <th>Date</th>
-                                                    <th>Total Duration</th>
-                                                    <th>Total Amount</th>
-                                                    <th>Begin</th>
-                                                    <th>End</th>
-                                                    <th>Description</th>
-                                                    <th>Warning</th>
-
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for date, timesheetData in projectData.timesheetsByDate %}
-                                                <tr>
-                                                    <td>{{ date }}</td>
-                                                    <td>{{ timesheetData.totalDuration|number_format(3) }} hr</td>
-                                                    <td>${{ timesheetData.totalAmount|number_format(3) }}</td>
-                                                </tr>
-                                                {% for timesheet in timesheetData.timesheets %}
-                                                <tr>
-                                                    <td>{{ timesheet.date }}</td>
-                                                    <td>{{ timesheet.duration_in_hour|number_format(3) }} hr</td>
-                                                    <td>${{ timesheet.rate|number_format(3) }}</td>
-                                                    <td>{{ timesheet.begin }}</td>
-                                                    <td>{{ timesheet.end }}</td>
-                                                    <td>{{ timesheet.description }}</td>
-                                                    <td>
-                                                        <ul>
-                                                            {% for errorMessage in timesheet.error %}
-                                                            <li>{{ errorMessage }}</li>
-                                                            {% endfor %}
-                                                        </ul>
-                                                    </td>
-                                                </tr>
-                                                {% endfor %}
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                        {% if not is_granted('ROLE_SUPER_ADMIN') %}
-                        <button id="submit_btn" type="button" class="btn btn-info">
-                            Submit
+                        <button id="prev_btn" type="button" class="btn btn-default">
+                            <i class="fas fa-arrow-left"></i> Previous
                         </button>
-                        {% endif %}
-                    </div>
+
+                        <button type="button" class="btn btn-default mb-2">{{ payrollDates.start }} to {{ payrollDates.end
+                            }}</button>
+
+                        <button id="next_btn" type="button" class="btn btn-default">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+
+                    </form>
+
+                    <p><strong>User</strong>: {{ selectedUserName }}</p>
+                    <p class="mt-6" style="margin-tp: 10px;"><strong>Total Hours</strong>: {{
+                        payrollData.total_hours|number_format(3) }} hrs</p>
+                    <p><strong>Total Earnings</strong>: ${{ payrollData.total_earnings|number_format(3) }}</p>
                 </div>
-            </div>
-            <div class="tab-pane fade" id="toApprove" role="tabpanel" aria-labelledby="toApproveTab">
-                <div class="mt-4">
+
+
+                <div class="table-responsive mt-4">
                     <table class="table table-bordered">
-                        <thead>
+                        <thead class="thead-dark">
                             <tr>
-                                <th>Sl</th>
-                                <th>Name</th>
-                                <th>Payroll Period dates</th>
-                                <th>Total hours</th>
-                                <th>Total amount</th>
-                                <th>Action</th>
+                                <th>Project</th>
+                                <th>Total Duration</th>
+                                <th>Total Amount</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {# Loop through your "Approved" data and generate rows #}
-                            {% for item in approvedData %}
-                                <tr>
-                                    <td>{{ loop.index }}</td>
-                                    <td>{{ item.name }}</td>
-                                    <td>{{ item.payrollPeriodDates }}</td>
-                                    <td>{{ item.totalHours }}</td>
-                                    <td>{{ item.totalAmount }}</td>
-                                    <td>
-                                        <a href="{{ path('lhg_payroll_approval_new', {'id': item.id}) }}" class="btn btn-primary">View</a> 
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="tab-pane fade" id="approved" role="tabpanel" aria-labelledby="approvedTab">
-                <div class="mt-4">
-                    <table class="table table-bordered">
-                        <thead>
+                            {% for projectId, projectData in projectWiseData %}
                             <tr>
-                                <th>Sl</th>
-                                <th>Name</th>
-                                <th>Payroll Period dates</th>
-                                <th>Total hours</th>
-                                <th>Total amount</th>
-                                <th>Action</th>
+                                <td>{{ projectData.projectName }}</td>
+                                <td>{{ projectData.totalDuration|number_format(3) }} hr</td>
+                                <td>${{ projectData.totalAmount|number_format(3) }}</td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            {# Loop through your "Approved" data and generate rows #}
-                            {% for item in approvedData %}
-                                <tr>
-                                    <td>{{ loop.index }}</td>
-                                    <td>{{ item.name }}</td>
-                                    <td>{{ item.payrollPeriodDates }}</td>
-                                    <td>{{ item.totalHours }}</td>
-                                    <td>{{ item.totalAmount }}</td>
-                                    <td>
-                                        <a href="{{ path('lhg_payroll_approval_new', {'id': item.id}) }}" class="btn btn-primary">View</a> 
-                                    </td>
-                                </tr>
+                            <tr>
+                                <td colspan="3">
+                                    <table class="sub-table table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Total Duration</th>
+                                                <th>Total Amount</th>
+                                                <th>Begin</th>
+                                                <th>End</th>
+                                                <th>Description</th>
+                                                <th>Warning</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for date, timesheetData in projectData.timesheetsByDate %}
+                                            <tr>
+                                                <td>{{ date }}</td>
+                                                <td>{{ timesheetData.totalDuration|number_format(3) }} hr</td>
+                                                <td>${{ timesheetData.totalAmount|number_format(3) }}</td>
+                                            </tr>
+                                            {% for timesheet in timesheetData.timesheets %}
+                                            <tr>
+                                                <td>{{ timesheet.date }}</td>
+                                                <td>{{ timesheet.duration_in_hour|number_format(3) }} hr</td>
+                                                <td>${{ timesheet.rate|number_format(3) }}</td>
+                                                <td>{{ timesheet.begin }}</td>
+                                                <td>{{ timesheet.end }}</td>
+                                                <td>{{ timesheet.description }}</td>
+                                                <td>
+                                                    <ul>
+                                                        {% for errorMessage in timesheet.error %}
+                                                        <li>{{ errorMessage }}</li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
                             {% endfor %}
                         </tbody>
                     </table>
+                    {% if not is_granted('ROLE_SUPER_ADMIN') %}
+                    <button id="submit_btn" type="button" class="btn btn-info">
+                        Submit
+                    </button>
+                    {% endif %}
                 </div>
             </div>
+        </div>
+        <div id="toApprove" class="tab-pane fade">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Sl</th>
+                        <th>Name</th>
+                        <th>Payroll Period dates</th>
+                        <th>Total hours</th>
+                        <th>Total amount</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {# Loop through your "To Approve" data and generate rows #}
+                    {% for item in toApproveData %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.payrollPeriodDates }}</td>
+                            <td>{{ item.totalHours }}</td>
+                            <td>{{ item.totalAmount }}</td>
+                            <td>
+                                <a href="{{ path('view_payroll', {'id': item.id}) }}" class="btn btn-primary">View</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div id="approved" class="tab-pane fade">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Sl</th>
+                        <th>Name</th>
+                        <th>Payroll Period dates</th>
+                        <th>Total hours</th>
+                        <th>Total amount</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {# Loop through your "To Approve" data and generate rows #}
+                    {% for item in toApproveData %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.payrollPeriodDates }}</td>
+                            <td>{{ item.totalHours }}</td>
+                            <td>{{ item.totalAmount }}</td>
+                            <td>
+                                <a href="{{ path('view_payroll', {'id': item.id}) }}" class="btn btn-primary">View</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
         </div>
     {% endblock %}
 {% endblock %}
