@@ -8,6 +8,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use DoctrineExtensions\Query\Mysql\Format;
 use KimaiPlugin\LhgPayrollBundle\Service\PayrollCalculatorService;
+use KimaiPlugin\LhgPayrollBundle\Service\StatusEnum;
 use KimaiPlugin\LhgPayrollBundle\Service\TeamLeadAndFinanceService;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -30,13 +31,15 @@ class LhgPayrollController extends AbstractController
     private $teamLeadAndFinanceService;
     private $logger;
     private $userRepository;
+    private $entityManager;
 
     public function __construct(SessionInterface $session, 
     Security $security, 
     PayrollCalculatorService $payrollCalculatorService, 
     UserRepository $userRepository, 
     LoggerInterface $logger, 
-    TeamLeadAndFinanceService $teamLeadAndFinanceService)
+    TeamLeadAndFinanceService $teamLeadAndFinanceService, 
+    EntityManagerInterface $entityManager)
     { 
         $this->session = $session;
         $this->security = $security; 
@@ -44,6 +47,7 @@ class LhgPayrollController extends AbstractController
         $this->teamLeadAndFinanceService = $teamLeadAndFinanceService;
         $this->logger = $logger;
         $this->userRepository = $userRepository;
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -142,11 +146,7 @@ class LhgPayrollController extends AbstractController
 
     public function biweeklyPayrollAction(Request $request, AuthorizationCheckerInterface $auth)
     {
-
-        // if(!$auth->isGranted('ROLE_SUPER_ADMIN')){
-        //     return new Response('Access denied', Response::HTTP_FORBIDDEN);
-        // }
-        // $users = $this->userRepository->findAll();
+        
         $users = $this->teamLeadAndFinanceService->getTeamUsers();
 
         // Get the date and user input from the request
@@ -158,11 +158,52 @@ class LhgPayrollController extends AbstractController
             $selectedDate = new DateTime();
         }
 
+        $dates = $this->payrollCalculatorService->calculateBiweeklyPeriod($selectedDate); 
+        $biweeklyStart = $dates['start'];
+        $biweeklyEnd = $dates['end'];  
+
+        if($this->teamLeadAndFinanceService->isTeamLead()){
+            $teamMemberuserId = [];
+            foreach($users as $user){
+                array_push($teamMemberuserId, $user->getId());
+            }
+
+            $toApproveData = $this->entityManager->getRepository(LhgPayrollApproval::class)->findBy([
+                'user' => $teamMemberuserId,
+                'startDate' => new \DateTime($dates['start']),
+                'endDate' => new \DateTime($dates['end']), 
+                'status' => StatusEnum::PENDING
+            ]);
+
+            $approvedData = $this->entityManager->getRepository(LhgPayrollApproval::class)->findBy([
+                'user' => $teamMemberuserId,
+                'startDate' => new \DateTime($dates['start']),
+                'endDate' => new \DateTime($dates['end']), 
+                'status' => StatusEnum::APPROVED_BY_TEAM_LEAD
+            ]);
+        }
+        else if($auth->isGranted('ROLE_SUPER_ADMIN')){
+            $toApproveData = $this->entityManager->getRepository(LhgPayrollApproval::class)->findBy([ 
+                'startDate' => new \DateTime($dates['start']),
+                'endDate' => new \DateTime($dates['end']), 
+                'status' => StatusEnum::APPROVED_BY_TEAM_LEAD
+            ]);
+
+            $approvedData = $this->entityManager->getRepository(LhgPayrollApproval::class)->findBy([ 
+                'startDate' => new \DateTime($dates['start']),
+                'endDate' => new \DateTime($dates['end']), 
+                'status' => StatusEnum::APPROVED_BY_TEAM_LEAD
+            ]);
+        }
+        else{
+            $toApproveData = [];
+        }
+
         $selectedUser = $this->getUser();
         
         if($request->query->get('user')){
             if($auth->isGranted('ROLE_SUPER_ADMIN')){
-                $selectedUser = $this->userRepository->getUserById($request->query->get('user'));
+                $selectedUser = $this->userRepository->getUserById($request->query->get('user')); 
             }
 
             else if($this->teamLeadAndFinanceService->isTeamLead()){ 
@@ -171,33 +212,12 @@ class LhgPayrollController extends AbstractController
                 }
                 else{
                     $selectedUser = $this->getUser(); 
-                }
+                } 
             }
             else{
                 $selectedUser = $this->getUser(); 
             }
-        }
-
-        
-
-        // if(!$auth->isGranted('ROLE_SUPER_ADMIN')){ 
-        //     if($this->teamLeadAndFinanceService->isTeamLead()){
-        //         dump('Team Lead');
-        //         if($this->teamLeadAndFinanceService->isInTeam($request->query->get('user'))){
-        //             dump('In Team');
-        //             $selectedUser = $this->userRepository->getUserById($request->query->get('user'));
-        //         }
-        //     }
-        //     else{
-        //         $selectedUser = $this->getUser(); 
-        //     }
-        // }
-        
-
-        $dates = $this->payrollCalculatorService->calculateBiweeklyPeriod($selectedDate);
-        // $selectedDate = $dates['start'];
-        $biweeklyStart = $dates['start'];
-        $biweeklyEnd = $dates['end'];
+        }  
 
         // Calculate biweekly payroll data
         [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($selectedUser, $biweeklyStart, $biweeklyEnd);
@@ -242,12 +262,7 @@ class LhgPayrollController extends AbstractController
 
             // Add the timesheet entry to the date
             $projectWiseData[$projectId]['timesheetsByDate'][$date]['timesheets'][] = $timesheet;
-        } 
-        
-        // echo '<pre>';
-        // print_r(json_encode($projectWiseData)); 
-        // echo '</pre>';
-        // exit();
+        }
         
         $totalHours = 0;
         $totalEarnings = 0;
@@ -260,7 +275,7 @@ class LhgPayrollController extends AbstractController
         $payrollData =  [
             'total_hours' => $totalHours,
             'total_earnings' => $totalEarnings
-        ];
+        ]; 
 
         // Render the template with payroll data
         return $this->render('@LhgPayroll/payroll/biweekly.html.twig', [
