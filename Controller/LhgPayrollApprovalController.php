@@ -94,13 +94,19 @@ class LhgPayrollApprovalController extends AbstractController
             // Create an instance of LhgPayrollApproval entity
             $approval = new LhgPayrollApproval(); 
             $existingApproval = $this->entityManager->getRepository(LhgPayrollApproval::class)->findOneBy([
-                'user' => $requestData['userId'], 
+                'user' => $requestData['userId'],
+                'startDate' => new \DateTime($requestData['startDate']),
+                'endDate' => new \DateTime($requestData['endDate'])
             ]);
+            if($existingApproval){
+                return new JsonResponse(['message' => 'A similar payroll approval already exists'], Response::HTTP_CONFLICT); 
+            }
 
             // Set properties using request data
             $user = $this->entityManager->getRepository(User::class)->find($requestData['userId']);
             $approval
                 ->setUser($user)
+                ->setSubmittedBy($this->getUser())
                 ->setStartDate(new \DateTime($requestData['startDate']))
                 ->setEndDate(new \DateTime($requestData['endDate']))
                 ->setStatus(1) // Set your desired status

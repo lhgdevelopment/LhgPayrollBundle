@@ -24,6 +24,12 @@ class LhgPayrollApproval
     private $user;
 
     /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $submittedBy;
+
+    /**
      * @ORM\Column(type="datetime")
      */
     private $startDate;
@@ -63,6 +69,18 @@ class LhgPayrollApproval
     public function setUser(?User $user): self
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getSubmittedBy(): ?User
+    {
+        return $this->submittedBy;
+    }
+
+    public function setSubmittedBy(?User $user): self
+    {
+        $this->submittedBy = $user;
 
         return $this;
     }
