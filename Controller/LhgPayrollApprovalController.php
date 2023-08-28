@@ -42,83 +42,56 @@ class LhgPayrollApprovalController extends AbstractController
      * @Route("/approval/new", name="lhg_payroll_approval_new", methods={"GET", "POST"})
      */
 
-    // public function new(Request $request): Response
-    // {
-    //     // Decode the JSON content of the request body
-    //     $requestData = json_decode($request->getContent(), true);
+    public function new(Request $request): Response
+    {
+        // Decode the JSON content of the request body
+        $requestData = json_decode($request->getContent(), true); 
 
-    //     // Convert the start date and end date strings to DateTime objects
-    //     $startDate = new \DateTime($requestData['startDate']);
-    //     $endDate = new \DateTime($requestData['endDate']);
-
-    //     // Check if a similar record already exists with overlapping date range
-    //     $existingApproval = $this->entityManager->getRepository(LhgPayrollApproval::class)->findOneBy([
-    //         'user' => $requestData['userId'],
-    //         // 'startDate' => $startDate,
-    //         // 'endDate' => $endDate,
-    //     ]);
-
-    //     dump($existingApproval);
-
-    //     if ($existingApproval) {
-    //         return new JsonResponse(['message' => 'A similar payroll approval already exists'], Response::HTTP_CONFLICT);
-    //     }
-
-    //     // Create an instance of LhgPayrollApproval entity
-    //     $approval = new LhgPayrollApproval();
-
-    //     // Set properties using request data
-    //     $user = $this->entityManager->getRepository(User::class)->find($requestData['userId']);
-    //     $approval
-    //         ->setUser($user)
-    //         ->setStartDate($startDate)
-    //         ->setEndDate($endDate)
-    //         ->setStatus(1) // Set your desired status
-    //         ->setExpectedDuration(0)
-    //         ->setCreationDate(new \DateTime());
-
-    //     // Persist and flush the entity
-    //     $this->entityManager->persist($approval);
-    //     $this->entityManager->flush();
-
-    //     return new JsonResponse(['message' => 'Payroll approval submitted successfully']);
-    // }
-
-
-
-        public function new(Request $request): Response
-        {
-            // Decode the JSON content of the request body
-            $requestData = json_decode($request->getContent(), true); 
-
-            // Create an instance of LhgPayrollApproval entity
-            $approval = new LhgPayrollApproval(); 
-            $existingApproval = $this->entityManager->getRepository(LhgPayrollApproval::class)->findOneBy([
-                'user' => $requestData['userId'],
-                'startDate' => new \DateTime($requestData['startDate']),
-                'endDate' => new \DateTime($requestData['endDate'])
-            ]);
-            if($existingApproval){
-                return new JsonResponse(['message' => 'A similar payroll approval already exists'], Response::HTTP_CONFLICT); 
-            }
-
-            // Set properties using request data
-            $user = $this->entityManager->getRepository(User::class)->find($requestData['userId']);
-            $approval
-                ->setUser($user)
-                ->setSubmittedBy($this->getUser())
-                ->setStartDate(new \DateTime($requestData['startDate']))
-                ->setEndDate(new \DateTime($requestData['endDate']))
-                ->setStatus(1) // Set your desired status
-                ->setExpectedDuration(0)
-                ->setCreationDate(new \DateTime());
-
-            // Persist and flush the entity
-            $this->entityManager->persist($approval);
-            $this->entityManager->flush();
-
-            return new JsonResponse(['message' => 'Payroll approval submitted successfully']);
+        // Create an instance of LhgPayrollApproval entity
+        $approval = new LhgPayrollApproval(); 
+        $existingApproval = $this->entityManager->getRepository(LhgPayrollApproval::class)->findOneBy([
+            'user' => $requestData['userId'],
+            'startDate' => new \DateTime($requestData['startDate']),
+            'endDate' => new \DateTime($requestData['endDate'])
+        ]);
+        if($existingApproval){
+            return new JsonResponse(['message' => 'A similar payroll approval already exists'], Response::HTTP_CONFLICT); 
         }
 
-        
+        // Set properties using request data
+        $user = $this->entityManager->getRepository(User::class)->find($requestData['userId']);
+        $approval
+            ->setUser($user)
+            ->setSubmittedBy($this->getUser())
+            ->setStartDate(new \DateTime($requestData['startDate']))
+            ->setEndDate(new \DateTime($requestData['endDate']))
+            ->setStatus(1) // Set your desired status
+            ->setExpectedDuration(0)
+            ->setCreationDate(new \DateTime());
+
+        // Persist and flush the entity
+        $this->entityManager->persist($approval);
+        $this->entityManager->flush();
+
+        return new JsonResponse(['message' => 'Payroll approval submitted successfully']);
     }
+
+    /**
+     * @Route("/approval/view/{id}", name="lhg_payroll_approval_view", methods={"GET"})
+     */
+    public function viewPayrollAction(int $id): Response
+    {
+        // Retrieve the LhgPayrollApproval entity based on the provided ID
+        $approval = $this->getDoctrine()->getRepository(LhgPayrollApproval::class)->find($id);
+
+        if (!$approval) {
+            // Handle the case when the approval is not found
+            throw $this->createNotFoundException('Payroll approval not found');
+        }
+
+        return $this->render('@LhgPayroll/approval/view.html.twig', ['approval' => $approval]);
+    }
+
+
+        
+}
