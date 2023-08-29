@@ -34,6 +34,8 @@ final class Version20220208134541 extends AbstractMigration
              start_date DATETIME NOT NULL,
              end_date DATETIME NOT NULL,
              status INT NOT NULL,
+             total_amount DOUBLE NULL,
+             total_duration DOUBLE NULL,
              expected_duration INT NOT NULL,
              creation_date DATETIME NOT NULL COMMENT \'(DC2Type:datetime)\',
              INDEX IDX_775C89B0A76ED395 (user_id),

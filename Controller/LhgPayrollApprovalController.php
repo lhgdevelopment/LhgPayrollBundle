@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use KimaiPlugin\LhgPayrollBundle\Entity\LhgPayrollApproval;
 use KimaiPlugin\LhgPayrollBundle\Form\LhgPayrollApprovalType;
+use KimaiPlugin\LhgPayrollBundle\Service\PayrollCalculatorService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
@@ -19,10 +20,12 @@ class LhgPayrollApprovalController extends AbstractController
 {
 
     private $entityManager;
+    private $payrollCalculatorService;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $entityManager, PayrollCalculatorService $payrollCalculatorService)
     {
         $this->entityManager = $entityManager;
+        $this->payrollCalculatorService = $payrollCalculatorService;
     }
 
     /**
@@ -66,6 +69,20 @@ class LhgPayrollApprovalController extends AbstractController
             return new JsonResponse(['message' => 'A similar payroll approval already exists'], Response::HTTP_CONFLICT); 
         }
 
+        $user = $this->entityManager->getRepository(User::class)->findOneBy([
+            'id' => $requestData['userId'], 
+        ]);
+
+        [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($user, new \DateTime($requestData['startDate']), new \DateTime($requestData['endDate']));
+
+        $totalHours = 0;
+        $totalEarnings = 0;
+
+        foreach ($timesheets as $timesheet) {
+            $totalHours += $timesheet['duration'] / 3600; // Converted to hrs
+            $totalEarnings += $timesheet['rate'];
+        }  
+
         // Set properties using request data
         $user = $this->entityManager->getRepository(User::class)->find($requestData['userId']);
         $approval
@@ -75,6 +92,8 @@ class LhgPayrollApprovalController extends AbstractController
             ->setEndDate(new \DateTime($requestData['endDate']))
             ->setStatus(1) // Set your desired status
             ->setExpectedDuration(0)
+            ->setTotalAmount($totalEarnings)
+            ->setTotalDuration($totalHours)
             ->setCreationDate(new \DateTime());
 
         // Persist and flush the entity

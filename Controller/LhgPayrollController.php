@@ -173,10 +173,11 @@ class LhgPayrollController extends AbstractController
                 'user' => $teamMemberuserId, 
                 'startDate' => $dates['start'] , 
                 'status' => StatusEnum::PENDING
-            ]);  
+            ]); 
 
             $approvedData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindOneBy([
                 'user' => $teamMemberuserId, 
+                'startDate' => $dates['start'] ,
                 'status' => StatusEnum::APPROVED_BY_TEAM_LEAD
             ]); 
         }
@@ -193,6 +194,7 @@ class LhgPayrollController extends AbstractController
         }
         else{
             $toApproveData = [];
+            $approvedData = [];
         }
 
         $selectedUser = $this->getUser();
@@ -273,8 +275,12 @@ class LhgPayrollController extends AbstractController
             'total_earnings' => $totalEarnings
         ]; 
 
+        // dump($toApproveData);
+
         // Render the template with payroll data
         return $this->render('@LhgPayroll/payroll/biweekly.html.twig', [
+            'toApproveData' => $toApproveData,
+            'approvedData' => $approvedData,
             'auth' => $auth,
             'users' => $users,
             'payrollData' => $payrollData,

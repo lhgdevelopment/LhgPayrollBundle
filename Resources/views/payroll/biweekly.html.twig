@@ -6,9 +6,13 @@
 {% block main %}
     {% block content %}
         <ul class="nav nav-tabs">
-        <li class="active"><a data-toggle="tab" href="#myPayroll">My Payroll</a></li>
-        <li><a data-toggle="tab" href="#toApprove">To Approve</a></li>
-        <li><a data-toggle="tab" href="#approved">Approved</a></li>
+            <li class="active"><a data-toggle="tab" href="#myPayroll">My Payroll</a></li>
+            {% if toApproveData|length > 0 %}
+                <li><a data-toggle="tab" href="#toApprove">To Approve</a></li>
+            {% endif %}
+            {% if approvedData|length > 0 %}
+                <li><a data-toggle="tab" href="#approved">Approved</a></li>
+            {% endif %}
         </ul>
 
         <div class="tab-content">
@@ -168,7 +172,7 @@
                 </thead>
                 <tbody>
                     {# Loop through your "To Approve" data and generate rows #}
-                    {% for item in toApproveData %}
+                    {% for item in approvedData %}
                         <tr>
                             <td>{{ loop.index }}</td>
                             <td>{{ item.name }}</td>

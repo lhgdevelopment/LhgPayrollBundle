@@ -3,6 +3,7 @@ namespace KimaiPlugin\LhgPayrollBundle\Entity;
 
 use App\Entity\User;
 use Doctrine\ORM\Mapping as ORM;
+use PhpParser\Node\Expr\Cast\Double;
 
 /**
  * @ORM\Entity
@@ -48,6 +49,16 @@ class LhgPayrollApproval
      * @ORM\Column(type="integer")
      */
     private $expectedDuration;
+
+    /**
+     * @ORM\Column(type="float")
+     */
+    private $totalAmount;
+
+    /**
+     * @ORM\Column(type="float")
+     */
+    private $totalDuration;
 
     /**
      * @ORM\Column(type="datetime")
@@ -130,6 +141,28 @@ class LhgPayrollApproval
     {
         $this->expectedDuration = $expectedDuration;
 
+        return $this;
+    }
+
+    public function getTotalDuration(): ?float
+    {
+        return $this->totalDuration;
+    }
+
+    public function setTotalDuration(float $dutraion): self
+    {
+        $this->totalDuration = $dutraion;
+        return $this;
+    }
+
+    public function getTotalAmount(): ?float
+    {
+        return $this->totalAmount;
+    }
+
+    public function setTotalAmount(float $amount): self
+    {
+        $this->totalAmount = $amount;
         return $this;
     }
 
