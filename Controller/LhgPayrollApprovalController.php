@@ -44,8 +44,16 @@ class LhgPayrollApprovalController extends AbstractController
 
     public function new(Request $request): Response
     {
+
+        
         // Decode the JSON content of the request body
         $requestData = json_decode($request->getContent(), true); 
+
+        // dump($this->entityManager->getRepository(LhgPayrollApproval::class)->findBy([
+        //         'user' => '51',
+        //         'startDate' => new \DateTime($requestData['startDate']),
+        //         'endDate' => new \DateTime($requestData['endDate'])
+        // ]));
 
         // Create an instance of LhgPayrollApproval entity
         $approval = new LhgPayrollApproval(); 

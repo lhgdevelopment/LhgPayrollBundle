@@ -7,6 +7,7 @@ use App\Repository\UserRepository;
 use DateTime; 
 use Doctrine\ORM\EntityManagerInterface;
 use DoctrineExtensions\Query\Mysql\Format;
+use KimaiPlugin\LhgPayrollBundle\Entity\LhgPayrollApproval;
 use KimaiPlugin\LhgPayrollBundle\Service\PayrollCalculatorService;
 use KimaiPlugin\LhgPayrollBundle\Service\StatusEnum;
 use KimaiPlugin\LhgPayrollBundle\Service\TeamLeadAndFinanceService;
@@ -160,7 +161,7 @@ class LhgPayrollController extends AbstractController
 
         $dates = $this->payrollCalculatorService->calculateBiweeklyPeriod($selectedDate); 
         $biweeklyStart = $dates['start'];
-        $biweeklyEnd = $dates['end'];  
+        $biweeklyEnd = $dates['end']; 
 
         if($this->teamLeadAndFinanceService->isTeamLead()){
             $teamMemberuserId = [];
@@ -168,30 +169,25 @@ class LhgPayrollController extends AbstractController
                 array_push($teamMemberuserId, $user->getId());
             }
 
-            $toApproveData = $this->entityManager->getRepository(LhgPayrollApproval::class)->findBy([
-                'user' => $teamMemberuserId,
-                'startDate' => new \DateTime($dates['start']),
-                'endDate' => new \DateTime($dates['end']), 
+            $toApproveData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindOneBy([
+                'user' => $teamMemberuserId, 
+                'startDate' => $dates['start'] , 
                 'status' => StatusEnum::PENDING
-            ]);
+            ]);  
 
-            $approvedData = $this->entityManager->getRepository(LhgPayrollApproval::class)->findBy([
-                'user' => $teamMemberuserId,
-                'startDate' => new \DateTime($dates['start']),
-                'endDate' => new \DateTime($dates['end']), 
+            $approvedData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindOneBy([
+                'user' => $teamMemberuserId, 
                 'status' => StatusEnum::APPROVED_BY_TEAM_LEAD
-            ]);
+            ]); 
         }
         else if($auth->isGranted('ROLE_SUPER_ADMIN')){
             $toApproveData = $this->entityManager->getRepository(LhgPayrollApproval::class)->findBy([ 
-                'startDate' => new \DateTime($dates['start']),
-                'endDate' => new \DateTime($dates['end']), 
+                'startDate' => $dates['start'], 
                 'status' => StatusEnum::APPROVED_BY_TEAM_LEAD
             ]);
 
             $approvedData = $this->entityManager->getRepository(LhgPayrollApproval::class)->findBy([ 
-                'startDate' => new \DateTime($dates['start']),
-                'endDate' => new \DateTime($dates['end']), 
+                'startDate' =>$dates['start'], 
                 'status' => StatusEnum::APPROVED_BY_TEAM_LEAD
             ]);
         }

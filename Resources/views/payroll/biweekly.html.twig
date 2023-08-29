@@ -142,7 +142,7 @@
                     {% for item in toApproveData %}
                         <tr>
                             <td>{{ loop.index }}</td>
-                            <td>{{ item.name }}</td>
+                            <td>{{ item.user.username }}</td>
                             <td>{{ item.payrollPeriodDates }}</td>
                             <td>{{ item.totalHours }}</td>
                             <td>{{ item.totalAmount }}</td>
