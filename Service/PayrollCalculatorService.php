@@ -90,31 +90,48 @@ class PayrollCalculatorService
         return $dates;
     }
 
-    function generateViewDataFromTimesheets(array $timesheets = []): array
-    {
-        $projectWisedata = [];
+    function generateViewDataFromTimesheets(array $timesheets): array
+    { 
+        $projectWiseData = [];
 
         foreach ($timesheets as $timesheet) {
-            $projectId = $timesheet->getProject()->getId();
-            $projectName = $timesheet->getProject()->getName();
-            $date = $timesheet->getBegin()->format('d-m-Y');
-            $duration = $timesheet->getDuration();
+            $projectId = $timesheet['projectId'];
+            $projectName = $timesheet['projectName'];
+            $durationInHours = $timesheet['duration_in_hour'];
 
-            if (!isset($projectWisedata[$projectId])) {
-                $projectWisedata[$projectId] = [
-                    'project' => $projectName,
-                    'timesheet' => [],
-                    'dates' => [],
+            // Check if the project exists in the $projectWiseData array
+            if (!isset($projectWiseData[$projectId])) {
+                $projectWiseData[$projectId] = [
+                    'projectName' => $projectName,
+                    'totalDuration' => 0,
+                    'totalAmount' => 0,
+                    'timesheetsByDate' => [], // Initialize an empty array for timesheets by date
                 ];
             }
 
-            $projectWisedata[$projectId]['timesheet'][] = $timesheet;
+            // Update total duration and amount for the project
+            $projectWiseData[$projectId]['totalDuration'] += $durationInHours;
+            $projectWiseData[$projectId]['totalAmount'] += $timesheet['rate'];
 
-            $projectWisedata[$projectId]['dates'][$date] ??= 0;
-            $projectWisedata[$projectId]['dates'][$date] += $duration;
+            // Group timesheets by date
+            $date = $timesheet['date'];
+            if (!isset($projectWiseData[$projectId]['timesheetsByDate'][$date])) {
+                $projectWiseData[$projectId]['timesheetsByDate'][$date] = [
+                    'totalDuration' => 0,
+                    'totalAmount' => 0,
+                    'timesheets' => [], // Initialize an empty array for timesheets
+                ];
+            }
+
+            // Update total duration and amount for the date
+            $projectWiseData[$projectId]['timesheetsByDate'][$date]['totalDuration'] += $durationInHours;
+            $projectWiseData[$projectId]['timesheetsByDate'][$date]['totalAmount'] += $timesheet['rate'];
+
+            // Add the timesheet entry to the date
+            $projectWiseData[$projectId]['timesheetsByDate'][$date]['timesheets'][] = $timesheet;
         }
 
-        return $projectWisedata;
+        return $projectWiseData;
     }
 
     /**

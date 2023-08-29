@@ -145,10 +145,10 @@
                     {% for index, toApprove in toApproveData %} 
                     <tr>
                         <td>{{ loop.index }}</td>
-                        <td>{{ toApprove.user.name }}</td>
+                        <td>{{ toApprove.user.alias }}</td>
                         <td>{{ payrollDates.start }} to {{ payrollDates.end }}</td>
-                        <td>{{ toApprove.totalDuration }}</td>
-                        <td>{{ toApprove.totalAmount }}</td>
+                        <td>{{ toApprove.totalDuration|number_format(3) }}</td>
+                        <td>{{ toApprove.totalAmount|number_format(3) }}</td>
                         <td>
                             <a href="{{ path('lhg_payroll_approval_view', {'id': toApprove.id}) }}" class="btn btn-primary">View</a>
                         </td>
@@ -173,10 +173,10 @@
                     {% for index, approved in approvedData %} 
                     <tr>
                         <td>{{ loop.index }}</td>
-                        <td>{{ approved.user.name }}</td>
+                        <td>{{ approved.user.alias }}</td>
                         <td>{{ payrollDates.start }} to {{ payrollDates.end }}</td>
-                        <td>{{ approved.totalDuration }}</td>
-                        <td>{{ approved.totalAmount }}</td>
+                        <td>{{ approved.totalDuration|number_format(3) }}</td>
+                        <td>{{ approved.totalAmount|number_format(3) }}</td>
                         <td>
                             <a href="{{ path('lhg_payroll_approval_view', {'id': approved.id}) }}" class="btn btn-primary">View</a>
                         </td>

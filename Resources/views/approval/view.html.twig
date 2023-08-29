@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+{% import "macros/widgets.html.twig" as widgets %}
+
+{% block page_title %}{{ 'LHG Payroll'|trans }}{% endblock %}
+
+{% block main %}
+    {% block content %} 
+        <div id="myPayroll" class="mt-4">
+            <div class="mt-4">
+                <div class="mt-4">  
+                    <p class="mt-6" style="margin-tp: 10px;"><strong>Total Hours</strong>: {{
+                        payrollData.total_hours|number_format(3) }} hrs</p>
+                    <p><strong>Total Earnings</strong>: ${{ payrollData.total_earnings|number_format(3) }}</p>
+                </div>
+
+
+                <div class="table-responsive mt-4">
+                    <table class="table table-bordered">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Project</th>
+                                <th>Total Duration</th>
+                                <th>Total Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for projectId, projectData in projectWiseData %}
+                            <tr>
+                                <td>{{ projectData.projectName }}</td>
+                                <td>{{ projectData.totalDuration|number_format(3) }} hr</td>
+                                <td>${{ projectData.totalAmount|number_format(3) }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3">
+                                    <table class="sub-table table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Total Duration</th>
+                                                <th>Total Amount</th>
+                                                <th>Begin</th>
+                                                <th>End</th>
+                                                <th>Description</th> 
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for date, timesheetData in projectData.timesheetsByDate %}
+                                            <tr>
+                                                <td>{{ date }}</td>
+                                                <td>{{ timesheetData.totalDuration|number_format(3) }} hr</td>
+                                                <td>${{ timesheetData.totalAmount|number_format(3) }}</td>
+                                            </tr>
+                                            {% for timesheet in timesheetData.timesheets %}
+                                            <tr>
+                                                <td>{{ timesheet.date }}</td>
+                                                <td>{{ timesheet.duration_in_hour|number_format(3) }} hr</td>
+                                                <td>${{ timesheet.rate|number_format(3) }}</td>
+                                                <td>{{ timesheet.begin }}</td>
+                                                <td>{{ timesheet.end }}</td>
+                                                <td>{{ timesheet.description }}</td> 
+                                            </tr>
+                                            {% endfor %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% if not is_granted('ROLE_SUPER_ADMIN') %}
+                    <button id="submit_btn" type="button" class="btn btn-info">
+                        Submit
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>    
+    {% endblock %}
+{% endblock %}
+
+{% block javascripts %} 
+    <script> 
+            document.addEventListener("DOMContentLoaded", function() { 
+            
+        }); 
+
+    </script>
+
+{% endblock %}

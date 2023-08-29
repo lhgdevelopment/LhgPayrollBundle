@@ -116,7 +116,30 @@ class LhgPayrollApprovalController extends AbstractController
             throw $this->createNotFoundException('Payroll approval not found');
         }
 
-        return $this->render('@LhgPayroll/approval/view.html.twig', ['approval' => $approval]);
+        [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($approval->getUser(), $approval->getStartDate(), $approval->getEndDate());
+        // dd($timesheets);
+
+        $projectWiseData = $this->payrollCalculatorService->generateViewDataFromTimesheets($timesheets); 
+
+        $totalHours = 0;
+        $totalEarnings = 0;
+
+        foreach ($timesheets as $timesheet) {
+            $totalHours += $timesheet['duration'] / 3600; // Converted to hrs
+            $totalEarnings += $timesheet['rate'];
+        }
+
+        $payrollData =  [
+            'total_hours' => $totalHours,
+            'total_earnings' => $totalEarnings
+        ];   
+
+        return $this->render('@LhgPayroll/approval/view.html.twig', [
+            'approval' => $approval,
+            'timesheets' => $timesheets,
+            'payrollData' => $payrollData,
+            'projectWiseData' => $projectWiseData 
+        ]);
     }
 
 
