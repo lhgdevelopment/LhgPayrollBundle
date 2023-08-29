@@ -142,18 +142,17 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {# Loop through your "To Approve" data and generate rows #}
-                    {% for item in toApproveData %}
-                        <tr>
-                            <td>{{ loop.index }}</td>
-                            <td>{{ item.user.username }}</td>
-                            <td>{{ item.payrollPeriodDates }}</td>
-                            <td>{{ item.totalHours }}</td>
-                            <td>{{ item.totalAmount }}</td>
-                            <td>
-                                <a href="{{ path('view_payroll', {'id': item.id}) }}" class="btn btn-primary">View</a>
-                            </td>
-                        </tr>
+                    {% for index, toApprove in toApproveData %} 
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ toApprove.user.name }}</td>
+                        <td>{{ payrollDates.start }} to {{ payrollDates.end }}</td>
+                        <td>{{ toApprove.totalDuration }}</td>
+                        <td>{{ toApprove.totalAmount }}</td>
+                        <td>
+                            <a href="{{ path('lhg_payroll_approval_view', {'id': toApprove.id}) }}" class="btn btn-primary">View</a>
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -171,18 +170,17 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {# Loop through your "To Approve" data and generate rows #}
-                    {% for item in approvedData %}
-                        <tr>
-                            <td>{{ loop.index }}</td>
-                            <td>{{ item.name }}</td>
-                            <td>{{ item.payrollPeriodDates }}</td>
-                            <td>{{ item.totalHours }}</td>
-                            <td>{{ item.totalAmount }}</td>
-                            <td>
-                                <a href="{{ path('view_payroll', {'id': item.id}) }}" class="btn btn-primary">View</a>
-                            </td>
-                        </tr>
+                    {% for index, approved in approvedData %} 
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ approved.user.name }}</td>
+                        <td>{{ payrollDates.start }} to {{ payrollDates.end }}</td>
+                        <td>{{ approved.totalDuration }}</td>
+                        <td>{{ approved.totalAmount }}</td>
+                        <td>
+                            <a href="{{ path('lhg_payroll_approval_view', {'id': approved.id}) }}" class="btn btn-primary">View</a>
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
