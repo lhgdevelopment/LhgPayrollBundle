@@ -36,7 +36,7 @@ final class Version20220208134541 extends AbstractMigration
             status INT NOT NULL,
             total_amount DOUBLE NULL,
             total_duration DOUBLE NULL,
-            commision DOUBLE NULL,
+            commission DOUBLE NULL,
             adjustment DOUBLE NULL,
             deduction DOUBLE NULL,
             net_payable DOUBLE NULL, 

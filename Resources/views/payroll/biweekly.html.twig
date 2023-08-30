@@ -2,6 +2,26 @@
 {% import "macros/widgets.html.twig" as widgets %}
 
 {% block page_title %}{{ 'LHG Payroll'|trans }}{% endblock %}
+{% block css %} 
+    <style>
+        .loader {
+            border: 8px solid #f3f3f3; /* Light grey */
+            border-top: 8px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+            margin: auto;
+            margin-top: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+    </style>
+{% endblock %}
 
 {% block main %}
     {% block content %}
@@ -188,6 +208,13 @@
             </table>
         </div>
         </div>
+
+        <div id="message-container" class="alert" style="display: none;"></div>
+
+        <div id="message-container" class="alert" style="display: none;">
+            <div id="loader" class="loader"></div>
+        </div>
+
     {% endblock %}
 {% endblock %}
 
@@ -214,7 +241,7 @@
 
             if(submitBtn != null){
                 submitBtn.addEventListener("click", function() {
-                    console.log("Submitted");
+                    document.getElementById("loader").style.display = "block";
                     const url =  "{{ path('lhg_payroll_approval_new') }}";
                     const data = {
                         startDate: '{{ payrollDates.start }}',
@@ -232,10 +259,28 @@
                     })
                     .then(response => response.json())
                     .then(data => {
-                        console.log('Payroll approval submitted successfully:', data); 
+                        console.log(data);
+                        // Hide the loader
+                        document.getElementById("loader").style.display = "none";
+
+                        // Show success message
+                        const messageContainer = document.getElementById("message-container");
+                        messageContainer.html = '';
+                        messageContainer.style.display = "block";
+                        messageContainer.className = "alert alert-success"; // You can customize this class
+                        messageContainer.textContent = "Payroll approval submitted successfully!";
+                        location.reload();
                     })
                     .catch(error => {
-                        console.error('Error submitting payroll approval:', error); 
+                        console.log(error);
+                        // Hide the loader
+                        document.getElementById("loader").style.display = "none";
+
+                        // Show error message
+                        const messageContainer = document.getElementById("message-container");
+                        messageContainer.style.display = "block";
+                        messageContainer.className = "alert alert-danger"; // You can customize this class
+                        messageContainer.textContent = "Error submitting payroll approval.";
                     });
                 });
             }
