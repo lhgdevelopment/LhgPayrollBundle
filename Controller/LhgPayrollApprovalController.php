@@ -9,8 +9,11 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use KimaiPlugin\LhgPayrollBundle\Entity\LhgPayrollApproval;
+use KimaiPlugin\LhgPayrollBundle\Entity\LhgPayrollApprovalHistory;
 use KimaiPlugin\LhgPayrollBundle\Form\LhgPayrollApprovalType;
 use KimaiPlugin\LhgPayrollBundle\Service\PayrollCalculatorService;
+use KimaiPlugin\LhgPayrollBundle\Service\StatusEnum;
+use KimaiPlugin\LhgPayrollBundle\Service\TeamLeadAndFinanceService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
@@ -21,11 +24,13 @@ class LhgPayrollApprovalController extends AbstractController
 
     private $entityManager;
     private $payrollCalculatorService;
+    private $teamLeadAndFinanceService;
 
-    public function __construct(EntityManagerInterface $entityManager, PayrollCalculatorService $payrollCalculatorService)
+    public function __construct(EntityManagerInterface $entityManager, PayrollCalculatorService $payrollCalculatorService, TeamLeadAndFinanceService $teamLeadAndFinanceService)
     {
         $this->entityManager = $entityManager;
         $this->payrollCalculatorService = $payrollCalculatorService;
+        $this->teamLeadAndFinanceService = $teamLeadAndFinanceService;
     }
 
     /**
@@ -111,8 +116,18 @@ class LhgPayrollApprovalController extends AbstractController
         // Retrieve the LhgPayrollApproval entity based on the provided ID
         $approval = $this->getDoctrine()->getRepository(LhgPayrollApproval::class)->find($id);
 
-        if (!$approval) {
-            // Handle the case when the approval is not found
+        $users = $this->teamLeadAndFinanceService->getTeamUsers();
+
+        $teamMemberuserId = [];
+        foreach($users as $user){
+            array_push($teamMemberuserId, $user->getId());
+        } 
+
+        if(!in_array($approval->getUser()->getId(), $teamMemberuserId)){
+             throw $this->createNotFoundException('You are not authorized to view this');
+        }
+
+        if (!$approval) { 
             throw $this->createNotFoundException('Payroll approval not found');
         }
 
@@ -140,6 +155,40 @@ class LhgPayrollApprovalController extends AbstractController
             'payrollData' => $payrollData,
             'projectWiseData' => $projectWiseData 
         ]);
+    }
+
+    /**
+     * @Route("/approval/update-status/{id}", name="lhg_payroll_approval_status_update", methods={"POST"})
+     */
+    public function updateStatus(int $id)
+    {
+        // Retrieve the LhgPayrollApproval entity based on the provided ID
+        $approval = $this->getDoctrine()->getRepository(LhgPayrollApproval::class)->find($id);
+
+        $users = $this->teamLeadAndFinanceService->getTeamUsers();
+
+        $teamMemberuserId = [];
+        foreach($users as $user){
+            array_push($teamMemberuserId, $user->getId());
+        } 
+
+        if(!in_array($approval->getUser()->getId(), $teamMemberuserId)){
+             throw $this->createNotFoundException('You are not authorized to view this');
+        }
+
+        if (!$approval) { 
+            throw $this->createNotFoundException('Payroll approval not found');
+        }
+
+        $approvalHistory = new LhgPayrollApprovalHistory(); 
+
+        $approvalHistory
+            ->setUser($user)
+            ->setStatus(StatusEnum::APPROVED_BY_TEAM_LEAD);
+
+        // Persist and flush the entity
+        $this->entityManager->persist($approval);
+        $this->entityManager->flush();
     }
 
 
