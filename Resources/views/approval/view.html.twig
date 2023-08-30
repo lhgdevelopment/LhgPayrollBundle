@@ -8,8 +8,8 @@
         <div id="myPayroll" class="mt-4">
             <div class="mt-4">
                 <div class="mt-4">  
-                    <p class="mt-6" style="margin-tp: 10px;"><strong>Total Hours</strong>: {{
-                        payrollData.total_hours|number_format(3) }} hrs</p>
+                    <p class="mt-6" style="margin-tp: 10px;"><strong>Name</strong>: {{ approval.user.alias  }}</p>
+                    <p class="mt-6"><strong>Total Hours</strong>: {{ payrollData.total_hours|number_format(3) }} hrs</p>
                     <p><strong>Total Earnings</strong>: ${{ payrollData.total_earnings|number_format(3) }}</p>
                 </div>
 

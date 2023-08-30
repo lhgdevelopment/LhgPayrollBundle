@@ -273,8 +273,18 @@ class LhgPayrollController extends AbstractController
         $payrollData =  [
             'total_hours' => $totalHours,
             'total_earnings' => $totalEarnings
-        ];  
+        ]; 
 
+        $submittedByUser = false;
+
+        $existingApproval = $this->entityManager->getRepository(LhgPayrollApproval::class)->findOneBy([
+            'user' => $selectedUser->getId(),
+            'startDate' => $dates['start'], 
+        ]);
+        // dd($existingApproval);
+        if($existingApproval){
+            $submittedByUser = true;
+        }
         // Render the template with payroll data
         return $this->render('@LhgPayroll/payroll/biweekly.html.twig', [
             'toApproveData' => $toApproveData,
@@ -290,7 +300,8 @@ class LhgPayrollController extends AbstractController
             'payrollDates' => [
                 'start' => $dates['start']->format('M-d-Y'),
                 'end' => $dates['end']->format('M-d-Y')
-            ]
+            ],
+            'submittedByUser' => $submittedByUser
         ]);
     }
 }

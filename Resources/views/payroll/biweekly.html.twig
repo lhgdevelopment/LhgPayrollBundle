@@ -121,10 +121,12 @@
                             {% endfor %}
                         </tbody>
                     </table>
-                    {% if not is_granted('ROLE_SUPER_ADMIN') %}
+                    {% if submittedByUser == false %}
                     <button id="submit_btn" type="button" class="btn btn-info">
                         Submit
                     </button>
+                    {% else %}  
+                        <p>This payroll has been submitted for approval</p>
                     {% endif %}
                 </div>
             </div>
@@ -148,7 +150,7 @@
                         <td>{{ toApprove.user.alias }}</td>
                         <td>{{ payrollDates.start }} to {{ payrollDates.end }}</td>
                         <td>{{ toApprove.totalDuration|number_format(3) }}</td>
-                        <td>{{ toApprove.totalAmount|number_format(3) }}</td>
+                        <td>${{ toApprove.totalAmount|number_format(3) }}</td>
                         <td>
                             <a href="{{ path('lhg_payroll_approval_view', {'id': toApprove.id}) }}" class="btn btn-primary">View</a>
                         </td>
