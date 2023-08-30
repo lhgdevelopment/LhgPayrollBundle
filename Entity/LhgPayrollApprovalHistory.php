@@ -32,7 +32,7 @@ class LhgPayrollApprovalHistory
     private $user;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="integer")
      */
     private $status;
 

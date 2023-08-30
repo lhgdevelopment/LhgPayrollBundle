@@ -181,15 +181,17 @@ class LhgPayrollController extends AbstractController
                 'status' => StatusEnum::APPROVED_BY_TEAM_LEAD
             ]); 
         }
-        else if($auth->isGranted('ROLE_SUPER_ADMIN')){
-            $toApproveData = $this->entityManager->getRepository(LhgPayrollApproval::class)->findBy([ 
-                'startDate' => $dates['start'], 
+        else if($auth->isGranted('ROLE_SUPER_ADMIN')){ 
+            $toApproveData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([ 
+                'startDate' => $dates['start'] ,
                 'status' => StatusEnum::APPROVED_BY_TEAM_LEAD
-            ]);
+            ]); 
+
+            // dd($toApproveData);
 
             $approvedData = $this->entityManager->getRepository(LhgPayrollApproval::class)->findBy([ 
                 'startDate' =>$dates['start'], 
-                'status' => StatusEnum::APPROVED_BY_TEAM_LEAD
+                'status' => StatusEnum::REJECTED_BY_FINANCE
             ]);
         }
         else{
