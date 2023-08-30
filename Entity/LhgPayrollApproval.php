@@ -61,6 +61,31 @@ class LhgPayrollApproval
     private $totalDuration;
 
     /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $commission;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $adjustment;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $deduction;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $netPayable;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $paymentMethod;
+
+    /**
      * @ORM\Column(type="datetime")
      */
     private $creationDate;
@@ -163,6 +188,61 @@ class LhgPayrollApproval
     public function setTotalAmount(float $amount): self
     {
         $this->totalAmount = $amount;
+        return $this;
+    }
+
+    public function getCommission(): ?float
+    {
+        return $this->commission;
+    }
+
+    public function setCommission(?float $commission): self
+    {
+        $this->commission = $commission;
+        return $this;
+    }
+
+    public function getAdjustment(): ?float
+    {
+        return $this->adjustment;
+    }
+
+    public function setAdjustment(?float $adjustment): self
+    {
+        $this->adjustment = $adjustment;
+        return $this;
+    }
+
+    public function getDeduction(): ?float
+    {
+        return $this->deduction;
+    }
+
+    public function setDeduction(?float $deduction): self
+    {
+        $this->deduction = $deduction;
+        return $this;
+    }
+
+    public function getNetPayable(): ?float
+    {
+        return $this->netPayable;
+    }
+
+    public function setNetPayable(?float $netPayable): self
+    {
+        $this->netPayable = $netPayable;
+        return $this;
+    }
+
+    public function getPaymentMethod(): ?string
+    {
+        return $this->paymentMethod;
+    }
+
+    public function setPaymentMethod(?string $paymentMethod): self
+    {
+        $this->paymentMethod = $paymentMethod;
         return $this;
     }
 

@@ -187,7 +187,7 @@ class LhgPayrollApprovalController extends AbstractController
             ->setStatus(StatusEnum::APPROVED_BY_TEAM_LEAD);
 
         // Persist and flush the entity
-        $this->entityManager->persist($approval);
+        $this->entityManager->persist($approvalHistory);
         $this->entityManager->flush();
     }
 

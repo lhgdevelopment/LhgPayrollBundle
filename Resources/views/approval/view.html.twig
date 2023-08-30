@@ -70,8 +70,37 @@
                         </tbody>
                     </table>
                     {% if not is_granted('ROLE_SUPER_ADMIN') %}
-                    <button id="submit_btn" type="button" class="btn btn-info">
-                        Submit
+                    <!-- Add this button inside the if statement for admins -->
+                    <button id="approve_btn" type="button" class="btn btn-success" data-toggle="modal" data-target="#approveModal">
+                        Approve
+                    </button>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-labelledby="approveModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="approveModalLabel">Approve Payroll</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <!-- Input fields for Total Commission, Adjustment, Deduction -->
+                                    <label for="totalCommission">Total Commission:</label>
+                                    <input type="number" id="totalCommission" class="form-control">
+                                    <!-- Repeat similar input fields for Adjustment and Deduction -->
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="button" id="approveConfirmBtn" class="btn btn-success">Approve</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="reject_btn" type="button" class="btn btn-danger">
+                        Reject
                     </button>
                     {% endif %}
                 </div>
@@ -82,9 +111,43 @@
 
 {% block javascripts %} 
     <script> 
-            document.addEventListener("DOMContentLoaded", function() { 
-            
-        }); 
+        document.addEventListener("DOMContentLoaded", function() {
+            const approveBtn = document.getElementById("approve_btn");
+            const modal = document.getElementById("approveModal");
+            const totalCommissionInput = document.getElementById("totalCommission");
+            // Similarly, get references to other input fields
+
+            // Event listener for the Approve button
+            approveBtn.addEventListener("click", function() {
+                // Clear input fields when modal is shown
+                totalCommissionInput.value = "";
+                // Similarly, clear other input fields
+
+                // Event listener for the "Approve" button inside the modal
+                document.getElementById("approveConfirmBtn").addEventListener("click", function() {
+                    // Get input values
+                    const totalCommission = parseFloat(totalCommissionInput.value);
+                    // Similarly, get values of other input fields
+
+                    // Calculate updated total using input values
+                    const newTotal = calculateNewTotal(totalCommission, /* Add other values */);
+
+                    // Update the UI with the new total
+                    document.querySelector(".mt-6 strong").innerText = "Total Earnings: $" + newTotal.toFixed(3);
+
+                    // Close the modal
+                    modal.modal("hide");
+                });
+            });
+
+            // Function to calculate new total based on input values
+            function calculateNewTotal(totalCommission, /* Add other parameters */) {
+                // Calculate new total using the input values
+                // Example calculation: totalEarnings + totalCommission - totalDeduction + totalAdjustment
+                return /* Calculated total */;
+            }
+        });
+
 
     </script>
 
