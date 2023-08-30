@@ -52,6 +52,7 @@ final class Version20220208134541 extends AbstractMigration
         approval_id INT NOT NULL,
         user_id INT NOT NULL,
         status INT NOT NULL,
+        message VARCHAR(255) NULL,
         date DATETIME NOT NULL COMMENT \'(DC2Type:datetime)\',
         INDEX IDX_A8341CE3FE65F000 (approval_id),
         INDEX IDX_A8341CE3A76ED395 (user_id),

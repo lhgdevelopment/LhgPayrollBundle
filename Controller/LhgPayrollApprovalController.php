@@ -160,7 +160,7 @@ class LhgPayrollApprovalController extends AbstractController
     /**
      * @Route("/approval/update-status/{id}", name="lhg_payroll_approval_status_update", methods={"POST"})
      */
-    public function updateStatus(int $id)
+    public function updateStatus(Request $request, int $id)
     {
         // Retrieve the LhgPayrollApproval entity based on the provided ID
         $approval = $this->getDoctrine()->getRepository(LhgPayrollApproval::class)->find($id);
@@ -168,27 +168,67 @@ class LhgPayrollApprovalController extends AbstractController
         $users = $this->teamLeadAndFinanceService->getTeamUsers();
 
         $teamMemberuserId = [];
-        foreach($users as $user){
+        foreach ($users as $user) {
             array_push($teamMemberuserId, $user->getId());
-        } 
-
-        if(!in_array($approval->getUser()->getId(), $teamMemberuserId)){
-             throw $this->createNotFoundException('You are not authorized to view this');
         }
 
-        if (!$approval) { 
+        if (!in_array($approval->getUser()->getId(), $teamMemberuserId)) {
+            throw $this->createNotFoundException('You are not authorized to view this');
+        }
+
+        if (!$approval) {
             throw $this->createNotFoundException('Payroll approval not found');
         }
 
-        $approvalHistory = new LhgPayrollApprovalHistory(); 
+        $entityManager = $this->getDoctrine()->getManager(); 
+            
+        // Retrieve the data from the AJAX request
+        $requestData = json_decode($request->getContent(), true); 
 
+        $approvalHistory = new LhgPayrollApprovalHistory();
+
+        // Set user and status for approval history
         $approvalHistory
-            ->setUser($user)
-            ->setStatus(StatusEnum::APPROVED_BY_TEAM_LEAD);
+            ->setUser($this->getUser())
+            ->setApproval($approval)
+            ->setMessage($requestData['message'])
+            ->setStatus($requestData['status']);
 
-        // Persist and flush the entity
-        $this->entityManager->persist($approvalHistory);
-        $this->entityManager->flush();
+        // If the status is approved with details (status 4)
+        if ($requestData['status'] === StatusEnum::APPROVED_BY_FINANCE) {
+            $approval
+                ->setCommission($requestData['totalCommission'])
+                ->setAdjustment($requestData['totalAdjustment'])
+                ->setDeduction($requestData['totalDeduction'])
+                ->setNetPayable($requestData['newTotal'])
+                ->setPaymentMethod($requestData['paymentMethod']);
+        }
+        
+
+        // Persist and flush the approval history
+        $entityManager->persist($approvalHistory);
+        $entityManager->flush();
+
+        // Update the approval status
+        $approval->setStatus($requestData['status']);
+
+        // Persist and flush the approval entity
+        $entityManager->persist($approval);
+        $entityManager->flush();
+
+        // Prepare the response data
+        $responseData = [
+            'message' => 'Payroll approval updated successfully',
+            'approval' => $approval
+        ]; 
+
+        // Create a JSON response object
+        $response = new JsonResponse($responseData);
+
+        return $response; 
+
+        // Return a regular Symfony response if not an AJAX request
+        // return $this->redirectToRoute('lhg_payroll_approval_view', ['id' => $id]);
     }
 
 
