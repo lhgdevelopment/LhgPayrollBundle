@@ -3,6 +3,7 @@
 namespace KimaiPlugin\LhgPayrollBundle\Controller;
 
 use App\Entity\User;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -199,6 +200,7 @@ class LhgPayrollApprovalController extends AbstractController
             ->setUser($this->getUser())
             ->setApproval($approval)
             ->setMessage($requestData['message'])
+            ->setDate( new DateTime())
             ->setStatus($requestData['status']);
 
         // If the status is approved with details (status 4)

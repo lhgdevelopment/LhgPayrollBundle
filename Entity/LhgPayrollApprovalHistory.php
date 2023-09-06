@@ -41,6 +41,11 @@ class LhgPayrollApprovalHistory
      */
     private $message;
 
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $date;
+
     // ... (other properties)
 
     public function getId(): ?int
@@ -92,6 +97,18 @@ class LhgPayrollApprovalHistory
     public function setMessage(?string $message): self
     {
         $this->message = $message;
+
+        return $this;
+    }
+
+    public function getDate(): ?\DateTimeInterface
+    {
+        return $this->date;
+    }
+
+    public function setDate(\DateTimeInterface $date): self
+    {
+        $this->date = $date;
 
         return $this;
     }
