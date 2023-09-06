@@ -8,6 +8,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use DoctrineExtensions\Query\Mysql\Format;
 use KimaiPlugin\LhgPayrollBundle\Entity\LhgPayrollApproval;
+use KimaiPlugin\LhgPayrollBundle\Entity\LhgPayrollApprovalHistory;
 use KimaiPlugin\LhgPayrollBundle\Service\PayrollCalculatorService;
 use KimaiPlugin\LhgPayrollBundle\Service\StatusEnum;
 use KimaiPlugin\LhgPayrollBundle\Service\TeamLeadAndFinanceService;
@@ -300,9 +301,15 @@ class LhgPayrollController extends AbstractController
             'startDate' => $dates['start'], 
         ]);
         // dd($existingApproval);
+        $approvalHistory = null;
         if($existingApproval){
             $submittedByUser = true;
+            $approvalHistory = $this->getDoctrine()->getRepository(LhgPayrollApprovalHistory::class)->findBy([
+                'approval' => $existingApproval 
+            ]); 
         }
+
+
         // Render the template with payroll data
         return $this->render('@LhgPayroll/payroll/biweekly.html.twig', [
             'toApproveData' => $toApproveData,
@@ -319,7 +326,9 @@ class LhgPayrollController extends AbstractController
                 'start' => $dates['start']->format('M-d-Y'),
                 'end' => $dates['end']->format('M-d-Y')
             ],
-            'submittedByUser' => $submittedByUser
+            'submittedByUser' => $submittedByUser,
+            'approvalHistory' => $approvalHistory,
+            'approval' => $existingApproval,
         ]);
     }
 }
