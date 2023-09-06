@@ -87,4 +87,28 @@ class TeamLeadAndFinanceService
         return false;
     }
 
+    public function getTeamMemberForTeamLead(){
+        $users = [];
+        $userPreferenceRepo = $this->entityManager->getRepository(UserPreference::class);
+    
+        $preferences = $userPreferenceRepo->findBy([
+            'name' => 'lhg_payroll.approvval_flow.team_lead',
+            'value' => $this->user->getId(),
+        ]);
+        
+        foreach ($preferences as $preference) {
+            $user = $preference->getUser();
+            
+            if ($user instanceof User) {
+                $users[] = $user;
+            }
+        }
+
+        if(sizeof($users) > 0){
+            array_push($users, $this->user);
+        }
+
+        return $users;
+    }
+
 }
