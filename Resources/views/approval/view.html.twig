@@ -12,6 +12,19 @@
                     <p class="mt-6"><strong>Total Hours</strong>: {{ payrollData.total_hours|number_format(3) }} hrs</p>
                     <p><strong>Total Earnings</strong>: ${{ payrollData.total_earnings|number_format(3) }}</p>
                 </div>
+                <div class="timeline">
+                    {% for history in approvalHistory %}
+                        <div class="timeline-item">
+                            <div class="timeline-content">
+                                <div class="timeline-meta">
+                                    {# <p>{{ history.date|date('F j, Y H:i') }}</p> #}
+                                    <p>Status: {{ history.status }}</p>
+                                </div>
+                                <p>{{ history.message }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
 
 
                 <div class="table-responsive mt-4">

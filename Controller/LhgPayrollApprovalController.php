@@ -131,6 +131,10 @@ class LhgPayrollApprovalController extends AbstractController
             throw $this->createNotFoundException('Payroll approval not found');
         }
 
+        $approvalHistory = $this->getDoctrine()->getRepository(LhgPayrollApprovalHistory::class)->findBy([
+            'approval' => $approval 
+        ]); 
+
         [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($approval->getUser(), $approval->getStartDate(), $approval->getEndDate());
         // dd($timesheets);
 
@@ -147,10 +151,13 @@ class LhgPayrollApprovalController extends AbstractController
         $payrollData =  [
             'total_hours' => $totalHours,
             'total_earnings' => $totalEarnings
-        ];   
+        ];  
+        
+        // dd($approvalHistory);
 
         return $this->render('@LhgPayroll/approval/view.html.twig', [
             'approval' => $approval,
+            'approvalHistory' => $approvalHistory,
             'timesheets' => $timesheets,
             'payrollData' => $payrollData,
             'projectWiseData' => $projectWiseData 
