@@ -105,7 +105,7 @@
                                                 <th>Begin</th>
                                                 <th>End</th>
                                                 <th>Description</th>
-                                                <th>Warning</th>
+                                                {# <th>Warning</th> #}
 
                                             </tr>
                                         </thead>
@@ -124,13 +124,13 @@
                                                 <td>{{ timesheet.begin }}</td>
                                                 <td>{{ timesheet.end }}</td>
                                                 <td>{{ timesheet.description }}</td>
-                                                <td>
+                                                {# <td>
                                                     <ul>
                                                         {% for errorMessage in timesheet.error %}
                                                         <li>{{ errorMessage }}</li>
                                                         {% endfor %}
                                                     </ul>
-                                                </td>
+                                                </td> #}
                                             </tr>
                                             {% endfor %}
                                             {% endfor %}
@@ -142,6 +142,9 @@
                         </tbody>
                     </table>
                     {% if submittedByUser == false %}
+                    <p>
+                        <input type="checkbox" checked id="consent-checkbox"> I hereby <em>{{ app.user.alias }}</em> declare that I have checked above time entries are are correct. 
+                    </p>
                     <button id="submit_btn" type="button" class="btn btn-info">
                         Submit
                     </button>
@@ -207,18 +210,13 @@
                 </tbody>
             </table>
         </div>
-        </div>
-
-        <div id="message-container" class="alert" style="display: none;"></div>
-
-        <div id="message-container" class="alert" style="display: none;">
-            <div id="loader" class="loader"></div>
-        </div>
+        </div> 
 
     {% endblock %}
 {% endblock %}
 
 {% block javascripts %} 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script> 
             document.addEventListener("DOMContentLoaded", function() { 
             // Get the buttons by their IDs
@@ -241,7 +239,7 @@
 
             if(submitBtn != null){
                 submitBtn.addEventListener("click", function() {
-                    document.getElementById("loader").style.display = "block";
+                     
                     const url =  "{{ path('lhg_payroll_approval_new') }}";
                     const data = {
                         startDate: '{{ payrollDates.start }}',
@@ -259,28 +257,29 @@
                     })
                     .then(response => response.json())
                     .then(data => {
-                        console.log(data);
-                        // Hide the loader
-                        document.getElementById("loader").style.display = "none";
-
+                        console.log(data); 
                         // Show success message
-                        const messageContainer = document.getElementById("message-container");
-                        messageContainer.html = '';
-                        messageContainer.style.display = "block";
-                        messageContainer.className = "alert alert-success"; // You can customize this class
-                        messageContainer.textContent = "Payroll approval submitted successfully!";
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Submitted successfully',
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
                         location.reload();
                     })
                     .catch(error => {
-                        console.log(error);
-                        // Hide the loader
-                        document.getElementById("loader").style.display = "none";
+                        console.log(error); 
 
                         // Show error message
-                        const messageContainer = document.getElementById("message-container");
-                        messageContainer.style.display = "block";
-                        messageContainer.className = "alert alert-danger"; // You can customize this class
-                        messageContainer.textContent = "Error submitting payroll approval.";
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'error',
+                            title: 'Something went wrong!',
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
+                         
                     });
                 });
             }

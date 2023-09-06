@@ -5,7 +5,7 @@
 
 {% block main %}
     {% block content %} 
-        <div id="myPayroll" class="mt-4">
+        <div id="myPayroll" class="mt-4"> 
             <div class="mt-4">
                 <div class="mt-4">  
                     <p class="mt-6" style="margin-tp: 10px;"><strong>Name</strong>: {{ approval.user.alias  }}</p>
@@ -158,98 +158,112 @@
 {% endblock %}
 
 {% block javascripts %} 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script> 
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function() { 
         const approveBtn = document.getElementById("approve_btn");
         const modal = document.getElementById("approveModal"); 
         const currentStatus = {{ approval.status }};
 
         // Event listener for the Approve button
-        approveBtn.addEventListener("click", function() {
+        if(approveBtn){
+            approveBtn.addEventListener("click", function() {
+                    if(currentStatus == 2){
+                        const totalCommissionInput = document.getElementById("commission");
+                        const totalAdjustmentInput = document.getElementById("adjustment");
+                        const totalDeductionInput = document.getElementById("deduction");
+                        const paymentMethodSelect = document.getElementById("payment_method"); 
+                        // Clear input fields when modal is shown
+                        totalCommissionInput.value = "";
+                        totalAdjustmentInput.value = "";
+                        totalDeductionInput.value = "";
+                        paymentMethodSelect.selectedIndex = 0;
+                    }
 
-                if(currentStatus == 2){
-                    const totalCommissionInput = document.getElementById("commission");
-                    const totalAdjustmentInput = document.getElementById("adjustment");
-                    const totalDeductionInput = document.getElementById("deduction");
-                    const paymentMethodSelect = document.getElementById("payment_method"); 
-                    // Clear input fields when modal is shown
-                    totalCommissionInput.value = "";
-                    totalAdjustmentInput.value = "";
-                    totalDeductionInput.value = "";
-                    paymentMethodSelect.selectedIndex = 0;
-                }
+                    const messageInput = document.getElementById("message");
+                    messageInput.value = "";
 
-                const messageInput = document.getElementById("message");
-                messageInput.value = "";
+                    // Event listener for the "Approve" button inside the modal
+                    document.getElementById("approveConfirmBtn").addEventListener("click", function() {
+                    // Get input values
+                    const approvalMessage = messageInput.value;
+                    var data = {};
+                    if(currentStatus == 2){
+                        const totalCommissionInput = document.getElementById("commission");
+                        const totalAdjustmentInput = document.getElementById("adjustment");
+                        const totalDeductionInput = document.getElementById("deduction");
+                        const paymentMethodSelect = document.getElementById("payment_method"); 
+                        
+                        const totalCommission = parseFloat(totalCommissionInput.value) || 0;
+                        const totalAdjustment = parseFloat(totalAdjustmentInput.value) || 0;
+                        const totalDeduction = parseFloat(totalDeductionInput.value) || 0;
+                        const selectedPaymentMethod = paymentMethodSelect.value;
+                        
 
-                // Event listener for the "Approve" button inside the modal
-                document.getElementById("approveConfirmBtn").addEventListener("click", function() {
-                // Get input values
-                const approvalMessage = messageInput.value;
-                var data = {};
-                if(currentStatus == 2){
-                    const totalCommissionInput = document.getElementById("commission");
-                    const totalAdjustmentInput = document.getElementById("adjustment");
-                    const totalDeductionInput = document.getElementById("deduction");
-                    const paymentMethodSelect = document.getElementById("payment_method"); 
-                    
-                    const totalCommission = parseFloat(totalCommissionInput.value) || 0;
-                    const totalAdjustment = parseFloat(totalAdjustmentInput.value) || 0;
-                    const totalDeduction = parseFloat(totalDeductionInput.value) || 0;
-                    const selectedPaymentMethod = paymentMethodSelect.value;
-                    
+                        // Calculate new total based on input values
+                        const newTotal = calculateNewTotal(totalCommission, totalAdjustment, totalDeduction);
 
-                    // Calculate new total based on input values
-                    const newTotal = calculateNewTotal(totalCommission, totalAdjustment, totalDeduction);
+                        
 
-                    
+                        data = {
+                            totalCommission,
+                            totalAdjustment,
+                            totalDeduction,
+                            paymentMethod: selectedPaymentMethod,
+                            message: approvalMessage,
+                            newTotal,
+                            status: 4
+                        }; 
+                    }
+                    else{
+                        data = {
+                            message: approvalMessage,
+                            status: 2
+                        };
+                    }
 
-                    data = {
-                        totalCommission,
-                        totalAdjustment,
-                        totalDeduction,
-                        paymentMethod: selectedPaymentMethod,
-                        message: approvalMessage,
-                        newTotal,
-                        status: 4
-                    }; 
-                }
-                else{
-                    data = {
-                        message: approvalMessage,
-                        status: 2
-                    };
-                }
+                    // Make an AJAX request to update the payroll approval
+                    const url = "{{ path('lhg_payroll_approval_status_update', {'id': approval.id}) }}"; // Update with your correct route 
+                    console.log(data);
 
-                // Make an AJAX request to update the payroll approval
-                const url = "{{ path('lhg_payroll_approval_status_update', {'id': approval.id}) }}"; // Update with your correct route 
-                console.log(data);
+                    // Make a POST request using fetch
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => response.json())
+                    .then(responseData => {
+                        // Handle success response here
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Updated successfully',
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
+                        location.reload(); 
+                        // Display a success message to the user or perform other actions
+                    })
+                    .catch(error => {
+                        console.log(error); 
+                        // Handle error here
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'error',
+                            title: 'Something went wrong!',
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
+                    });
 
-                // Make a POST request using fetch
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then(response => response.json())
-                .then(responseData => {
-                    // Handle success response here
-                    console.log('Payroll approval updated successfully:', responseData);
-                    {# location.reload(); #}
-                    // Display a success message to the user or perform other actions
-                })
-                .catch(error => {
-                    // Handle error here
-                    console.log('Error updating payroll approval:', error);
-                    // Display an error message to the user or perform other actions
+                    // Close the modal
+                    $(modal).modal("hide"); 
                 });
-
-                // Close the modal
-                $(modal).modal("hide"); 
             });
-        });
+        }
 
         // Function to calculate new total based on input values
         function calculateNewTotal(commission, adjustment, deduction) {
