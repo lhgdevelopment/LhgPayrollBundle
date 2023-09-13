@@ -383,7 +383,7 @@
                                                 <td>${{ timesheet.rate|number_format(3) }}</td>
                                                 <td>{{ timesheet.begin }}</td>
                                                 <td>{{ timesheet.end }}</td>
-                                                <td>{{ timesheet.description }}</td>
+                                                <td>{{ timesheet.description | raw }}</td>
                                                 {# <td>
                                                     <ul>
                                                         {% for errorMessage in timesheet.error %}
@@ -403,7 +403,7 @@
                     </table>
                     {% if submittedByUser == false %}
                     <p>
-                        <input type="checkbox" checked id="consent-checkbox"> I hereby <em>{{ app.user.alias }}</em> declare that I have checked above time entries are are correct. 
+                        <input type="checkbox" checked id="consent-checkbox"> I hereby <em>{{ app.user.alias }}</em> declare that I have checked above time entries are correct. 
                     </p>
                     <button id="submit_btn" type="button" class="btn btn-info">
                         Submit
@@ -502,7 +502,8 @@
     {% endblock %}
 {% endblock %}
 
-{% block javascripts %} 
+{% block javascripts %}
+    {{ parent() }}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script> 
             document.addEventListener("DOMContentLoaded", function() { 

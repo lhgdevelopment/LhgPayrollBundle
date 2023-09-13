@@ -369,7 +369,7 @@
                                                 <td>${{ timesheet.rate|number_format(3) }}</td>
                                                 <td>{{ timesheet.begin }}</td>
                                                 <td>{{ timesheet.end }}</td>
-                                                <td>{{ timesheet.description }}</td> 
+                                                <td>{{ timesheet.description | raw }}</td> 
                                             </tr>
                                             {% endfor %}
                                             {% endfor %}
