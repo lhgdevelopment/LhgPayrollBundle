@@ -393,7 +393,7 @@
                     {# 1 = pending. team lead to approve / reject #}
                     {% if approval.status == 1 %}
                     <button id="approve_btn" type="button" class="btn btn-success" data-toggle="modal" data-target="#approveModal">
-                        Approve
+                        Team Lead Approve 
                     </button>
 
                     <div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-labelledby="approveModalLabel" aria-hidden="true">
@@ -423,7 +423,7 @@
                     {% elseif approval.status == 2 and is_granted('ROLE_SUPER_ADMIN') %}
                         <!-- Add this button inside the if statement for admins -->
                         <button id="approve_btn" type="button" class="btn btn-success" data-toggle="modal" data-target="#approveModal">
-                            Approve
+                            Finance Lead Approve
                         </button>
 
                         <!-- Modal -->
