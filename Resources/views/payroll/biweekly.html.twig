@@ -448,6 +448,7 @@
                         <th>Sl</th>
                         <th>Name</th>
                         <th>Payroll Period dates</th>
+                        <th>Status</th>
                         <th>Total hours</th>
                         <th>Total amount</th>
                         <th>Action</th>
@@ -459,6 +460,7 @@
                         <td>{{ loop.index }}</td>
                         <td>{{ toApprove.user.alias }}</td>
                         <td>{{ payrollDates.start }} to {{ payrollDates.end }}</td>
+                        <td>{{ statusArray[toApprove.status] }}</td>
                         <td>{{ toApprove.totalDuration|number_format(3) }}</td>
                         <td>${{ toApprove.totalAmount|number_format(3) }}</td>
                         <td>

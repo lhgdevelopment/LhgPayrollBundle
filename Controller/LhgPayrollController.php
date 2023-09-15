@@ -13,6 +13,7 @@ use KimaiPlugin\LhgPayrollBundle\Service\PayrollCalculatorService;
 use KimaiPlugin\LhgPayrollBundle\Service\StatusEnum;
 use KimaiPlugin\LhgPayrollBundle\Service\TeamLeadAndFinanceService;
 use Psr\Log\LoggerInterface;
+use ReflectionClass;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response; 
@@ -311,6 +312,14 @@ class LhgPayrollController extends AbstractController
 
 
         // Render the template with payroll data
+        $reflection = new ReflectionClass('KimaiPlugin\LhgPayrollBundle\Service\StatusEnum');
+        $constants = $reflection->getConstants();
+
+        $enumValuePairs = [];
+        foreach ($constants as $constantName => $constantValue) {
+            $enumValuePairs[$constantValue] = $constantName;
+        }
+        // dd($enumValuePairs[1]);
         return $this->render('@LhgPayroll/payroll/biweekly.html.twig', [
             'toApproveData' => $toApproveData,
             'approvedData' => $approvedData,
@@ -329,6 +338,7 @@ class LhgPayrollController extends AbstractController
             'submittedByUser' => $submittedByUser,
             'approvalHistory' => $approvalHistory,
             'approval' => $existingApproval,
+            'statusArray' => $enumValuePairs
         ]);
     }
 }
