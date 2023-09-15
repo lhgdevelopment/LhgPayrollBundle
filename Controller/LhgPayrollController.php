@@ -165,6 +165,8 @@ class LhgPayrollController extends AbstractController
         $biweeklyStart = $dates['start'];
         $biweeklyEnd = $dates['end']; 
 
+        $notSubmittedYet = [];
+
         if($this->teamLeadAndFinanceService->isTeamLead() && !$auth->isGranted('ROLE_SUPER_ADMIN')){
             $teamMemberuserId = [];
             foreach($users as $user){
@@ -184,11 +186,43 @@ class LhgPayrollController extends AbstractController
             ]); 
         }
         else if($auth->isGranted('ROLE_SUPER_ADMIN')){ 
+            // Get not submitted data set 
+            $submittedApprovalData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([ 
+                'startDate' => $dates['start'] 
+            ]);
+
+            $submitedUsers = [];
+            foreach($submittedApprovalData as $submitteddata){
+                array_push($submitedUsers, $submitteddata->getUser()->getId());
+            }
+            $queryBuilder = $this->entityManager->createQueryBuilder();
+
+            if(sizeof($submitedUsers) > 0){
+                $notSubmittedUsers = $queryBuilder
+                ->select('u')
+                ->from(User::class, 'u')
+                ->where($queryBuilder->expr()->notIn('u.id', $submitedUsers))
+                ->andWhere('u.enabled = :enabled')
+                ->setParameter('enabled', 1)
+                ->getQuery()
+                ->getResult();
+            }
+            else{
+                $notSubmittedUsers = $queryBuilder
+                ->select('u')
+                ->from(User::class, 'u') 
+                ->andWhere('u.enabled = :enabled')
+                ->setParameter('enabled', 1)
+                ->getQuery()
+                ->getResult();
+            }
+
+            // dd($notSubmittedUsers);
             // dd('Yes Admin');
             $toApproveData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([ 
                 'startDate' => $dates['start'] ,
                 'status' => StatusEnum::APPROVED_BY_TEAM_LEAD
-            ]); 
+            ]);
             // Process Team Member Data
             if($this->teamLeadAndFinanceService->isTeamLead()){
                 // Get admin team members 
@@ -338,7 +372,8 @@ class LhgPayrollController extends AbstractController
             'submittedByUser' => $submittedByUser,
             'approvalHistory' => $approvalHistory,
             'approval' => $existingApproval,
-            'statusArray' => $enumValuePairs
+            'statusArray' => $enumValuePairs,
+            'notSubmittedUsers' => $notSubmittedUsers,
         ]);
     }
 }

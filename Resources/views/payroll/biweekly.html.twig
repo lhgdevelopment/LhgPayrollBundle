@@ -293,6 +293,9 @@
             {% if approvedData|length > 0 %}
                 <li><a data-toggle="tab" href="#approved">Approved</a></li>
             {% endif %}
+            {% if notSubmittedUsers|length > 0 and is_granted('ROLE_SUPER_ADMIN') %}
+                <li><a data-toggle="tab" href="#notSubmittedYet">Not Submitted</a></li>
+            {% endif %}
         </ul>
 
         <div class="tab-content">
@@ -501,13 +504,35 @@
                 </tbody>
             </table>
         </div>
+        <div id="notSubmittedYet" class="tab-pane fade">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Sl</th>
+                        <th>Name</th> 
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for index, notSubmitted in notSubmittedUsers %} 
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ notSubmitted.alias }}</td>
+                        <td>
+                            <a href="?user={{ notSubmitted.id }}&date={{ selectedDate }}" class="btn btn-primary">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
         </div> 
 
     {% endblock %}
 {% endblock %}
 
 {% block javascripts %}
-    {{ parent() }}
+    {# {{ parent() }} #}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script> 
             document.addEventListener("DOMContentLoaded", function() { 
