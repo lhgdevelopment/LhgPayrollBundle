@@ -320,10 +320,19 @@
         </div>
         <div id="myPayroll" class="mt-4"> 
             <div class="mt-4">
-                <div class="mt-4">  
+                <div class="mt-4">                    
                     <p class="mt-6" style="margin-tp: 10px;"><strong>Name</strong>: {{ approval.user.alias  }}</p>
                     <p class="mt-6"><strong>Total Hours</strong>: {{ payrollData.total_hours|number_format(3) }} hrs</p>
                     <p><strong>Total Earnings</strong>: ${{ payrollData.total_earnings|number_format(3) }}</p>
+                    {% if approval.status == 4 %}
+                    <hr>
+                    <p><strong>Commission</strong>: ${{ approval.commission|number_format(3) }}</p>
+                    <p><strong>Adjustment</strong>: ${{ approval.adjustment|number_format(3) }}</p>
+                    <p><strong>Deduction</strong>: ${{ approval.deduction|number_format(3) }}</p>
+                    <hr>
+                    <p><strong>Net Payable</strong>: ${{ approval.netPayable|number_format(3) }}</p>
+                    <p><strong>Paid Through</strong>: {{ approval.paymentMethod }}</p>
+                    {% endif %}
                 </div>
                 <div class="table-responsive mt-4">
                     <table class="table table-bordered">
