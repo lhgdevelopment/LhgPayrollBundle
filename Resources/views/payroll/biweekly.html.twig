@@ -458,7 +458,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for index, toApprove in toApproveData %} 
+                    {% set toApproveNetTotalDuration = 0 %}  
+                    {% set toApproveNetTotalAmount = 0 %}  
+                    {% set toApproveNetTotalPayable = 0 %}
+                    {% for index, toApprove in toApproveData %}
+                        {% set toApproveNetTotalDuration = toApproveNetTotalDuration + toApprove.totalDuration %}
+                        {% set toApproveNetTotalAmount = toApproveNetTotalAmount + toApprove.totalAmount %}
+                        {% set toApproveNetTotalPayable = toApproveNetTotalPayable + toApprove.netPayable %} 
                     <tr>
                         <td>{{ loop.index }}</td>
                         <td>{{ toApprove.user.alias }}</td>
@@ -471,6 +477,17 @@
                         </td>
                     </tr>
                     {% endfor %}
+                    <tr>
+                        <td><strong>Total</strong></td>
+                        <td></td>
+                        <td></td>
+                        <td></td> 
+                        <td>{{ toApproveNetTotalDuration|number_format(3) }}</td>
+                        <td>${{ toApproveNetTotalAmount|number_format(3) }}</td>
+                        <td>${{ toApproveNetTotalPayable|number_format(3) }}</td> 
+                        <td></td>
+
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -515,8 +532,8 @@
                         <td></td>
                         <td></td> 
                         <td>{{ netTotalDuration|number_format(3) }}</td>
-                        <td>{{ netTotalAmount|number_format(3) }}</td>
-                        <td>{{ netTotalPayable|number_format(3) }}</td> 
+                        <td>${{ netTotalAmount|number_format(3) }}</td>
+                        <td>${{ netTotalPayable|number_format(3) }}</td> 
                         <td></td>
 
                     </tr>
