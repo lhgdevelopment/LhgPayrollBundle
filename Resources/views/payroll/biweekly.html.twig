@@ -546,6 +546,7 @@
                     <tr>
                         <th>Sl</th>
                         <th>Name</th> 
+                        <th>Taem Lead</th> 
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -554,6 +555,7 @@
                     <tr>
                         <td>{{ loop.index }}</td>
                         <td>{{ notSubmitted.alias }}</td>
+                        <td>{{ 'Team Lead Name' }}</td>
                         <td>
                             <a href="?user={{ notSubmitted.id }}&date={{ selectedDate }}" class="btn btn-primary">View</a>
                         </td>
