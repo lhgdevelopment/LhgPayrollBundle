@@ -484,11 +484,18 @@
                         <th>Status</th>
                         <th>Total hours</th>
                         <th>Total amount</th>
+                        <th>Net Payable</th> 
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
+                    {% set netTotalDuration = 0 %}  
+                    {% set netTotalAmount = 0 %}  
+                    {% set netTotalPayable = 0 %}
                     {% for index, approved in approvedData %} 
+                        {% set netTotalDuration = netTotalDuration + approved.totalDuration %}
+                        {% set netTotalAmount = netTotalAmount + approved.totalAmount %}
+                        {% set netTotalPayable = netTotalPayable + approved.netPayable %}
                     <tr>
                         <td>{{ loop.index }}</td>
                         <td>{{ approved.user.alias }}</td>
@@ -496,11 +503,23 @@
                         <td>{{ statusArray[approved.status] }}</td>
                         <td>{{ approved.totalDuration|number_format(3) }}</td>
                         <td>{{ approved.totalAmount|number_format(3) }}</td>
+                        <td>{{ approved.netPayable|number_format(3) }}</td>
                         <td>
                             <a href="{{ path('lhg_payroll_approval_view', {'id': approved.id}) }}" class="btn btn-primary">View</a>
                         </td>
                     </tr>
                     {% endfor %}
+                    <tr>
+                        <td><strong>Total</strong></td>
+                        <td></td>
+                        <td></td>
+                        <td></td> 
+                        <td>{{ netTotalDuration|number_format(3) }}</td>
+                        <td>{{ netTotalAmount|number_format(3) }}</td>
+                        <td>{{ netTotalPayable|number_format(3) }}</td> 
+                        <td></td>
+
+                    </tr>
                 </tbody>
             </table>
         </div>
