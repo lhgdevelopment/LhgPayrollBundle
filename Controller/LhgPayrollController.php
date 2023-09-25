@@ -61,53 +61,7 @@ class LhgPayrollController extends AbstractController
      */
     public function indexAction(Request $request, SessionInterface $session, AuthorizationCheckerInterface $auth): Response
     {
-        // echo $this->session->get('INTERACTIVE_LOGIN_AS');
-        // echo json_encode($this->session->get('INTERACTIVE_LOGIN_ORIGINAL')); 
-        // echo $session->get('INTERACTIVE_LOGIN'); 
-        // exit;
-
-        $isLoggedInAs = $session->get('INTERACTIVE_LOGIN'); 
-
-        if ($auth->isGranted('ROLE_SUPER_ADMIN') || $isLoggedInAs == 1) {
-            $userRepository = $this->getDoctrine()->getRepository(User::class);
-            $users = $userRepository->findAll(); 
-
-            if ($request->isMethod('POST')) {
-                $selectedUserId = $request->request->get('user');
-                $selectedUser = $userRepository->find($selectedUserId);
-                
-                if ($selectedUser) {
-                    $orignalUser = $this->security->getUser();
-                    $token = new UsernamePasswordToken($selectedUser, null, 'main', $selectedUser->getRoles());
-                    $this->get('security.token_storage')->setToken($token); 
-
-                    $user = $this->security->getUser();
-                    $session->set('INTERACTIVE_LOGIN', 1);
-                    $session->set('INTERACTIVE_LOGIN_AS', $user->getUsername());
-
-                    if($session->get('INTERACTIVE_LOGIN_ORIGINAL') == null){  
-                        $session->set('INTERACTIVE_LOGIN_ORIGINAL', [
-                            'name' => $orignalUser->getUsername(), 
-                            'id'   => $orignalUser->getId()
-                        ]);
-                    }
-
-                    // return $this->redirectToRoute('homepage');
-                    return $this->redirectToRoute('payroll');
-                }
-            } 
-
-            return $this->render('@LhgPayroll/index.html.twig', [
-                'users' => $users,
-                'isLoggedInAs' => $isLoggedInAs, 
-                'loggedInAs' => $this->session->get('INTERACTIVE_LOGIN_AS'),
-                'originalUser' => $this->session->get('INTERACTIVE_LOGIN_ORIGINAL')
-
-            ]);
-        }
-        else{
-            return new Response('Access denied', Response::HTTP_FORBIDDEN);
-        }
+        return new Response('Hello There!'); 
     }
 
     /**
@@ -118,26 +72,7 @@ class LhgPayrollController extends AbstractController
      */
     public function exitUserAction(Request $request): Response
     { 
-        $userRepository = $this->getDoctrine()->getRepository(User::class);
-
-        // echo $this->session->get('INTERACTIVE_LOGIN_ORIGINAL');
-        // exit;
-
-        if ($this->session->get('INTERACTIVE_LOGIN_ORIGINAL') != null) { 
-            $selectedUser = $userRepository->find($this->session->get('INTERACTIVE_LOGIN_ORIGINAL')['id']);
-
-            if ($selectedUser) {
-                $token = new UsernamePasswordToken($selectedUser, null, 'main', $selectedUser->getRoles());
-                $this->get('security.token_storage')->setToken($token);
-                $this->session->remove('INTERACTIVE_LOGIN');
-                $this->session->remove('INTERACTIVE_LOGIN_AS'); 
-                $this->session->remove('INTERACTIVE_LOGIN_ORIGINAL'); 
-
-                return $this->redirectToRoute('payroll');
-            }
-        }
-
-        return $this->redirectToRoute('payroll');
+        return new Response('Hello There!'); 
     }
 
     /**
@@ -149,7 +84,6 @@ class LhgPayrollController extends AbstractController
 
     public function biweeklyPayrollAction(Request $request, AuthorizationCheckerInterface $auth)
     {
-        
         $users = $this->teamLeadAndFinanceService->getTeamUsers();
 
         // Get the date and user input from the request
@@ -173,17 +107,36 @@ class LhgPayrollController extends AbstractController
                 array_push($teamMemberuserId, $user->getId());
             }
 
-            $toApproveData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([
+            // new code starts 
+            // $submittedData = [];
+            // $approvedByTeamLeadData = []; 
+            $approvedData = [];
+
+            $submittedData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([
                 'user' => $teamMemberuserId, 
                 'startDate' => $dates['start'] , 
                 'status' => StatusEnum::PENDING
-            ]); 
+            ]);
 
-            $approvedData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([
+            $approvedByTeamLeadData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([
                 'user' => $teamMemberuserId, 
                 'startDate' => $dates['start'] ,
                 'status' => StatusEnum::APPROVED_BY_TEAM_LEAD
             ]); 
+
+            // new code ends
+
+            // $toApproveData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([
+            //     'user' => $teamMemberuserId, 
+            //     'startDate' => $dates['start'] , 
+            //     'status' => StatusEnum::PENDING
+            // ]); 
+
+            // $approvedData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([
+            //     'user' => $teamMemberuserId, 
+            //     'startDate' => $dates['start'] ,
+            //     'status' => StatusEnum::APPROVED_BY_TEAM_LEAD
+            // ]); 
         }
         else if($auth->isGranted('ROLE_SUPER_ADMIN')){ 
             // Get not submitted data set 
@@ -219,35 +172,54 @@ class LhgPayrollController extends AbstractController
 
             // dd($notSubmittedUsers);
             // dd('Yes Admin');
-            $toApproveData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([ 
+            // new
+
+            $submittedData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([ 
+                'startDate' => $dates['start'] , 
+                'status' => StatusEnum::PENDING
+            ]);
+
+            $approvedByTeamLeadData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([ 
                 'startDate' => $dates['start'] ,
                 'status' => StatusEnum::APPROVED_BY_TEAM_LEAD
-            ]);
-            // Process Team Member Data
-            if($this->teamLeadAndFinanceService->isTeamLead()){
-                // Get admin team members 
-                $teamMembers = $this->teamLeadAndFinanceService->getTeamMemberForTeamLead();
-                if(sizeof($teamMembers) > 0){
-                    $pendingData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([
-                        'user' => $teamMembers, 
-                        'startDate' => $dates['start'] , 
-                        'status' => StatusEnum::PENDING
-                    ]);
-                    // dd($pendingData);
-
-                    $toApproveData = array_merge($pendingData, $toApproveData);
-                }
-            }
-
-            // dd($toApproveData);
+            ]); 
 
             $approvedData = $this->entityManager->getRepository(LhgPayrollApproval::class)->findBy([ 
                 'startDate' =>$dates['start'], 
                 'status' => StatusEnum::APPROVED_BY_FINANCE
             ]);
+            // new ends 
+
+            // $toApproveData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([ 
+            //     'startDate' => $dates['start'] ,
+            //     'status' => StatusEnum::APPROVED_BY_TEAM_LEAD
+            // ]);
+            // // Process Team Member Data
+            // if($this->teamLeadAndFinanceService->isTeamLead()){
+            //     // Get admin team members 
+            //     $teamMembers = $this->teamLeadAndFinanceService->getTeamMemberForTeamLead();
+            //     if(sizeof($teamMembers) > 0){
+            //         $pendingData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([
+            //             'user' => $teamMembers, 
+            //             'startDate' => $dates['start'] , 
+            //             'status' => StatusEnum::PENDING
+            //         ]);
+            //         // dd($pendingData);
+
+            //         $toApproveData = array_merge($pendingData, $toApproveData);
+            //     }
+            // }
+
+            // // dd($toApproveData);
+
+            // $approvedData = $this->entityManager->getRepository(LhgPayrollApproval::class)->findBy([ 
+            //     'startDate' =>$dates['start'], 
+            //     'status' => StatusEnum::APPROVED_BY_FINANCE
+            // ]);
         }
         else{
-            $toApproveData = [];
+            $submittedData = [];
+            $approvedByTeamLeadData = [];
             $approvedData = [];
         }
 
@@ -355,7 +327,9 @@ class LhgPayrollController extends AbstractController
         }
         // dd($enumValuePairs[1]);
         return $this->render('@LhgPayroll/payroll/biweekly.html.twig', [
-            'toApproveData' => $toApproveData,
+            // 'toApproveData' => $toApproveData,
+            'submittedData' => $submittedData,
+            'approvedByTeamLeadData' => $approvedByTeamLeadData,
             'approvedData' => $approvedData,
             'auth' => $auth,
             'users' => $users,
