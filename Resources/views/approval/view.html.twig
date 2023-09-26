@@ -367,9 +367,9 @@
                                         <tbody>
                                             {% for date, timesheetData in projectData.timesheetsByDate %}
                                             <tr>
-                                                <td>{{ date }}</td>
-                                                <td>{{ timesheetData.totalDuration|number_format(3) }} hr</td>
-                                                <td>${{ timesheetData.totalAmount|number_format(3) }}</td>
+                                                <td><strong>{{ date }}</strong></td>
+                                                <td><strong>{{ timesheetData.totalDuration|number_format(3) }} hr</strong></td>
+                                                <td><strong>${{ timesheetData.totalAmount|number_format(3) }}</strong></td> 
                                             </tr>
                                             {% for timesheet in timesheetData.timesheets %}
                                             <tr>
