@@ -173,7 +173,7 @@ class LhgPayrollController extends AbstractController
                 array_push($teamMemberuserId, $user->getId());
             }
 
-            $toApproveData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([
+            $submittedData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([
                 'user' => $teamMemberuserId, 
                 'startDate' => $dates['start'] , 
                 'status' => StatusEnum::PENDING
@@ -219,27 +219,36 @@ class LhgPayrollController extends AbstractController
 
             // dd($notSubmittedUsers);
             // dd('Yes Admin');
-            $toApproveData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([ 
+            // $toApproveData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([ 
+            //     'startDate' => $dates['start'] ,
+            //     'status' => StatusEnum::APPROVED_BY_TEAM_LEAD
+            // ]);
+            // // Process Team Member Data
+            // if($this->teamLeadAndFinanceService->isTeamLead()){
+            //     // Get admin team members 
+            //     $teamMembers = $this->teamLeadAndFinanceService->getTeamMemberForTeamLead();
+            //     if(sizeof($teamMembers) > 0){
+            //         $pendingData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([
+            //             'user' => $teamMembers, 
+            //             'startDate' => $dates['start'] , 
+            //             'status' => StatusEnum::PENDING
+            //         ]);
+            //         // dd($pendingData);
+
+            //         $toApproveData = array_merge($pendingData, $toApproveData);
+            //     }
+            // }
+
+            // Submitted 
+            $submittedData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([ 
+                'startDate' => $dates['start'] ,
+                'status' => StatusEnum::PENDING
+            ]);
+
+            $approvedByTeamLead = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([ 
                 'startDate' => $dates['start'] ,
                 'status' => StatusEnum::APPROVED_BY_TEAM_LEAD
-            ]);
-            // Process Team Member Data
-            if($this->teamLeadAndFinanceService->isTeamLead()){
-                // Get admin team members 
-                $teamMembers = $this->teamLeadAndFinanceService->getTeamMemberForTeamLead();
-                if(sizeof($teamMembers) > 0){
-                    $pendingData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([
-                        'user' => $teamMembers, 
-                        'startDate' => $dates['start'] , 
-                        'status' => StatusEnum::PENDING
-                    ]);
-                    // dd($pendingData);
-
-                    $toApproveData = array_merge($pendingData, $toApproveData);
-                }
-            }
-
-            // dd($toApproveData);
+            ]); 
 
             $approvedData = $this->entityManager->getRepository(LhgPayrollApproval::class)->findBy([ 
                 'startDate' =>$dates['start'], 
@@ -247,8 +256,10 @@ class LhgPayrollController extends AbstractController
             ]);
         }
         else{
-            $toApproveData = [];
+            // $toApproveData = [];
+            $submittedData = [];
             $approvedData = [];
+            $approvedByTeamLead = [];
         }
 
         $selectedUser = $this->getUser();
@@ -355,7 +366,8 @@ class LhgPayrollController extends AbstractController
         }
         // dd($enumValuePairs[1]);
         return $this->render('@LhgPayroll/payroll/biweekly.html.twig', [
-            'toApproveData' => $toApproveData,
+            'submittedData' => $submittedData,
+            'approvedByTeamLead' => $approvedByTeamLead,
             'approvedData' => $approvedData,
             'auth' => $auth,
             'users' => $users,

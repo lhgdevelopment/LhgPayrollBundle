@@ -287,11 +287,14 @@
     {% block content %}
         <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#myPayroll">My Payroll</a></li>
-            {% if toApproveData|length > 0 %}
-                <li><a data-toggle="tab" href="#toApprove">To Approve</a></li>
+            {% if submittedData|length > 0 %}
+                <li><a data-toggle="tab" href="#submittedData">Submitted</a></li>
+            {% endif %}
+            {% if approvedByTeamLead|length > 0 %}
+                <li><a data-toggle="tab" href="#approvedByTeamLead">Approved By Team Lead</a></li>
             {% endif %}
             {% if approvedData|length > 0 %}
-                <li><a data-toggle="tab" href="#approved">Approved</a></li>
+                <li><a data-toggle="tab" href="#approvedData">Approved By Finane</a></li>
             {% endif %}
             {% if notSubmittedUsers|length > 0 and is_granted('ROLE_SUPER_ADMIN') %}
                 <li><a data-toggle="tab" href="#notSubmittedYet">Not Submitted</a></li>
@@ -448,7 +451,7 @@
                 </div>
             </div>
         </div>
-        <div id="toApprove" class="tab-pane fade">
+        <div id="submittedData" class="tab-pane fade">
             <table class="table table-bordered">
                 <thead>
                     <tr>
@@ -462,22 +465,22 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% set toApproveNetTotalDuration = 0 %}  
-                    {% set toApproveNetTotalAmount = 0 %}  
-                    {% set toApproveNetTotalPayable = 0 %}
-                    {% for index, toApprove in toApproveData %}
-                        {% set toApproveNetTotalDuration = toApproveNetTotalDuration + toApprove.totalDuration %}
-                        {% set toApproveNetTotalAmount = toApproveNetTotalAmount + toApprove.totalAmount %}
-                        {% set toApproveNetTotalPayable = toApproveNetTotalPayable + toApprove.netPayable %} 
+                    {% set submittedNetTotalDuration = 0 %}  
+                    {% set submittedNetTotalAmount = 0 %}  
+                    {% set submittedNetTotalPayable = 0 %}
+                    {% for index, submitted in submittedData %}
+                        {% set submittedNetTotalDuration = submittedNetTotalDuration + submitted.totalDuration %}
+                        {% set submittedNetTotalAmount = submittedNetTotalAmount + submitted.totalAmount %}
+                        {% set submittedNetTotalPayable = submittedNetTotalPayable + submitted.netPayable %} 
                     <tr>
                         <td>{{ loop.index }}</td>
-                        <td>{{ toApprove.user.alias }}</td>
+                        <td>{{ submitted.user.alias }}</td>
                         <td>{{ payrollDates.start }} to {{ payrollDates.end }}</td>
-                        <td>{{ statusArray[toApprove.status] }}</td>
-                        <td>{{ toApprove.totalDuration|number_format(3) }}</td>
-                        <td>${{ toApprove.totalAmount|number_format(3) }}</td>
+                        <td>{{ statusArray[submitted.status] }}</td>
+                        <td>{{ submitted.totalDuration|number_format(3) }}</td>
+                        <td>${{ submitted.totalAmount|number_format(3) }}</td>
                         <td>
-                            <a href="{{ path('lhg_payroll_approval_view', {'id': toApprove.id}) }}" class="btn btn-primary">View</a>
+                            <a href="{{ path('lhg_payroll_approval_view', {'id': submitted.id}) }}" class="btn btn-primary">View</a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -486,16 +489,16 @@
                         <td></td>
                         <td></td>
                         <td></td> 
-                        <td>{{ toApproveNetTotalDuration|number_format(3) }}</td>
-                        <td>${{ toApproveNetTotalAmount|number_format(3) }}</td>
-                        <td>${{ toApproveNetTotalPayable|number_format(3) }}</td> 
+                        <td>{{ submittedNetTotalDuration|number_format(3) }}</td>
+                        <td>${{ submittedNetTotalAmount|number_format(3) }}</td>
+                        <td>${{ submittedNetTotalPayable|number_format(3) }}</td> 
                         <td></td>
 
                     </tr>
                 </tbody>
             </table>
         </div>
-        <div id="approved" class="tab-pane fade">
+        <div id="approvedByTeamLead" class="tab-pane fade">
             <table class="table table-bordered">
                 <thead>
                     <tr>
@@ -513,20 +516,20 @@
                     {% set netTotalDuration = 0 %}  
                     {% set netTotalAmount = 0 %}  
                     {% set netTotalPayable = 0 %}
-                    {% for index, approved in approvedData %} 
-                        {% set netTotalDuration = netTotalDuration + approved.totalDuration %}
-                        {% set netTotalAmount = netTotalAmount + approved.totalAmount %}
-                        {% set netTotalPayable = netTotalPayable + approved.netPayable %}
+                    {% for index, teamLeadApproved in approvedByTeamLead %} 
+                        {% set netTotalDuration = netTotalDuration + teamLeadApproved.totalDuration %}
+                        {% set netTotalAmount = netTotalAmount + teamLeadApproved.totalAmount %}
+                        {% set netTotalPayable = netTotalPayable + teamLeadApproved.netPayable %}
                     <tr>
                         <td>{{ loop.index }}</td>
-                        <td>{{ approved.user.alias }}</td>
+                        <td>{{ teamLeadApproved.user.alias }}</td>
                         <td>{{ payrollDates.start }} to {{ payrollDates.end }}</td>
-                        <td>{{ statusArray[approved.status] }}</td>
-                        <td>{{ approved.totalDuration|number_format(3) }}</td>
-                        <td>{{ approved.totalAmount|number_format(3) }}</td>
-                        <td>{{ approved.netPayable|number_format(3) }}</td>
+                        <td>{{ statusArray[teamLeadApproved.status] }}</td>
+                        <td>{{ teamLeadApproved.totalDuration|number_format(3) }}</td>
+                        <td>{{ teamLeadApproved.totalAmount|number_format(3) }}</td>
+                        <td>{{ teamLeadApproved.netPayable|number_format(3) }}</td>
                         <td>
-                            <a href="{{ path('lhg_payroll_approval_view', {'id': approved.id}) }}" class="btn btn-primary">View</a>
+                            <a href="{{ path('lhg_payroll_approval_view', {'id': teamLeadApproved.id}) }}" class="btn btn-primary">View</a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -538,6 +541,55 @@
                         <td>{{ netTotalDuration|number_format(3) }}</td>
                         <td>${{ netTotalAmount|number_format(3) }}</td>
                         <td>${{ netTotalPayable|number_format(3) }}</td> 
+                        <td></td>
+
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="approvedData" class="tab-pane fade">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Sl</th>
+                        <th>Name</th>
+                        <th>Payroll Period dates</th>
+                        <th>Status</th>
+                        <th>Total hours</th>
+                        <th>Total amount</th>
+                        <th>Net Payable</th> 
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set netTotalFinanceDuration = 0 %}  
+                    {% set netFinanceTotalAmount = 0 %}  
+                    {% set netFinanceTotalPayable = 0 %}
+                    {% for index, financeApproved in approvedData %} 
+                        {% set netTotalFinanceDuration = netTotalFinanceDuration + financeApproved.totalDuration %}
+                        {% set netFinanceTotalAmount = netFinanceTotalAmount + financeApproved.totalAmount %}
+                        {% set netFinanceTotalPayable = netFinanceTotalPayable + financeApproved.netPayable %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ financeApproved.user.alias }}</td>
+                        <td>{{ payrollDates.start }} to {{ payrollDates.end }}</td>
+                        <td>{{ statusArray[financeApproved.status] }}</td>
+                        <td>{{ financeApproved.totalDuration|number_format(3) }}</td>
+                        <td>{{ financeApproved.totalAmount|number_format(3) }}</td>
+                        <td>{{ financeApproved.netPayable|number_format(3) }}</td>
+                        <td>
+                            <a href="{{ path('lhg_payroll_approval_view', {'id': financeApproved.id}) }}" class="btn btn-primary">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td><strong>Total</strong></td>
+                        <td></td>
+                        <td></td>
+                        <td></td> 
+                        <td>{{ netTotalFinanceDuration|number_format(3) }}</td>
+                        <td>${{ netFinanceTotalAmount|number_format(3) }}</td>
+                        <td>${{ netFinanceTotalPayable|number_format(3) }}</td> 
                         <td></td>
 
                     </tr>
