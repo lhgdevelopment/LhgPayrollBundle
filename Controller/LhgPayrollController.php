@@ -179,11 +179,13 @@ class LhgPayrollController extends AbstractController
                 'status' => StatusEnum::PENDING
             ]); 
 
-            $approvedData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([
+            $approvedByTeamLead = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([
                 'user' => $teamMemberuserId, 
                 'startDate' => $dates['start'] ,
                 'status' => StatusEnum::APPROVED_BY_TEAM_LEAD
-            ]); 
+            ]);
+            $approvedData = [];
+            $notSubmittedUsers = [];
         }
         else if($auth->isGranted('ROLE_SUPER_ADMIN')){ 
             // Get not submitted data set 
@@ -260,6 +262,7 @@ class LhgPayrollController extends AbstractController
             $submittedData = [];
             $approvedData = [];
             $approvedByTeamLead = [];
+            $notSubmittedUsers = [];
         }
 
         $selectedUser = $this->getUser();
