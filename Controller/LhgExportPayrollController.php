@@ -33,7 +33,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 /**
  * @Route(path="/admin/payroll-export")
  */
-class LhgExportPayrollController extends TimesheetAbstractController
+class LhgExportPayrollController extends AbstractController
 { 
     private $session;
     private $security; 
@@ -96,15 +96,31 @@ class LhgExportPayrollController extends TimesheetAbstractController
         ]);
     }
 
-    protected function getCreateForm(Timesheet $entry): FormInterface
+    /**
+     * @Route(path="/pdf", name="payrollExportPDF", methods={"GET", "POST"})
+
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function pdf(): Response
     {
-        return $this->generateCreateForm($entry, TimesheetEditForm::class, $this->generateUrl('timesheet_create'));
+        // Create a new mPDF instance
+        $mpdf = new Mpdf();
+
+        // Your HTML content goes here. You can generate it dynamically or load from a template.
+        $htmlContent = '<h1>Hello, PDF!</h1>';
+
+        // Generate PDF from HTML content
+        $mpdf->WriteHTML($htmlContent);
+
+        // Output the PDF to the browser or save it to a file
+        $mpdf->Output();
+
+        // Return a Symfony Response
+        return new Response();
     }
 
-    protected function getDuplicateForm(Timesheet $entry, Timesheet $original): FormInterface
-    {
-        return $this->generateCreateForm($entry, TimesheetEditForm::class, $this->generateUrl('timesheet_duplicate', ['id' => $original->getId()]));
-    }
+     
 
     
 }
