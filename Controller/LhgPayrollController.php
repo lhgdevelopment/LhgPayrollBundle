@@ -55,7 +55,7 @@ class LhgPayrollController extends AbstractController
         $this->entityManager = $entityManager;
 
         $this->timeZone = new DateTimeZone('America/Los_Angeles');
-        // date_default_timezone_set($this->timeZone->getName());
+        date_default_timezone_set($this->timeZone->getName());
     }
 
     /**
@@ -169,7 +169,7 @@ class LhgPayrollController extends AbstractController
         $dates = $this->payrollCalculatorService->calculateBiweeklyPeriod($selectedDate); 
         $biweeklyStart = $dates['start'];
         $biweeklyEnd = $dates['end']; 
-        dd($dates);
+        // dd($dates);
 
         $notSubmittedYet = [];
 
@@ -223,35 +223,14 @@ class LhgPayrollController extends AbstractController
                 ->setParameter('enabled', 1)
                 ->getQuery()
                 ->getResult();
-            }
-
-            // dd($notSubmittedUsers);
-            // dd('Yes Admin');
-            // $toApproveData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([ 
-            //     'startDate' => $dates['start'] ,
-            //     'status' => StatusEnum::APPROVED_BY_TEAM_LEAD
-            // ]);
-            // // Process Team Member Data
-            // if($this->teamLeadAndFinanceService->isTeamLead()){
-            //     // Get admin team members 
-            //     $teamMembers = $this->teamLeadAndFinanceService->getTeamMemberForTeamLead();
-            //     if(sizeof($teamMembers) > 0){
-            //         $pendingData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([
-            //             'user' => $teamMembers, 
-            //             'startDate' => $dates['start'] , 
-            //             'status' => StatusEnum::PENDING
-            //         ]);
-            //         // dd($pendingData);
-
-            //         $toApproveData = array_merge($pendingData, $toApproveData);
-            //     }
-            // }
+            } 
 
             // Submitted 
             $submittedData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([ 
                 'startDate' => $dates['start'] ,
                 'status' => StatusEnum::PENDING
             ]);
+            // dd($submittedData);
 
             $approvedByTeamLead = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([ 
                 'startDate' => $dates['start'] ,
