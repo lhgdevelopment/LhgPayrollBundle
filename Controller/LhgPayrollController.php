@@ -169,7 +169,7 @@ class LhgPayrollController extends AbstractController
         $dates = $this->payrollCalculatorService->calculateBiweeklyPeriod($selectedDate); 
         $biweeklyStart = $dates['start'];
         $biweeklyEnd = $dates['end']; 
-        // dd($dates);
+        dd($dates);
 
         $notSubmittedYet = [];
 
