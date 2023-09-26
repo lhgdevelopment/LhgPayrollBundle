@@ -206,24 +206,46 @@ class LhgPayrollController extends AbstractController
             $queryBuilder = $this->entityManager->createQueryBuilder();
 
             if(sizeof($submitedUsers) > 0){
+                // $notSubmittedUsers = $queryBuilder
+                // ->select('u')
+                // ->from(User::class, 'u')
+                // ->where($queryBuilder->expr()->notIn('u.id', $submitedUsers))
+                // ->andWhere('u.enabled = :enabled')
+                // ->setParameter('enabled', 1)
+                // ->getQuery()
+                // ->getResult();
+
                 $notSubmittedUsers = $queryBuilder
-                ->select('u')
-                ->from(User::class, 'u')
-                ->where($queryBuilder->expr()->notIn('u.id', $submitedUsers))
-                ->andWhere('u.enabled = :enabled')
-                ->setParameter('enabled', 1)
-                ->getQuery()
-                ->getResult();
+                    ->select('u')
+                    ->from(User::class, 'u')
+                    ->leftJoin('u.preferences', 'up') // Join with UserPreference 
+                    ->where($queryBuilder->expr()->notIn('u.id', $submitedUsers))
+                    ->andWhere('u.enabled = :enabled')
+                    ->andWhere('up.name = :preferenceName') // Filter by preference name
+                    ->setParameters([
+                        'enabled' => 1,
+                        'preferenceName' => 'lhg_payroll.approvval_flow.team_lead',
+                    ])
+                    ->getQuery()
+                    ->getResult(); 
+
+
             }
             else{
                 $notSubmittedUsers = $queryBuilder
-                ->select('u')
-                ->from(User::class, 'u') 
-                ->andWhere('u.enabled = :enabled')
-                ->setParameter('enabled', 1)
-                ->getQuery()
-                ->getResult();
+                    ->select('u')
+                    ->from(User::class, 'u')
+                    ->leftJoin('u.preferences', 'up') // Join with UserPreference 
+                    ->andWhere('u.enabled = :enabled')
+                    ->andWhere('up.name = :preferenceName') // Filter by preference name
+                    ->setParameters([
+                        'enabled' => 1,
+                        'preferenceName' => 'lhg_payroll.approvval_flow.team_lead',
+                    ])
+                    ->getQuery()
+                    ->getResult();
             } 
+            // dd($notSubmittedUsers);
 
             // Submitted 
             $submittedData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([ 
