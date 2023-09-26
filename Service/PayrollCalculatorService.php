@@ -151,21 +151,7 @@ class PayrollCalculatorService
         $timesheetQuery->setOrder(BaseQuery::ORDER_ASC);
 
         $timesheets = $this->timesheetRepository->getTimesheetsForQuery($timesheetQuery);
-        $errors = $this->breakTimeCheckToolGER->checkBreakTime($timesheets);
-
-        // $totalHours = 0;
-        // $totalEarnings = 0;
-
-        // foreach ($timesheets as $timesheet) {
-        //     $totalHours += $timesheet->getDuration() / 3600; // Converted to hrs
-        //     $totalEarnings += $timesheet->getRate();
-        // }
-
-        // return [
-        //     'total_hours' => $totalHours,
-        //     'total_earnings' => $totalEarnings, 
-        //     'timesheets' => $timesheets
-        // ];
+        $errors = $this->breakTimeCheckToolGER->checkBreakTime($timesheets); 
 
         return [
             array_reduce(

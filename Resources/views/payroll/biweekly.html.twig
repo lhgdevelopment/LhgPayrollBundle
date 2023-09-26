@@ -416,7 +416,7 @@
                     
                     {% if submittedByUser == false %}
                     <p>
-                        <input type="checkbox" checked id="consent-checkbox"> I hereby <em>{{ app.user.alias }}</em> declare that I have checked above time entries are correct. 
+                        <input type="checkbox" id="consent-checkbox"> I hereby <em>{{ app.user.alias }}</em> declare that I have checked above time entries are correct. 
                     </p>
                     <button id="submit_btn" type="button" class="btn btn-info">
                         Submit
@@ -653,6 +653,18 @@
 
             if(submitBtn != null){
                 submitBtn.addEventListener("click", function() {
+
+                    var consent = document.getElementById("consent-checkbox");
+                    if(!consent.checked){
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'error',
+                            title: 'Please check the consent first!',
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
+                        return;
+                    }
                      
                     const url =  "{{ path('lhg_payroll_approval_new') }}";
                     const data = {
