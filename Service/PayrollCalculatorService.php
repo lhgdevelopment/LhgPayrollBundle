@@ -139,6 +139,7 @@ class PayrollCalculatorService
      */
     function getTimesheets(?User $selectedUser, DateTime $start, DateTime $end)
     {
+        // dd([$start, $end]);
         $timesheetQuery = new TimesheetQuery();
         $timesheetQuery->setUser($selectedUser);
         $dateRange = new DateRange();

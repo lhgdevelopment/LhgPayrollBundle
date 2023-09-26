@@ -36,7 +36,7 @@ class LhgPayrollApprovalController extends AbstractController
         $this->teamLeadAndFinanceService = $teamLeadAndFinanceService;
 
         $this->timeZone = new DateTimeZone('America/Los_Angeles');
-        date_default_timezone_set($this->timeZone->getName());
+        // date_default_timezone_set($this->timeZone->getName());
     }
 
     /**
@@ -60,10 +60,10 @@ class LhgPayrollApprovalController extends AbstractController
     { 
         $requestData = json_decode($request->getContent(), true);  
         
-        $startDate = new \DateTime($requestData['startDate'], $this->timeZone);
+        $startDate = new \DateTime($requestData['startDate']);
         $startDate->setTime(0, 0, 0); // Set the time to midnight
 
-        $endDate = new \DateTime($requestData['endDate'], $this->timeZone);
+        $endDate = new \DateTime($requestData['endDate']);
         $endDate->setTime(23, 59, 59); // Set the time to 23:59:59
 
         // dd([$startDate, $endDate]);
@@ -120,7 +120,7 @@ class LhgPayrollApprovalController extends AbstractController
     {
         // Retrieve the LhgPayrollApproval entity based on the provided ID
         $approval = $this->getDoctrine()->getRepository(LhgPayrollApproval::class)->find($id); 
-        // dd($approval);
+        // dd($approval->getStartDate()->setTimezone($this->timeZone));
 
         $users = $this->teamLeadAndFinanceService->getTeamUsers();
 
@@ -141,7 +141,12 @@ class LhgPayrollApprovalController extends AbstractController
             'approval' => $approval 
         ]); 
 
-        [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($approval->getUser(), $approval->getStartDate(), $approval->getEndDate()); 
+        $selectedDate = $approval->getEndDate();
+        $selectedDate->modify('+2 days');
+
+        $dates = $this->payrollCalculatorService->calculateBiweeklyPeriod($selectedDate);
+
+        [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($approval->getUser(), $dates['start'], $dates['end']); 
 
         $projectWiseData = $this->payrollCalculatorService->generateViewDataFromTimesheets($timesheets); 
 
