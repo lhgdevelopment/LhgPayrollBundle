@@ -31,12 +31,12 @@ class LhgPayrollApproval
     private $submittedBy;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="date")
      */
     private $startDate;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="date")
      */
     private $endDate;
 

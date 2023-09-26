@@ -61,10 +61,14 @@ class LhgPayrollApprovalController extends AbstractController
         $requestData = json_decode($request->getContent(), true);  
         
         $startDate = new \DateTime($requestData['startDate']);
-        $startDate->setTime(0, 0, 0); // Set the time to midnight
+        // $startDate->setTime(0, 0, 0); // Set the time to midnight
+        $startDate->setTimezone($this->timeZone);
+
+        // dd($startDate);
 
         $endDate = new \DateTime($requestData['endDate']);
-        $endDate->setTime(23, 59, 59); // Set the time to 23:59:59
+        // $endDate->setTime(23, 59, 59); // Set the time to 23:59:59
+        $endDate->setTimezone($this->timeZone);
 
         // dd([$startDate, $endDate]);
 

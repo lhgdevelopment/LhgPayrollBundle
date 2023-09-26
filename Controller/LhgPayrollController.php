@@ -181,7 +181,7 @@ class LhgPayrollController extends AbstractController
 
             $submittedData = $this->entityManager->getRepository(LhgPayrollApproval::class)->FindBy([
                 'user' => $teamMemberuserId, 
-                'startDate' => $dates['start'] , 
+                'startDate' => $dates['start'], 
                 'status' => StatusEnum::PENDING
             ]); 
 
