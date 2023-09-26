@@ -15,6 +15,7 @@ use KimaiPlugin\LhgPayrollBundle\Entity\LhgPayrollApprovalHistory;
 use KimaiPlugin\LhgPayrollBundle\Service\PayrollCalculatorService;
 use KimaiPlugin\LhgPayrollBundle\Service\StatusEnum;
 use KimaiPlugin\LhgPayrollBundle\Service\TeamLeadAndFinanceService;
+use Mpdf\Mpdf;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -73,58 +74,26 @@ class LhgExportPayrollController extends TimesheetAbstractController
 
     public function indexAction(Request $request, HttpClientInterface $httpClient, UrlGeneratorInterface $urlGenerator): Response
     {
+        return $this->generatePdf();
+    }
 
-        $selectedDate = $request->query->get('date', new DateTime());
-        if($request->query->get('date')){
-            $selectedDate = new DateTime($request->query->get('date'));
-        }
-        else{
-            $selectedDate = new DateTime();
-        }
+    public function generatePdf(): Response
+    {
+        // Create an instance of mPDF
+        $mpdf = new Mpdf();
 
-        $dates = $this->payrollCalculatorService->calculateBiweeklyPeriod($selectedDate); 
-        $biweeklyStart = $dates['start'];
-        $biweeklyEnd = $dates['end']; 
-
-        // Define the URL of your internal route
-        // $url = $this->generateUrl('timesheet_export');
-        $url = $this->generateUrl('timesheet_export', [], UrlGeneratorInterface::ABSOLUTE_URL); 
-
-        // Create an array of parameters to set in the request body
-        $requestParameters = [
-            'export' => [
-                'daterange' => $biweeklyStart->format('Y-m-d') . ' - ' . $biweeklyEnd->format('Y-m-d'),
-                'export' => 'pdf',
-                'state' => 1,
-                'exported' => 1,
-                'orderBy' => 'begin',
-                'order' => 'ASC',
-            ],
-        ];
-        dd($requestParameters);
-
-        // Make the API call with the specified parameters
-        $response = $httpClient->request('POST', $url, [
-            'json' => $requestParameters,
+        // Your HTML content to be converted to PDF
+        $html = $this->renderView('@LhgPayroll/payroll/export.html.twig', [
+            'data' => 'Hello, mPDF!'
         ]);
 
-        // Check if the response status code indicates success (e.g., 200 OK)
-        if ($response->getStatusCode() === 200) {
-            // Retrieve the PDF content from the response
-            $pdfContent = $response->getContent();
+        // Load HTML content into mPDF
+        $mpdf->WriteHTML($html);
 
-            // Create a Symfony Response containing the PDF content
-            $response = new Response($pdfContent);
-
-            // Set the response headers to indicate that it's a PDF
-            $response->headers->set('Content-Type', 'application/pdf');
-            $response->headers->set('Content-Disposition', 'inline; filename="your-pdf-file.pdf"');
-
-            return $response;
-        } else {
-            // Handle the case when the API call does not return a PDF
-            return new Response('Failed to retrieve PDF', $response->getStatusCode());
-        }
+        // Output the PDF as a response
+        return new Response($mpdf->Output(), 200, [
+            'Content-Type' => 'application/pdf',
+        ]);
     }
 
     protected function getCreateForm(Timesheet $entry): FormInterface
