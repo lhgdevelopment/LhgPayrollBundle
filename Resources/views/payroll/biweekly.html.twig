@@ -612,10 +612,10 @@
                     {% for index, notSubmitted in notSubmittedUsers %} 
                     <tr>
                         <td>{{ loop.index }}</td>
-                        <td>{{ notSubmitted['user'].alias }}</td>
+                        <td>{{ notSubmitted.alias }}</td>
                         <td>{{ 'Team Lead Name' }}</td>
                         <td>
-                            <a href="?user={{ notSubmitted['user'].id }}&date={{ selectedDate }}" class="btn btn-primary">View</a>
+                            <a href="?user={{ notSubmitted.id }}&date={{ selectedDate }}" class="btn btn-primary">View</a>
                         </td>
                     </tr>
                     {% endfor %}
