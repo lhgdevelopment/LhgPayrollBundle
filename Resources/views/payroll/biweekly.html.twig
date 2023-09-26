@@ -307,9 +307,11 @@
                 <div class="mt-4">
                     <form method="GET" action="{{ path('biweekly-payroll') }}" class="form-inline">
                         <div class="form-group mb-2">
-                            {# <select name="user" class="form-control select2" id="payroll_user"> #}
+                            {# <select name="user" class="form-control select2" id="payroll_user"> #} 
                                 {% if users|length > 0 %}
                                 <select name="user" id="payroll_user" class="selectpicker form-control select2 ">
+                                    {# <option {% if selectedUserId == app.user.id %} {{ 'selected' }} {% endif %} value="{{ app.user.id }}">{{
+                                            app.user.alias ?? app.user.username }}</option> #}
                                     {% for user in users %}
                                     <option {% if selectedUserId==user.id %} {{ 'selected' }} {% endif %} value="{{ user.id }}">{{
                                         user.alias ?? user.username }}</option>
@@ -411,6 +413,7 @@
                             {% endfor %}
                         </tbody>
                     </table>
+                    
                     {% if submittedByUser == false %}
                     <p>
                         <input type="checkbox" checked id="consent-checkbox"> I hereby <em>{{ app.user.alias }}</em> declare that I have checked above time entries are correct. 

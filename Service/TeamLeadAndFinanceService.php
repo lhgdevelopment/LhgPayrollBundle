@@ -68,9 +68,9 @@ class TeamLeadAndFinanceService
                 }
             }
 
-            if(sizeof($users) > 0){
-                array_push($users, $this->user);
-            }
+            // if(sizeof($users) < 0){
+            //     array_push($users, $this->user);
+            // }
         } 
 
         return $users;

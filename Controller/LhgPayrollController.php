@@ -4,7 +4,8 @@ namespace KimaiPlugin\LhgPayrollBundle\Controller;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
-use DateTime; 
+use DateTime;
+use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use DoctrineExtensions\Query\Mysql\Format;
 use KimaiPlugin\LhgPayrollBundle\Entity\LhgPayrollApproval;
@@ -35,6 +36,7 @@ class LhgPayrollController extends AbstractController
     private $logger;
     private $userRepository;
     private $entityManager;
+    private $timeZone;
 
     public function __construct(SessionInterface $session, 
     Security $security, 
@@ -51,6 +53,9 @@ class LhgPayrollController extends AbstractController
         $this->logger = $logger;
         $this->userRepository = $userRepository;
         $this->entityManager = $entityManager;
+
+        $this->timeZone = new DateTimeZone('America/Los_Angeles');
+        date_default_timezone_set($this->timeZone->getName());
     }
 
     /**
@@ -164,6 +169,7 @@ class LhgPayrollController extends AbstractController
         $dates = $this->payrollCalculatorService->calculateBiweeklyPeriod($selectedDate); 
         $biweeklyStart = $dates['start'];
         $biweeklyEnd = $dates['end']; 
+        // dd($dates);
 
         $notSubmittedYet = [];
 
@@ -367,7 +373,12 @@ class LhgPayrollController extends AbstractController
         foreach ($constants as $constantName => $constantValue) {
             $enumValuePairs[$constantValue] = $constantName;
         }
-        // dd($enumValuePairs[1]);
+
+        // $users = array_push($this->security->getUser(), $users);
+        // dd($this->security->getUser());
+        // dd(gettype((array) $this->security->getUser()));
+        // dd($timesheets); // 312
+
         return $this->render('@LhgPayroll/payroll/biweekly.html.twig', [
             'submittedData' => $submittedData,
             'approvedByTeamLead' => $approvedByTeamLead,

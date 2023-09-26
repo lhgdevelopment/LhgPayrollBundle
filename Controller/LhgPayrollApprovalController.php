@@ -4,6 +4,7 @@ namespace KimaiPlugin\LhgPayrollBundle\Controller;
 
 use App\Entity\User;
 use DateTime;
+use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,12 +27,16 @@ class LhgPayrollApprovalController extends AbstractController
     private $entityManager;
     private $payrollCalculatorService;
     private $teamLeadAndFinanceService;
+    private $timeZone;
 
     public function __construct(EntityManagerInterface $entityManager, PayrollCalculatorService $payrollCalculatorService, TeamLeadAndFinanceService $teamLeadAndFinanceService)
     {
         $this->entityManager = $entityManager;
         $this->payrollCalculatorService = $payrollCalculatorService;
         $this->teamLeadAndFinanceService = $teamLeadAndFinanceService;
+
+        $this->timeZone = new DateTimeZone('America/Los_Angeles');
+        date_default_timezone_set($this->timeZone->getName());
     }
 
     /**
@@ -52,24 +57,23 @@ class LhgPayrollApprovalController extends AbstractController
      */
 
     public function new(Request $request): Response
-    {
-
+    { 
+        $requestData = json_decode($request->getContent(), true);  
         
-        // Decode the JSON content of the request body
-        $requestData = json_decode($request->getContent(), true); 
+        $startDate = new \DateTime($requestData['startDate'], $this->timeZone);
+        $startDate->setTime(0, 0, 0); // Set the time to midnight
 
-        // dump($this->entityManager->getRepository(LhgPayrollApproval::class)->findBy([
-        //         'user' => '51',
-        //         'startDate' => new \DateTime($requestData['startDate']),
-        //         'endDate' => new \DateTime($requestData['endDate'])
-        // ]));
+        $endDate = new \DateTime($requestData['endDate'], $this->timeZone);
+        $endDate->setTime(23, 59, 59); // Set the time to 23:59:59
+
+        // dd([$startDate, $endDate]);
 
         // Create an instance of LhgPayrollApproval entity
         $approval = new LhgPayrollApproval(); 
         $existingApproval = $this->entityManager->getRepository(LhgPayrollApproval::class)->findOneBy([
             'user' => $requestData['userId'],
-            'startDate' => new \DateTime($requestData['startDate']),
-            'endDate' => new \DateTime($requestData['endDate'])
+            'startDate' => $startDate,
+            'endDate' => $endDate
         ]);
         if($existingApproval){
             return new JsonResponse(['message' => 'A similar payroll approval already exists'], Response::HTTP_CONFLICT); 
@@ -94,8 +98,8 @@ class LhgPayrollApprovalController extends AbstractController
         $approval
             ->setUser($user)
             ->setSubmittedBy($this->getUser())
-            ->setStartDate(new \DateTime($requestData['startDate']))
-            ->setEndDate(new \DateTime($requestData['endDate']))
+            ->setStartDate($startDate)
+            ->setEndDate($endDate)
             ->setStatus(1) // Set your desired status
             ->setExpectedDuration(0)
             ->setTotalAmount($totalEarnings)
@@ -115,7 +119,8 @@ class LhgPayrollApprovalController extends AbstractController
     public function viewPayrollAction(int $id): Response
     {
         // Retrieve the LhgPayrollApproval entity based on the provided ID
-        $approval = $this->getDoctrine()->getRepository(LhgPayrollApproval::class)->find($id);
+        $approval = $this->getDoctrine()->getRepository(LhgPayrollApproval::class)->find($id); 
+        // dd($approval);
 
         $users = $this->teamLeadAndFinanceService->getTeamUsers();
 
@@ -136,8 +141,7 @@ class LhgPayrollApprovalController extends AbstractController
             'approval' => $approval 
         ]); 
 
-        [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($approval->getUser(), $approval->getStartDate(), $approval->getEndDate());
-        // dd($timesheets);
+        [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($approval->getUser(), $approval->getStartDate(), $approval->getEndDate()); 
 
         $projectWiseData = $this->payrollCalculatorService->generateViewDataFromTimesheets($timesheets); 
 
