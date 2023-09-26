@@ -521,15 +521,15 @@
                     {% for index, teamLeadApproved in approvedByTeamLead %} 
                         {% set netTotalDuration = netTotalDuration + teamLeadApproved.totalDuration %}
                         {% set netTotalAmount = netTotalAmount + teamLeadApproved.totalAmount %}
-                        {% set netTotalPayable = netTotalPayable + teamLeadApproved.netPayable %}
+                        {% set netTotalPayable = netTotalPayable + teamLeadApproved.netPayable ?? teamLeadApproved.totalAmount  %}
                     <tr>
                         <td>{{ loop.index }}</td>
                         <td>{{ teamLeadApproved.user.alias }}</td>
                         <td>{{ payrollDates.start }} to {{ payrollDates.end }}</td>
                         <td>{{ statusArray[teamLeadApproved.status] }}</td>
                         <td>{{ teamLeadApproved.totalDuration|number_format(3) }}</td>
-                        <td>{{ teamLeadApproved.totalAmount|number_format(3) }}</td>
-                        <td>{{ teamLeadApproved.netPayable|number_format(3) }}</td>
+                        <td>${{ teamLeadApproved.totalAmount|number_format(3) }}</td>
+                        <td>${{ teamLeadApproved.netPayable ?? teamLeadApproved.totalAmount|number_format(3) }}</td>
                         <td>
                             <a href="{{ path('lhg_payroll_approval_view', {'id': teamLeadApproved.id}) }}" class="btn btn-primary">View</a>
                         </td>
@@ -570,15 +570,15 @@
                     {% for index, financeApproved in approvedData %} 
                         {% set netTotalFinanceDuration = netTotalFinanceDuration + financeApproved.totalDuration %}
                         {% set netFinanceTotalAmount = netFinanceTotalAmount + financeApproved.totalAmount %}
-                        {% set netFinanceTotalPayable = netFinanceTotalPayable + financeApproved.netPayable %}
+                        {% set netFinanceTotalPayable = netFinanceTotalPayable + financeApproved.netPayable ?? financeApproved.totalAmount %}
                     <tr>
                         <td>{{ loop.index }}</td>
                         <td>{{ financeApproved.user.alias }}</td>
                         <td>{{ payrollDates.start }} to {{ payrollDates.end }}</td>
                         <td>{{ statusArray[financeApproved.status] }}</td>
                         <td>{{ financeApproved.totalDuration|number_format(3) }}</td>
-                        <td>{{ financeApproved.totalAmount|number_format(3) }}</td>
-                        <td>{{ financeApproved.netPayable|number_format(3) }}</td>
+                        <td>${{ financeApproved.totalAmount|number_format(3) }}</td>
+                        <td>${{ financeApproved.netPayable ?? financeApproved.totalAmount|number_format(3) }}</td>
                         <td>
                             <a href="{{ path('lhg_payroll_approval_view', {'id': financeApproved.id}) }}" class="btn btn-primary">View</a>
                         </td>
@@ -612,10 +612,10 @@
                     {% for index, notSubmitted in notSubmittedUsers %} 
                     <tr>
                         <td>{{ loop.index }}</td>
-                        <td>{{ notSubmitted.alias }}</td>
+                        <td>{{ notSubmitted['user'].alias }}</td>
                         <td>{{ 'Team Lead Name' }}</td>
                         <td>
-                            <a href="?user={{ notSubmitted.id }}&date={{ selectedDate }}" class="btn btn-primary">View</a>
+                            <a href="?user={{ notSubmitted['user'].id }}&date={{ selectedDate }}" class="btn btn-primary">View</a>
                         </td>
                     </tr>
                     {% endfor %}
