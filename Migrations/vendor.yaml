@@ -1,0 +1,11 @@
+# --------------------------------------------------------------------------------------------------
+# Generate a new migration with:
+# bin/console doctrine:migrations:diff --em=default --configuration=var/plugins/LhgPayrollBundle/Migrations/vendor.yaml
+#
+# bin/console doctrine:migrations:migrate --em=default --configuration=var/plugins/LhgPayrollBundle/Migrations/vendor.yaml
+# --------------------------------------------------------------------------------------------------
+
+table_storage:
+    table_name: 'bundle_migration_vendor'
+migrations_paths:
+    'KimaiPlugin\LhgPayrollBundle\Migrations\Vendor': 'var/plugins/LhgPayrollBundle/Migrations/Vendor'
