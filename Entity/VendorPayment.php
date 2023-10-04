@@ -27,9 +27,10 @@ class VendorPayment
     private $project;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\ManyToOne(targetEntity="KimaiPlugin\LhgPayrollBundle\Entity\Vendor")
+     * @ORM\JoinColumn(name="vendor_id", referencedColumnName="id")
      */
-    private $vendorId;
+    private $vendor;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -67,16 +68,16 @@ class VendorPayment
     {
         $this->project = $project;
         return $this;
+    } 
+
+    public function getVendor(): ?Vendor
+    {
+        return $this->vendor;
     }
 
-    public function getVendorId(): ?int
+    public function setVendor(?Vendor $vendor): self
     {
-        return $this->vendorId;
-    }
-
-    public function setVendorId(int $vendorId): self
-    {
-        $this->vendorId = $vendorId;
+        $this->vendor = $vendor;
         return $this;
     }
 

@@ -41,6 +41,12 @@ class VendorPaymentController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager = $this->getDoctrine()->getManager();
+
+            $vendor = $form->get('vendor')->getData();
+            $vendorPayment->setVendor($vendor);
+
+            $project = $form->get('project')->getData();
+            $vendorPayment->setProject($project);
             $entityManager->persist($vendorPayment);
             $entityManager->flush();
 

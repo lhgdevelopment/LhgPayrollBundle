@@ -43,20 +43,21 @@
          // Add the "Payroll" menu item
          $payrollMenuItem = new MenuItemModel('payroll', 'Payroll', 'biweekly-payroll', [], 'fas fa-dollar-sign');
          $menu->addChild($payrollMenuItem);
- 
-         // Add the "Vendor" submenu item under "Payroll"
-         $vendorMenuItem = new MenuItemModel('vendor', 'Vendor', 'vendor_index'); // Customize the route and label
-         $payrollMenuItem->addChild($vendorMenuItem);
- 
-         // Add the "Vendor Payment" submenu item under "Payroll"
-         $vendorPaymentMenuItem = new MenuItemModel('vendor_payment', 'Vendor Payment', 'vendor_payment_index'); // Customize the route and label
-         $payrollMenuItem->addChild($vendorPaymentMenuItem);
+
+         
  
          // Check if the user has a certain role (e.g., ROLE_SUPER_ADMIN) to determine if they can access the submenu items
-         if (!$auth->isGranted('ROLE_SUPER_ADMIN')) {
-             // Remove the submenu items if the user doesn't have the required role
-             $payrollMenuItem->removeChild($vendorMenuItem);
-             $payrollMenuItem->removeChild($vendorPaymentMenuItem);
+         if ($auth->isGranted('ROLE_SUPER_ADMIN')) {
+            $vendorMenuItem = new MenuItemModel('vendor', 'Vendor', 'vendor_index', [], 'fas fa-industry');
+            $menu->addChild($vendorMenuItem);
+    
+            // Add the "Vendor" submenu item under "Payroll"
+            $vendorMenuSubItem = new MenuItemModel('vendor', 'Vendor', 'vendor_index'); // Customize the route and label
+            $vendorMenuItem->addChild($vendorMenuSubItem);
+    
+            // Add the "Vendor Payment" submenu item under "Payroll"
+            $vendorPaymentMenuItem = new MenuItemModel('vendor_payment', 'Vendor Payment', 'vendor_payment_index'); // Customize the route and label
+            $vendorMenuItem->addChild($vendorPaymentMenuItem);
          }
      }
  }

@@ -3,6 +3,7 @@
 
 namespace KimaiPlugin\LhgPayrollBundle\Form;
 
+use KimaiPlugin\LhgPayrollBundle\Entity\Vendor;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -18,7 +19,10 @@ class VendorPaymentType extends AbstractType
                 'class' => 'App\Entity\Project', // Adjust the class to your Project entity
                 'choice_label' => 'name', // Customize the label property
             ])
-            ->add('vendorId')
+            ->add('vendor', EntityType::class, [
+                'class' => Vendor::class, // Use the Vendor entity
+                'choice_label' => 'name', // Customize the label property
+            ])
             ->add('billingType')
             ->add('amount')
             ->add('note')
