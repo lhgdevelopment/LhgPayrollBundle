@@ -252,6 +252,67 @@ class LhgPayrollApprovalController extends AbstractController
         // Return a regular Symfony response if not an AJAX request
         // return $this->redirectToRoute('lhg_payroll_approval_view', ['id' => $id]);
     }
+    /**
+     * @Route("/approval/re-submit/{id}", name="lhg_payroll_approval_resubmit", methods={"POST"})
+     */
+    public function resubmitPayroll(Request $request, int $id)
+    {
+        // Retrieve the LhgPayrollApproval entity based on the provided ID
+        $approval = $this->getDoctrine()->getRepository(LhgPayrollApproval::class)->find($id);
+
+        $users = $this->teamLeadAndFinanceService->getTeamUsers();
+
+        $teamMemberuserId = [];
+        foreach ($users as $user) {
+            array_push($teamMemberuserId, $user->getId());
+        }
+
+        if (!in_array($approval->getUser()->getId(), $teamMemberuserId)) {
+            throw $this->createNotFoundException('You are not authorized to view this');
+        }
+
+        if (!$approval) {
+            throw $this->createNotFoundException('Payroll approval not found');
+        }
+
+        $entityManager = $this->getDoctrine()->getManager();  
+
+        $approvalHistory = new LhgPayrollApprovalHistory();
+
+        // Set user and status for approval history
+        $approvalHistory
+            ->setUser($this->getUser())
+            ->setApproval($approval)
+            ->setMessage('Re-submitted payroll for paaroval')
+            ->setDate( new DateTime())
+            ->setStatus(StatusEnum::PENDING); 
+        
+
+        // Persist and flush the approval history
+        $entityManager->persist($approvalHistory);
+        $entityManager->flush();
+
+        // Update the approval status
+        $approval->setStatus(StatusEnum::PENDING);
+
+        // Persist and flush the approval entity
+        $entityManager->persist($approval);
+        $entityManager->flush();
+
+        // Prepare the response data
+        $responseData = [
+            'message' => 'Payroll approval updated successfully',
+            'approval' => $approval
+        ]; 
+
+        // Create a JSON response object
+        $response = new JsonResponse($responseData);
+
+        return $response; 
+
+        // Return a regular Symfony response if not an AJAX request
+        // return $this->redirectToRoute('lhg_payroll_approval_view', ['id' => $id]);
+    }
 
 
         

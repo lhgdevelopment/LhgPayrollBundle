@@ -396,6 +396,10 @@
                         Team Lead Approve 
                     </button>
 
+                    <button id="reject_btn" type="button" data-role="team_lead" class="btn btn-danger" data-toggle="modal" data-target="#rejectModal">
+                        Team Lead Reject
+                    </button>
+
                     <div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-labelledby="approveModalLabel" aria-hidden="true">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
@@ -467,10 +471,33 @@
                             </div>
                         </div>
 
-                        <button id="reject_btn" type="button" class="btn btn-danger">
-                            Reject
+                        <button id="reject_btn" type="button" data-role="finance_lead" class="btn btn-danger" data-toggle="modal" data-target="#rejectModal">
+                            Finance Lead Reject
                         </button>
                     {% endif %}
+                    {# Reject modal  #}
+                    <div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="rejectModalLabel">Reject Payroll</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="rejectForm">
+                                        <label for="message">Note:</label>
+                                        <input type="text" id="rejectMessage" class="form-control"> 
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="button" id="rejectConfirmBtn" class="btn btn-warning">Reject</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div> 
@@ -482,8 +509,35 @@
     <script> 
         document.addEventListener("DOMContentLoaded", function() { 
         const approveBtn = document.getElementById("approve_btn");
+        const rejectBtn = document.getElementById("reject_btn");
         const modal = document.getElementById("approveModal"); 
         const currentStatus = {{ approval.status }};
+
+        if(rejectBtn){
+            rejectBtn.addEventListener("click", function() {
+                const role = this.getAttribute("data-role");
+                var status = null;
+                if(role){
+                    document.getElementById("rejectConfirmBtn").addEventListener("click", function() {
+                        if(role =='team_lead'){
+                            status = 3; // Rejected by team lead
+                        }
+                        else{
+                            status = 5; // Rejected by Finance Lead
+                        }
+                        const messageInput = document.getElementById("rejectMessage");
+
+                        data = {
+                            message: messageInput.value,
+                            status: status
+                        };
+
+                        updateStatusAxajCall(data);
+
+                    });
+                }
+            });
+        }
 
         // Event listener for the Approve button
         if(approveBtn){
@@ -504,7 +558,7 @@
                     messageInput.value = "";
 
                     // Event listener for the "Approve" button inside the modal
-                    document.getElementById("approveConfirmBtn").addEventListener("click", function() {
+                document.getElementById("approveConfirmBtn").addEventListener("click", function() {
                     // Get input values
                     const approvalMessage = messageInput.value;
                     var data = {};
@@ -542,46 +596,52 @@
                         };
                     }
 
-                    // Make an AJAX request to update the payroll approval
-                    const url = "{{ path('lhg_payroll_approval_status_update', {'id': approval.id}) }}"; // Update with your correct route 
-                    console.log(data);
+                    updateStatusAxajCall(data);
 
-                    // Make a POST request using fetch
-                    fetch(url, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(data)
-                    })
-                    .then(response => response.json())
-                    .then(responseData => {
-                        // Handle success response here
-                        Swal.fire({
-                            position: 'top-end',
-                            icon: 'success',
-                            title: 'Updated successfully',
-                            showConfirmButton: false,
-                            timer: 1500
-                        })
-                        location.reload(); 
-                        // Display a success message to the user or perform other actions
-                    })
-                    .catch(error => {
-                        console.log(error); 
-                        // Handle error here
-                        Swal.fire({
-                            position: 'top-end',
-                            icon: 'error',
-                            title: 'Something went wrong!',
-                            showConfirmButton: false,
-                            timer: 1500
-                        })
-                    });
+                    
 
                     // Close the modal
                     $(modal).modal("hide"); 
                 });
+            });
+        }
+
+        function updateStatusAxajCall(data){
+            // Make an AJAX request to update the payroll approval
+            const url = "{{ path('lhg_payroll_approval_status_update', {'id': approval.id}) }}"; // Update with your correct route 
+            console.log(data);
+
+            // Make a POST request using fetch
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(responseData => {
+                // Handle success response here
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Updated successfully',
+                    showConfirmButton: false,
+                    timer: 1500
+                })
+                location.reload(); 
+                // Display a success message to the user or perform other actions
+            })
+            .catch(error => {
+                console.log(error); 
+                // Handle error here
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Something went wrong!',
+                    showConfirmButton: false,
+                    timer: 1500
+                })
             });
         }
 

@@ -294,7 +294,7 @@
                 <li><a data-toggle="tab" href="#approvedByTeamLead">Approved By Team Lead</a></li>
             {% endif %}
             {% if approvedData|length > 0 %}
-                <li><a data-toggle="tab" href="#approvedData">Approved By Finane</a></li>
+                <li><a data-toggle="tab" href="#approvedData">Approved By Finance</a></li>
             {% endif %}
             {% if notSubmittedUsers|length > 0 and is_granted('ROLE_SUPER_ADMIN') %}
                 <li><a data-toggle="tab" href="#notSubmittedYet">Not Submitted</a></li>
@@ -422,34 +422,44 @@
                         Submit
                     </button>
                     {% else %}  
-                        <div class="mt-4 timeline-div">
-                            <div class="timeline">  
-                                <ul class="timeline">
-                                    <!-- Item 1 -->
+                        {% if approval.status == 3 or approval.status == 5 %}
+                            {{ approval.status }}
+                            {{ submittedByUser }}
+                                <button id="re_submit_btn" type="button" class="btn btn-info">
+                                    Re-Submit
+                                </button>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if approval != null %}
+                    <div class="mt-4 timeline-div">
+                        <div class="timeline">  
+                            <ul class="timeline">
+                                <!-- Item 1 -->
+                                <li>
+                                    <div class="direction-l"> 
+                                        <div class="flag-wrapper">
+                                            <span class="flag">{{ approval.user.alias }}</span>
+                                            <span class="time-wrapper"><span class="time">{{ approval.creationDate | date("Y-m-d g:i:sA") }}</span></span>
+                                        </div>
+                                        <div class="desc">{{ 'Submitted for approval' }}</div>
+                                    </div>
+                                </li> 
+                                {% for history in approvalHistory %}
                                     <li>
-                                        <div class="direction-l"> 
+                                        <div class="direction-{% if loop.index is divisible by 2 %}l{% else %}r{% endif %}"> 
                                             <div class="flag-wrapper">
-                                                <span class="flag">{{ approval.user.alias }}</span>
-                                                <span class="time-wrapper"><span class="time">{{ approval.creationDate | date("Y-m-d g:i:sA") }}</span></span>
+                                                <span class="flag">{{ history.user.alias }}</span>
+                                                <span class="time-wrapper"><span class="time">{{ history.date | date("Y-m-d g:i:sA") }}</span></span>
                                             </div>
-                                            <div class="desc">{{ 'Submitted for approval' }}</div>
+                                            <div class="desc">{{ history.message }}</div>
                                         </div>
                                     </li> 
-                                    {% for history in approvalHistory %}
-                                        <li>
-                                            <div class="direction-{% if loop.index is divisible by 2 %}l{% else %}r{% endif %}"> 
-                                                <div class="flag-wrapper">
-                                                    <span class="flag">{{ history.user.alias }}</span>
-                                                    <span class="time-wrapper"><span class="time">{{ history.date | date("Y-m-d g:i:sA") }}</span></span>
-                                                </div>
-                                                <div class="desc">{{ history.message }}</div>
-                                            </div>
-                                        </li> 
-                                        
-                                    {% endfor %}
-                                </ul>
-                            </div> 
-                        </div>
+                                    
+                                {% endfor %}
+                            </ul>
+                        </div> 
+                    </div>
                     {% endif %}
                 </div>
             </div>
@@ -636,6 +646,7 @@
             const prevButton = document.getElementById("prev_btn");
             const nextButton = document.getElementById("next_btn");
             const submitBtn = document.getElementById("submit_btn");
+            const reSubmitBtn = document.getElementById("re_submit_btn");
             const payRollUser = document.getElementById("payroll_user");
 
             const dateInput = document.getElementById("payroll_date");
@@ -729,6 +740,46 @@
                 // Submit the form
                 document.querySelector("form").submit();
             }); 
+
+            if(reSubmitBtn != null){
+                reSubmitBtn.addEventListener("click", function(){
+                    const url = "{{ path('lhg_payroll_approval_resubmit', {'id': approval.id}) }}"; // Update with your correct route 
+                
+
+                    // Make a POST request using fetch
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: null
+                    })
+                    .then(response => response.json())
+                    .then(responseData => {
+                        // Handle success response here
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Updated successfully',
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
+                        location.reload(); 
+                        // Display a success message to the user or perform other actions
+                    })
+                    .catch(error => {
+                        console.log(error); 
+                        // Handle error here
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'error',
+                            title: 'Something went wrong!',
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
+                    });
+                });
+            } 
         }); 
 
     </script>
