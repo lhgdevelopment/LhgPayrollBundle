@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+{% import "macros/widgets.html.twig" as widgets %}
+
+{% block page_title %}Edit Vendor Payment{% endblock %}
+
+{% block main %}
+{% block content %}
+    <h1>Edit Vendor Payment</h1>
+
+    {{ form_start(form) }}
+    {{ form_widget(form) }}
+    <button type="submit">Save changes</button>
+    {{ form_end(form) }}
+
+    <a href="{{ path('vendor_payment_index') }}">Back to list</a>
+    <a href="{{ path('vendor_payment_show', {'id': vendor_payment.id}) }}">View</a>
+{% endblock %}
+{% endblock %}

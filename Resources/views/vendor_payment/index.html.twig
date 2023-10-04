@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+{% import "macros/widgets.html.twig" as widgets %}
+
+{% block page_title %}Vendor Payments{% endblock %}
+
+{% block main %}
+{% block content %}
+    <h1>Vendor Payments</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Project</th>
+                <th>Vendor ID</th>
+                <th>Billing Type</th>
+                <th>Amount</th>
+                <th>Note</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for vendorPayment in vendor_payments %}
+                <tr>
+                    <td>{{ vendorPayment.id }}</td>
+                    <td>{{ vendorPayment.project.name }}</td>
+                    <td>{{ vendorPayment.vendorId }}</td>
+                    <td>{{ vendorPayment.billingType }}</td>
+                    <td>{{ vendorPayment.amount }}</td>
+                    <td>{{ vendorPayment.note }}</td>
+                    <td>{{ vendorPayment.description }}</td>
+                    <td>
+                        <a href="{{ path('vendor_payment_show', {'id': vendorPayment.id}) }}">Show</a>
+                        <a href="{{ path('vendor_payment_edit', {'id': vendorPayment.id}) }}">Edit</a>
+                        <form action="{{ path('vendor_payment_delete', {'id': vendorPayment.id}) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this item?');">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ vendorPayment.id) }}">
+                            <button type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('vendor_payment_new') }}">Create new Vendor Payment</a>
+{% endblock %}
+{% endblock %}

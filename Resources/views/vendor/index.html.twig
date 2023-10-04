@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+{% import "macros/widgets.html.twig" as widgets %}
+
+{% block main %}
+{% block content %}
+    <h1>Vendors</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Website</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for vendor in vendors %}
+                <tr>
+                    <td>{{ vendor.id }}</td>
+                    <td>{{ vendor.name }}</td>
+                    <td>{{ vendor.website }}</td>
+                    <td>
+                        <a href="{{ path('vendor_show', {'id': vendor.id}) }}">Show</a>
+                        <a href="{{ path('vendor_edit', {'id': vendor.id}) }}">Edit</a>
+                        <form method="post" action="{{ path('vendor_delete', {'id': vendor.id}) }}" style="display: inline;">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ vendor.id) }}">
+                            <button type="submit" class="btn btn-link">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('vendor_new') }}" class="btn btn-primary">Create new Vendor</a>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+{% import "macros/widgets.html.twig" as widgets %}
+
+{% block main %}
+{% block content %}
+    <h1>Vendor Details</h1>
+
+    <dl class="row">
+        <dt class="col-sm-3">ID</dt>
+        <dd class="col-sm-9">{{ vendor.id }}</dd>
+        <dt class="col-sm-3">Name</dt>
+        <dd class="col-sm-9">{{ vendor.name }}</dd>
+        <dt class="col-sm-3">Website</dt>
+        <dd class="col-sm-9">{{ vendor.website }}</dd>
+    </dl>
+
+    <a href="{{ path('vendor_index') }}" class="btn btn-secondary">Back to List</a>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+{% import "macros/widgets.html.twig" as widgets %}
+
+{% block main %}
+{% block content %}
+    <h1>Edit Vendor</h1>
+
+    {{ form_start(form) }}
+    {{ form_widget(form) }}
+
+    <button type="submit" class="btn btn-primary">Update</button>
+    <a href="{{ path('vendor_index') }}" class="btn btn-secondary">Back to List</a>
+
+    {{ form_end(form) }}
+{% endblock %}
+{% endblock %}
