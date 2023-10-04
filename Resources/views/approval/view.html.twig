@@ -371,15 +371,15 @@
                                                 <td><strong>{{ timesheetData.totalDuration|number_format(3) }} hr</strong></td>
                                                 <td><strong>${{ timesheetData.totalAmount|number_format(3) }}</strong></td> 
                                             </tr>
-                                            {% for timesheet in timesheetData.timesheets %}
-                                            <tr>
-                                                <td>{{ timesheet.date }}</td>
-                                                <td>{{ timesheet.duration_in_hour|number_format(3) }} hr</td>
-                                                <td>${{ timesheet.rate|number_format(3) }}</td>
-                                                <td>{{ timesheet.begin }}</td>
-                                                <td>{{ timesheet.end }}</td>
-                                                <td>{{ timesheet.description | parse_links }}</td> 
-                                            </tr>
+                                            {% for timesheet in timesheetData.timesheets %} 
+                                                <tr>
+                                                    <td><a href="{{ path('timesheet_edit', {'id': timesheet.id}) }}" target="_blank">{{ timesheet.date }}</a></td>
+                                                    <td>{{ timesheet.duration_in_hour|number_format(3) }} hr</td>
+                                                    <td>${{ timesheet.rate|number_format(3) }}</td>
+                                                    <td>{{ timesheet.begin }}</td>
+                                                    <td>{{ timesheet.end }}</td>
+                                                    <td>{{ timesheet.description | parse_links }}</td> 
+                                                </tr>
                                             {% endfor %}
                                             {% endfor %}
                                         </tbody>

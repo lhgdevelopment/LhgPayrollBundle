@@ -160,6 +160,7 @@ class PayrollCalculatorService
                     $date = $timesheet->getBegin()->format('Y-m-d');
                     if ($timesheet->getEnd()) {
                         $result[] = [
+                            'id' => $timesheet->getId(),
                             'date' => $date,
                             'begin' => $timesheet->getBegin()->format('H:i'),
                             'end' => $timesheet->getEnd()->format('H:i'),
