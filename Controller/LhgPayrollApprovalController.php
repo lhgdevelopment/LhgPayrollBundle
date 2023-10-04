@@ -258,18 +258,7 @@ class LhgPayrollApprovalController extends AbstractController
     public function resubmitPayroll(Request $request, int $id)
     {
         // Retrieve the LhgPayrollApproval entity based on the provided ID
-        $approval = $this->getDoctrine()->getRepository(LhgPayrollApproval::class)->find($id);
-
-        $users = $this->teamLeadAndFinanceService->getTeamUsers();
-
-        $teamMemberuserId = [];
-        foreach ($users as $user) {
-            array_push($teamMemberuserId, $user->getId());
-        }
-
-        if (!in_array($approval->getUser()->getId(), $teamMemberuserId)) {
-            throw $this->createNotFoundException('You are not authorized to view this');
-        }
+        $approval = $this->getDoctrine()->getRepository(LhgPayrollApproval::class)->find($id); 
 
         if (!$approval) {
             throw $this->createNotFoundException('Payroll approval not found');
@@ -277,13 +266,23 @@ class LhgPayrollApprovalController extends AbstractController
 
         $entityManager = $this->getDoctrine()->getManager();  
 
+        [$timesheets, $errors] = $this->payrollCalculatorService->getTimesheets($this->getUser(), $approval->getStartDate(), $approval->getEndDate());
+
+        $totalHours = 0;
+        $totalEarnings = 0;
+
+        foreach ($timesheets as $timesheet) {
+            $totalHours += $timesheet['duration'] / 3600; // Converted to hrs
+            $totalEarnings += $timesheet['rate'];
+        }  
+
         $approvalHistory = new LhgPayrollApprovalHistory();
 
         // Set user and status for approval history
         $approvalHistory
             ->setUser($this->getUser())
             ->setApproval($approval)
-            ->setMessage('Re-submitted payroll for paaroval')
+            ->setMessage('Re-submitted payroll for approval')
             ->setDate( new DateTime())
             ->setStatus(StatusEnum::PENDING); 
         
@@ -293,7 +292,10 @@ class LhgPayrollApprovalController extends AbstractController
         $entityManager->flush();
 
         // Update the approval status
-        $approval->setStatus(StatusEnum::PENDING);
+        $approval->setStatus(StatusEnum::PENDING)
+            ->setExpectedDuration(0)
+            ->setTotalAmount($totalEarnings)
+            ->setTotalDuration($totalHours);
 
         // Persist and flush the approval entity
         $entityManager->persist($approval);
