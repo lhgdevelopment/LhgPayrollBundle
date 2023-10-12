@@ -36,7 +36,7 @@ class LhgPayrollApprovalController extends AbstractController
         $this->teamLeadAndFinanceService = $teamLeadAndFinanceService;
 
         $this->timeZone = new DateTimeZone('America/Los_Angeles');
-        // date_default_timezone_set($this->timeZone->getName());
+        date_default_timezone_set($this->timeZone->getName());
     }
 
     /**
