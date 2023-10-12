@@ -1,0 +1,11 @@
+# --------------------------------------------------------------------------------------------------
+# Generate a new migration with:
+# bin/console doctrine:migrations:diff --em=default --configuration=var/plugins/LhgPayrollBundle/Migrations/expense.yaml
+#
+# bin/console doctrine:migrations:migrate --em=default --configuration=var/plugins/LhgPayrollBundle/Migrations/expense.yaml
+# --------------------------------------------------------------------------------------------------
+
+table_storage:
+    table_name: 'bundle_migration_lhg_expense'
+migrations_paths:
+    'KimaiPlugin\LhgPayrollBundle\Migrations\Expense': 'var/plugins/LhgPayrollBundle/Migrations/Expense'
