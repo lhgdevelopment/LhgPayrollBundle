@@ -453,10 +453,14 @@
 
                                             <label for="payment_method">Paid Through:</label>
                                             {# <input type="number" id="payment_method" class="form-control">  #}
-                                            <select class="form-control" id="payment_method">
-                                                <option value="Payoneer">Payoneer</option>
+                                            <select class="form-control " id="payment_method">
+                                                {% for paymentMethod in paymentMethods %}
+                                                    <option value={{ paymentMethod }}>{{ paymentMethod }}</option>
+                                                {% endfor %}
+                                            
+                                                {# <option value="Payoneer">Payoneer</option>
                                                 <option value="Paypal">Paypal</option>
-                                                <option value="Upwork">Upwork</option>
+                                                <option value="Upwork">Upwork</option> #}
                                             </select>
 
                                             <label for="message">Note:</label>

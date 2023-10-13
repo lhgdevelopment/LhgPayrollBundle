@@ -166,6 +166,15 @@ class LhgPayrollApprovalController extends AbstractController
             'total_hours' => $totalHours,
             'total_earnings' => $totalEarnings
         ];  
+
+        $paymentMethods = [
+            "Payoneer" => "Payoneer",
+            "Paypal" => "Paypal",
+            "Patriot Software" => "Patriot Software",
+            "Wise" => "Wise",
+            "Upwork" => "Upwork",
+            "Zelle" => "Zelle"
+        ];
         
         // dd($approvalHistory);
 
@@ -174,7 +183,8 @@ class LhgPayrollApprovalController extends AbstractController
             'approvalHistory' => $approvalHistory,
             'timesheets' => $timesheets,
             'payrollData' => $payrollData,
-            'projectWiseData' => $projectWiseData 
+            'projectWiseData' => $projectWiseData,
+            'paymentMethods' => $paymentMethods
         ]);
     }
 
