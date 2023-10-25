@@ -26,7 +26,7 @@ class ThemeEventSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            ThemeEvent::JAVASCRIPT => ['renderJavaScript', 100],
+            ThemeEvent::HTML_HEAD => ['renderJavaScript', 100],
         ];
     }
 
