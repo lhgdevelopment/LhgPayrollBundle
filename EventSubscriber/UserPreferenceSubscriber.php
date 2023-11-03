@@ -8,6 +8,7 @@ use App\Entity\UserPreference;
 use App\Event\UserPreferenceEvent;
 use KimaiPlugin\LhgPayrollBundle\Form\Type\TeamLeadDropDownType;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 
 class UserPreferenceSubscriber implements EventSubscriberInterface
 {
@@ -32,12 +33,22 @@ class UserPreferenceSubscriber implements EventSubscriberInterface
 
         $event->addPreference(
             (new UserPreference())
-                ->setName('lhg_payroll.approvval_flow.finance_lead') 
-                ->setOrder(920)
+                ->setName('lhg_payroll.salary') 
+                ->setOrder(910)
                 ->setType(TeamLeadDropDownType::class)
                 ->setEnabled(true)
-                ->setOptions(['help' => 'Select finace lead for this user', 'label' => 'Finance Lead']) 
+                ->setOptions(['help' => 'Select team lead for this user', 'label' => 'Team Lead']) 
                 ->setSection('lhgPayroll')
+        );
+
+        $event->addPreference(
+            (new UserPreference())
+                ->setName('lhg_payroll.payroll.salary') 
+                ->setOrder(930)
+                ->setType(MoneyType::class)
+                ->setEnabled(true)
+                ->setOptions(['help' => 'Enter Salary Amount', 'label' => 'Salary']) 
+                ->setSection('rate')
         );
     }
 }
