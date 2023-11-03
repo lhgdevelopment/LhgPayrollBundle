@@ -569,9 +569,19 @@
     <script> 
         document.addEventListener("DOMContentLoaded", function() { 
         const approveBtn = document.getElementById("approve_btn");
+        const message = document.getElementById("message");
         const rejectBtn = document.getElementById("reject_btn");
         const modal = document.getElementById("approveModal"); 
         const currentStatus = {{ approval.status }};
+
+        if(message){
+            message.addEventListener("keypress", function(e) {
+                if (event.keyCode === 13) { 
+                    event.preventDefault(); 
+                    document.getElementById("approveConfirmBtn").click(); 
+                }
+            });
+        }
 
         if(rejectBtn){
             rejectBtn.addEventListener("click", function() {
@@ -709,8 +719,16 @@
         function calculateNewTotal(commission, adjustment, deduction) {
             // Calculate the new total based on the given formula
             return {{ payrollData.total_earnings }} + commission + adjustment - deduction;
-        }
+        } 
     });
+
+    function clickButtonOnEnter(event) { 
+        if (event.keyCode === 13) {
+            console.log(e);
+            event.preventDefault(); 
+            document.getElementById("approve_btn").click(); 
+        }
+    }
 
 
 
