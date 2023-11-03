@@ -37,7 +37,7 @@ class UserPreferenceSubscriber implements EventSubscriberInterface
                 ->setOrder(930)
                 ->setType(MoneyType::class)
                 ->setEnabled(true)
-                ->setOptions(['help' => 'Enter Salary Amount', 'label' => 'Salary']) 
+                ->setOptions(['help' => 'Enter Salary Amount', 'label' => 'Salary', 'currency' => 'USD']) 
                 ->setSection('rate')
         );
     }
