@@ -334,6 +334,59 @@
                     <hr>
                     <p><strong>Net Payable</strong>: ${{ approval.netPayable|number_format(3) }}</p>
                     <p><strong>Paid Through</strong>: {{ approval.paymentMethod }}</p>
+                    <p>
+                        <button id="updateBtn" type="button" class="btn btn-info" data-toggle="modal" data-target="#updateModal">
+                        Update
+                        </button>
+                        
+                        <!-- Modal -->
+                        <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="updateModalLabel">Update Payroll</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body"> 
+                                        <p>Hourly rate:  ${{ hourlytRate }} || Total Earnings: ${{ payrollData.total_hours|number_format(3) }} || Salary : {{ salary|number_format(3) }}</p>
+                                        <form id="updateForm" action="{{ path('lhg_payroll_approval_update', {'id': approval.id}) }}" method="POST">
+                                            <label for="commission">Commission:</label>
+                                            <input type="number" value ="{{ approval.commission }}" name="commission" class="form-control">  
+                                            <label for="adjustment">Adjustment:</label>
+                                            <input type="number" value ="{{ approval.adjustment }}"  name="adjustment" class="form-control">
+
+                                            <label for="deduction">Deduction:</label>
+                                            <input type="number" value ="{{ approval.deduction }}"  name="deduction" class="form-control"> 
+
+                                            <label for="payment_method">Paid Through:</label>
+                                            <select class="form-control " name="payment_method">
+                                                {% for paymentMethod in paymentMethods %}
+                                                    <option {% if approval.paymentMethod == paymentMethod %} selected {% endif %} value={{ paymentMethod }}>{{ paymentMethod }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <label for="status">Status</label>
+                                            <select class="form-control " name="status">
+                                                {% for key, status in statusArray %}
+                                                    <option {% if approval.status == key %} selected {% endif %} value={{ key }}>{{ status }}</option>
+                                                {% endfor %}
+                                            </select>
+
+                                            <label for="message">Note:</label>
+                                            <input type="text" name="message" class="form-control"> 
+                                        
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        <button type="submit" id="updateApprovalEntry" class="btn btn-success">Update</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </p>
                     {% endif %}
                 </div>
                 <div class="table-responsive mt-4">

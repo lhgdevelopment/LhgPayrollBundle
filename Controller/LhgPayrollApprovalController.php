@@ -16,6 +16,7 @@ use KimaiPlugin\LhgPayrollBundle\Form\LhgPayrollApprovalType;
 use KimaiPlugin\LhgPayrollBundle\Service\PayrollCalculatorService;
 use KimaiPlugin\LhgPayrollBundle\Service\StatusEnum;
 use KimaiPlugin\LhgPayrollBundle\Service\TeamLeadAndFinanceService;
+use ReflectionClass;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
@@ -183,6 +184,15 @@ class LhgPayrollApprovalController extends AbstractController
         if($salary && $salary > 0){
             $salaryAndEarningDifference = $payrollData['total_earnings'] - $salary;
         }
+
+        // Render the template with payroll data
+        $reflection = new ReflectionClass('KimaiPlugin\LhgPayrollBundle\Service\StatusEnum');
+        $constants = $reflection->getConstants();
+
+        $enumValuePairs = [];
+        foreach ($constants as $constantName => $constantValue) {
+            $enumValuePairs[$constantValue] = $constantName;
+        }
         
         // dd($approvalHistory);
 
@@ -196,6 +206,7 @@ class LhgPayrollApprovalController extends AbstractController
             'hourlytRate' => $hourlytRate, 
             'salary' => $salary, 
             'salaryAndEarningDifference' => $salaryAndEarningDifference, 
+            'statusArray' => $enumValuePairs,
         ]);
     }
 
@@ -335,6 +346,68 @@ class LhgPayrollApprovalController extends AbstractController
 
         // Return a regular Symfony response if not an AJAX request
         // return $this->redirectToRoute('lhg_payroll_approval_view', ['id' => $id]);
+    }
+
+    /**
+     * @Route("/approval/update/{id}", name="lhg_payroll_approval_update", methods={"POST"})
+     */
+    public function updatePayroll(Request $request, int $id)
+    {
+        $approval = $this->getDoctrine()->getRepository(LhgPayrollApproval::class)->find($id); 
+
+        if (!$approval) {
+            throw $this->createNotFoundException('Payroll approval not found');
+        }
+
+        // Handle form submission
+        $commission = $request->request->get('commission');
+        $adjustment = $request->request->get('adjustment');
+        $deduction = $request->request->get('deduction');
+        $paymentMethod = $request->request->get('payment_method');
+        $status = $request->request->get('status');
+        $message = $request->request->get('message');
+
+        // Update the entity with the new data
+        $approval->setCommission($commission);
+        $approval->setAdjustment($adjustment);
+        $approval->setDeduction($deduction);
+        $approval->setPaymentMethod($paymentMethod);
+        $approval->setStatus($status); 
+
+        // Persist the changes to the database
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->persist($approval);
+        $entityManager->flush();
+
+        // Update History 
+        $approvalHistory = new LhgPayrollApprovalHistory();
+
+        // Set user and status for approval history
+        $approvalHistory
+            ->setUser($this->getUser())
+            ->setApproval($approval)
+            ->setMessage($message)
+            ->setDate( new DateTime())
+            ->setStatus($status); 
+        
+
+        // Persist and flush the approval history
+        $entityManager->persist($approvalHistory);
+        $entityManager->flush();
+
+        // return $this->redirectToRoute('your_target_route_name');
+        return $this->redirect($request->headers->get('referer'));
+
+        // Prepare the response data
+        // $responseData = [
+        //     'message' => 'Payroll approval updated successfully',
+        //     'approval' => $approval
+        // ]; 
+
+        // // Create a JSON response object
+        // $response = new JsonResponse($responseData);
+
+        // return $response;
     }
 
 
