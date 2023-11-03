@@ -175,6 +175,14 @@ class LhgPayrollApprovalController extends AbstractController
             "Upwork" => "Upwork",
             "Zelle" => "Zelle"
         ];
+
+        $hourlytRate = $approval->getUser()->getPreferenceValue('hourly_rate');
+        $salary = $approval->getUser()->getPreferenceValue('lhg_payroll.payroll.salary'); 
+
+        $salaryAndEarningDifference = 0;
+        if($salary && $salary > 0){
+            $salaryAndEarningDifference = $payrollData['total_earnings'] - $salary;
+        }
         
         // dd($approvalHistory);
 
@@ -184,7 +192,10 @@ class LhgPayrollApprovalController extends AbstractController
             'timesheets' => $timesheets,
             'payrollData' => $payrollData,
             'projectWiseData' => $projectWiseData,
-            'paymentMethods' => $paymentMethods
+            'paymentMethods' => $paymentMethods, 
+            'hourlytRate' => $hourlytRate, 
+            'salary' => $salary, 
+            'salaryAndEarningDifference' => $salaryAndEarningDifference, 
         ]);
     }
 

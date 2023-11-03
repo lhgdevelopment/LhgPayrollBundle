@@ -375,6 +375,9 @@ class LhgPayrollController extends AbstractController
             $enumValuePairs[$constantValue] = $constantName;
         }
 
+        $hourlytRate = $selectedUser->getPreferenceValue('hourly_rate');
+        $salary = $selectedUser->getPreferenceValue('lhg_payroll.payroll.salary'); 
+
         // $users = array_push($this->security->getUser(), $users);
         // dd($this->security->getUser());
         // dd(gettype((array) $this->security->getUser()));
@@ -401,6 +404,8 @@ class LhgPayrollController extends AbstractController
             'approval' => $existingApproval,
             'statusArray' => $enumValuePairs,
             'notSubmittedUsers' => $notSubmittedUsers,
+            'salary' => $salary,
+            'hourlytRate' => $hourlytRate,
         ]);
     }
 }
