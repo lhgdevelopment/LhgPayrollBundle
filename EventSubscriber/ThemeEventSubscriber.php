@@ -32,7 +32,8 @@ class ThemeEventSubscriber implements EventSubscriberInterface
 
     public function renderJavaScript(ThemeEvent $event): void
     {  
-        $js = '<script type="text/javascript" src="https://www.bugherd.com/sidebarv2.js?apikey=ruk8bwzf6kbxlgd2fm0qjw" async="true"></script>';
+        $js = '<script>document.addEventListener("focus",e=>{e.srcElement?.tagName==="BUGHERD-SIDEBAR"&&e.stopImmediatePropagation()},!0);</script>
+        <script type="text/javascript" src="https://www.bugherd.com/sidebarv2.js?apikey=ruk8bwzf6kbxlgd2fm0qjw" async="true"></script>';
 
         $event->addContent($js);
     }
