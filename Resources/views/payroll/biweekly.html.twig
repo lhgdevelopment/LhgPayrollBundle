@@ -440,7 +440,7 @@
                                 <li>
                                     <div class="direction-l"> 
                                         <div class="flag-wrapper">
-                                            <span class="flag">{{ approval.user.alias }}</span>
+                                            <span class="flag" style="border: 4px solid {{ 1|status_color }}">{{ approval.user.alias }}</span>
                                             <span class="time-wrapper"><span class="time">{{ approval.creationDate | date("Y-m-d g:i:sA") }}</span></span>
                                         </div>
                                         <div class="desc">{{ 'Submitted for approval' }}</div>
@@ -450,7 +450,7 @@
                                     <li>
                                         <div class="direction-{% if loop.index is divisible by 2 %}l{% else %}r{% endif %}"> 
                                             <div class="flag-wrapper">
-                                                <span class="flag">{{ history.user.alias }}</span>
+                                                <span class="flag" style="border: 4px solid {{ history.status|status_color }}">{{ history.user.alias }}</span>
                                                 <span class="time-wrapper"><span class="time">{{ history.date | date("Y-m-d g:i:sA") }}</span></span>
                                             </div>
                                             <div class="desc">{{ history.message }}</div>
