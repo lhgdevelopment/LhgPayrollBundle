@@ -344,8 +344,8 @@
                     </form>
 
                     <p><strong>User</strong>: {{ selectedUserName }}</p>
-                    <p><strong>Hourly Rate</strong>: {{ hourlytRate }}</p>
-                    <p><strong>Salary</strong>: {{ salary }}</p>
+                    <p><strong>Hourly Rate</strong>: ${{ hourlytRate }}</p>
+                    <p><strong>Salary</strong>: ${{ salary|number_format(3) }}</p>
                     <p class="mt-6" style="margin-tp: 10px;"><strong>Total Hours</strong>: {{
                         payrollData.total_hours|number_format(3) }} hrs</p>
                     <p><strong>Total Earnings</strong>: ${{ payrollData.total_earnings|number_format(3) }}</p>
