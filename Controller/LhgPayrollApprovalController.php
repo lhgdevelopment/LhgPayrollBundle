@@ -367,11 +367,14 @@ class LhgPayrollApprovalController extends AbstractController
         $status = $request->request->get('status');
         $message = $request->request->get('message');
 
+        $netPayable = $approval->getTotalAmount() + $commission + $adjustment - $deduction;
+
         // Update the entity with the new data
         $approval->setCommission($commission);
         $approval->setAdjustment($adjustment);
         $approval->setDeduction($deduction);
         $approval->setPaymentMethod($paymentMethod);
+        $approval->setNetPayable($netPayable);
         $approval->setStatus($status); 
 
         // Persist the changes to the database
