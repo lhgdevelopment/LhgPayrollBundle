@@ -121,7 +121,7 @@ class ThemeEventSubscriber implements EventSubscriberInterface
 
         if(!$userTimeZone){
             $userIP = $_SERVER['REMOTE_ADDR'];
-            dump($userIP);
+            echo ($userIP);
             $ipInfo = file_get_contents("http://ipinfo.io/{$userIP}/json");
             $ipInfo = json_decode($ipInfo); 
             dump($ipInfo);
