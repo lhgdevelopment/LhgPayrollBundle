@@ -73,9 +73,7 @@ class ThemeEventSubscriber implements EventSubscriberInterface
                     }, 1000); 
                 </script>";
 
-        $event->addContent($pstclockJs); 
-
-        $userTimezone = $this->getUserTimeZone();
+        $event->addContent($pstclockJs);  
         $userclockJs = "<script>
                     setInterval(function() {
                         // Create a DateTimeFormat object
