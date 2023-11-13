@@ -28,7 +28,7 @@ class DashboardTimeNowWidget extends SimpleWidget
             'user' => null,
             'id' => '',
             'psttitle' => 'America/Los_Angeles (PST)',
-            'yourtitle' => $this->getUserTimeZone(),
+            'yourtitle' => 'Your Time'
         ]);
     } 
 

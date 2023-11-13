@@ -78,8 +78,12 @@ class ThemeEventSubscriber implements EventSubscriberInterface
         $userTimezone = $this->getUserTimeZone();
         $userclockJs = "<script>
                     setInterval(function() {
-                        const targetTimeZone = '$userTimezone';
-                        let timeString = new Date().toLocaleString('en-US', { timeZone: targetTimeZone });
+                        // Create a DateTimeFormat object
+                        const dateTimeFormat = new Intl.DateTimeFormat();
+
+                        // Extract the timezone from the format
+                        const userTimeZone = dateTimeFormat.resolvedOptions().timeZone; 
+                        let timeString = new Date().toLocaleString('en-US', { timeZone: userTimeZone });
 
                         // Create a Date object using the obtained string
                         let time = new Date(timeString); 
