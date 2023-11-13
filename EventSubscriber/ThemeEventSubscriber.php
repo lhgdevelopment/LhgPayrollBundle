@@ -12,15 +12,15 @@
 
 use App\Event\ThemeEvent; 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;  
 
 class ThemeEventSubscriber implements EventSubscriberInterface
 {
-    private $session;
+    private $session; 
 
-    public function __construct(SessionInterface $session)
+    public function __construct(SessionInterface $session )
     {
-        $this->session = $session;
+        $this->session = $session; 
     }
 
     public static function getSubscribedEvents(): array
@@ -115,17 +115,12 @@ class ThemeEventSubscriber implements EventSubscriberInterface
     }
 
     private function getUserTimeZone(){ 
-        $userTimeZone   = $this->session->get('userTimeZone');
-        // dd($userTimeZone);
-        // exit();
+        $userTimeZone   = $this->session->get('userTimeZone'); 
 
         if(!$userTimeZone){
-            $userIP = $_SERVER['REMOTE_ADDR'];
-            echo ($userIP);
+            $userIP = $_SERVER['REMOTE_ADDR'];  
             $ipInfo = file_get_contents("http://ipinfo.io/{$userIP}/json");
-            $ipInfo = json_decode($ipInfo); 
-            dump($ipInfo);
-            exit();
+            $ipInfo = json_decode($ipInfo);  
             if(isset($ipInfo->timezone)){
                 $userTimezone = $ipInfo->timezone;
                 $this->session->set('userTimeZone', $userTimezone);
