@@ -121,10 +121,11 @@ class ThemeEventSubscriber implements EventSubscriberInterface
 
         if(!$userTimeZone){
             $userIP = $_SERVER['REMOTE_ADDR'];
-            dd($userIP);
+            dump($userIP);
             $ipInfo = file_get_contents("http://ipinfo.io/{$userIP}/json");
             $ipInfo = json_decode($ipInfo); 
-            dd($ipInfo); 
+            dump($ipInfo);
+            exit();
             if(isset($ipInfo->timezone)){
                 $userTimezone = $ipInfo->timezone;
                 $this->session->set('userTimeZone', $userTimezone);
