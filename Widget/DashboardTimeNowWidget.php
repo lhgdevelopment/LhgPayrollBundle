@@ -56,7 +56,7 @@ class DashboardTimeNowWidget extends SimpleWidget
     private function getUserTimeZone(){ 
         $userTimeZone   = $this->session->get('userTimeZone');
 
-        if(!$userTimeZone || !$userTimeZone){
+        if(!$userTimeZone){
              $userIP = $_SERVER['REMOTE_ADDR'];
             $ipInfo = file_get_contents("http://ipinfo.io/{$userIP}/json");
             $ipInfo = json_decode($ipInfo); 

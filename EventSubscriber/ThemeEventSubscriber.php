@@ -116,11 +116,15 @@ class ThemeEventSubscriber implements EventSubscriberInterface
 
     private function getUserTimeZone(){ 
         $userTimeZone   = $this->session->get('userTimeZone');
+        // dd($userTimeZone);
+        // exit();
 
-        if(!$userTimeZone || !$userTimeZone){
-             $userIP = $_SERVER['REMOTE_ADDR'];
+        if(!$userTimeZone){
+            $userIP = $_SERVER['REMOTE_ADDR'];
+            dd($userIP);
             $ipInfo = file_get_contents("http://ipinfo.io/{$userIP}/json");
             $ipInfo = json_decode($ipInfo); 
+            dd($ipInfo); 
             if(isset($ipInfo->timezone)){
                 $userTimezone = $ipInfo->timezone;
                 $this->session->set('userTimeZone', $userTimezone);
@@ -128,7 +132,7 @@ class ThemeEventSubscriber implements EventSubscriberInterface
             else{
                 $userTimeZone = 'America/Los_Angeles';
             }
-        }
+        } 
 
         return $userTimeZone;
     }
