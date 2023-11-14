@@ -34,7 +34,7 @@ class UserPreferenceSubscriber implements EventSubscriberInterface
         $event->addPreference(
             (new UserPreference())
                 ->setName('lhg_payroll.approvval_flow.finance_lead') 
-                ->setOrder(910)
+                ->setOrder(920)
                 ->setType(TeamLeadDropDownType::class)
                 ->setEnabled(true)
                 ->setOptions(['help' => 'Select finace lead for this user', 'label' => 'Finance Lead']) 
@@ -47,7 +47,7 @@ class UserPreferenceSubscriber implements EventSubscriberInterface
                 ->setOrder(930)
                 ->setType(MoneyType::class)
                 ->setEnabled(true)
-                ->setOptions(['help' => 'Enter Salary Amount', 'label' => 'Salary', 'currency' => 'USD']) 
+                ->setOptions(['help' => 'Enter Salary Amount', 'label' => 'Salary', 'currency' => 'USD', 'required' => false]) 
                 ->setSection('rate')
         );
     }
