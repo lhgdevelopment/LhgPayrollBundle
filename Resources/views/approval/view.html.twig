@@ -353,12 +353,12 @@
                                         <p>Hourly rate:  ${{ hourlytRate }} || Total Earnings: ${{ payrollData.total_earnings|number_format(3) }} || Salary : ${{ salary|number_format(3) }} (Difference ${{ salaryAndEarningDifference|number_format(3) }})</p>
                                         <form id="updateForm" action="{{ path('lhg_payroll_approval_update', {'id': approval.id}) }}" method="POST">
                                             <label for="commission">Commission:</label>
-                                            <input type="number" value ="{{ approval.commission }}" name="commission" class="form-control">  
+                                            <input type="number" value ="{{ approval.commission }}" step="any" name="commission" class="form-control">  
                                             <label for="adjustment">Adjustment:</label>
-                                            <input type="number" value ="{{ approval.adjustment }}"  name="adjustment" class="form-control">
+                                            <input type="number" value ="{{ approval.adjustment }}"  step="any" name="adjustment" class="form-control">
 
                                             <label for="deduction">Deduction:</label>
-                                            <input type="number" value ="{{ approval.deduction }}"  name="deduction" class="form-control"> 
+                                            <input type="number" value ="{{ approval.deduction }}"  step="any" name="deduction" class="form-control"> 
 
                                             <label for="payment_method">Paid Through:</label>
                                             <select class="form-control " name="payment_method">
