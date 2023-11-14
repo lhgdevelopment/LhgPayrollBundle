@@ -33,6 +33,16 @@ class UserPreferenceSubscriber implements EventSubscriberInterface
 
         $event->addPreference(
             (new UserPreference())
+                ->setName('lhg_payroll.approvval_flow.finance_lead') 
+                ->setOrder(910)
+                ->setType(TeamLeadDropDownType::class)
+                ->setEnabled(true)
+                ->setOptions(['help' => 'Select finace lead for this user', 'label' => 'Finance Lead']) 
+                ->setSection('lhgPayroll')
+        );
+
+        $event->addPreference(
+            (new UserPreference())
                 ->setName('lhg_payroll.payroll.salary') 
                 ->setOrder(930)
                 ->setType(MoneyType::class)
