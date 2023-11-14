@@ -293,7 +293,7 @@
                     <li>
                         <div class="direction-l"> 
                             <div class="flag-wrapper">
-                                <span class="flag" style="border: 4px solid {{ 1|status_color }}">{{ approval.user.alias }}</span>
+                                <span class="flag" style="border: 4px solid {{ 1|status_color }}">{{ approval.submittedBy.alias }}</span>
                                 <span class="time-wrapper"><span class="time">{{ approval.creationDate | date("Y-m-d g:i:sA") }}</span></span>
                             </div>
                             <div class="desc">{{ 'Submitted for approval' }}</div>
