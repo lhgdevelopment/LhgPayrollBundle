@@ -499,13 +499,13 @@
                                         <p>Hourly rate:  ${{ hourlytRate }} || Total Earnings: ${{ payrollData.total_earnings|number_format(3) }} || Salary : ${{ salary|number_format(3) }} (Difference ${{ salaryAndEarningDifference|number_format(3) }})</p>
                                         <form id="approvalForm">
                                             <label for="commission">Commission:</label>
-                                            <input type="number" id="commission" class="form-control"> 
+                                            <input type="number" step="any" id="commission" class="form-control"> 
 
                                             <label for="adjustment">Adjustment:</label>
-                                            <input type="number" id="adjustment" class="form-control">
+                                            <input type="number" step="any" id="adjustment" class="form-control">
 
                                             <label for="deduction">Deduction:</label>
-                                            <input type="number" id="deduction" class="form-control"> 
+                                            <input type="number" step="any" id="deduction" class="form-control"> 
 
                                             <label for="payment_method">Paid Through:</label>
                                             {# <input type="number" id="payment_method" class="form-control">  #}
