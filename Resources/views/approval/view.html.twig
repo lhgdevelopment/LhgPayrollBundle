@@ -325,7 +325,7 @@
                     <p class="mt-6" style="margin-tp: 10px;"><strong>Hourly Rate</strong>: ${{ hourlytRate  }}</p>
                     <p class="mt-6"><strong>Total Hours</strong>: {{ payrollData.total_hours|number_format(3) }} hrs</p>
                     <p><strong>Total Earnings</strong>: ${{ payrollData.total_earnings|number_format(3) }}</p>
-                    <p><strong>Salary</strong>: ${{ salary|number_format(3) }} (Difference ${{ salaryAndEarningDifference|number_format(3) }})</p>
+                    <p><strong>Salary</strong>: ${{ salary|number_format(3) }} (Difference {{ salaryAndEarningDifference|number_format(3) }} USD)</p>
                     {% if approval.status == 4 or approval.status == 5 %}
                     <hr>
                     <p><strong>Commission</strong>: ${{ approval.commission|number_format(3) }}</p>

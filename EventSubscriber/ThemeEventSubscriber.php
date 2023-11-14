@@ -82,8 +82,10 @@ class ThemeEventSubscriber implements EventSubscriberInterface
                         // Extract the timezone from the format
                         const userTimeZone = dateTimeFormat.resolvedOptions().timeZone;
 
-                        const yourClockTitle = document.getElementById('customTitleId'); 
-                        yourClockTitle.innerHTML = userTimeZone;
+                        const yourClockTitle = document.getElementById('customTitleId');
+                        if(yourClockTitle != null){
+                            yourClockTitle.innerHTML = userTimeZone;
+                        } 
 
                         let timeString = new Date().toLocaleString('en-US', { timeZone: userTimeZone });
 

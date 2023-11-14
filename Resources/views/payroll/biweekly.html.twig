@@ -349,6 +349,9 @@
                     <p class="mt-6" style="margin-tp: 10px;"><strong>Total Hours</strong>: {{
                         payrollData.total_hours|number_format(3) }} hrs</p>
                     <p><strong>Total Earnings</strong>: ${{ payrollData.total_earnings|number_format(3) }}</p>
+                    <button id="copyTextBtn"  type="button" class="btn btn-success">
+                        Copy for Clickup
+                    </button>
                 </div>
 
 
@@ -644,6 +647,7 @@
     <script> 
             document.addEventListener("DOMContentLoaded", function() { 
             // Get the buttons by their IDs
+            const copyTextBtn = document.getElementById("copyTextBtn");
             const prevButton = document.getElementById("prev_btn");
             const nextButton = document.getElementById("next_btn");
             const submitBtn = document.getElementById("submit_btn");
@@ -728,7 +732,21 @@
                 });
             }
 
-            // Add click event listeners to the buttons
+            // Add click event listeners to the buttons 
+            copyTextBtn.addEventListener("click", function(e) { 
+                // 10.09.2023 - 10.22.2023 - Raju Rayhan - 82.42  hours - $1,076.60  - Approved
+                const text = "{{ payrollDates.start }} to {{ payrollDates.end }} - {{ selectedUserName }} - {{ payrollData.total_hours|number_format(2) }} hours - ${{ payrollData.total_earnings|number_format(2) }}";
+                e.target.innerText = "Copied!";
+                try {
+                    navigator.clipboard.writeText(text);
+                    console.log('Content copied to clipboard');
+                } catch (err) {
+                    console.error('Failed to copy: ', err);
+                }
+                setTimeout(function() {
+                    e.target.innerText = "Copy for Clickup";
+                }, 500);
+            });
             prevButton.addEventListener("click", function() { 
                 const payrollEnddate = new Date('{{ payrollDates.end }}');
                 payrollEnddate.setDate(payrollEnddate.getDate() - 1); 
