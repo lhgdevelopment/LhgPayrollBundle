@@ -69,7 +69,7 @@ class UserListController extends BaseApiController
             $queryBuilder = $this->entityManager->createQueryBuilder();
 
             $usersData = $queryBuilder
-                ->select('u.id', 'u.username', 'u.email', 'u.alias', 'up.value as hourly_rate')
+                ->select('u.id', 'u.username', 'u.email', 'u.alias as name', 'up.value as hourly_rate')
                 ->from(User::class, 'u')
                 ->leftJoin(UserPreference::class, 'up', 'WITH', 'up.user = u.id AND up.name = :preferenceName')
                 ->where('up.value IS NOT NULL AND up.value != 0')
