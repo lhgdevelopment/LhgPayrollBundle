@@ -1,7 +1,6 @@
 <?php 
 namespace KimaiPlugin\LhgPayrollBundle\Controller;
 
-use App\Entity\User;
 use App\Repository\Query\UserQuery;
 use App\Utils\SearchTerm;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -13,6 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use App\Entity\Project;
 use App\Entity\Timesheet;
+use App\Entity\User;
 
 /**
  * @Route(path="/admin/talent")
@@ -83,9 +83,18 @@ class TalentController extends AbstractController
             }
         }
 
-        // Get all specialities
-        $specialityRepository = $this->getDoctrine()->getRepository(Speciality::class);
-        $specialities = $specialityRepository->findAll();
+        // Get user's specialities using raw query
+        $connection = $this->getDoctrine()->getConnection();
+        $specialityQuery = '
+            SELECT s.* 
+            FROM lhg_speciality s
+            INNER JOIN lhg_user_speciality us ON s.id = us.speciality_id
+            WHERE us.user_id = :user_id
+            ORDER BY s.name
+        ';
+        $specialityStmt = $connection->prepare($specialityQuery);
+        $specialityResult = $specialityStmt->executeQuery(['user_id' => $talent->getId()]);
+        $specialities = $specialityResult->fetchAllAssociative();
 
         return $this->render('@LhgPayroll/talent/view.html.twig', [
             'talent' => $talent,
@@ -97,48 +106,73 @@ class TalentController extends AbstractController
     /**
      * @Route(path="/{id}/specialities", name="talent_specialities", methods={"GET", "POST"})
      */
-    public function specialities(Request $request, User $talent): Response
+    public function specialities(Request $request, $id): Response
     {
-        $specialityRepo = $this->getDoctrine()->getRepository(Speciality::class);
-        $allSpecialities = $specialityRepo->findAll();
+        $connection = $this->getDoctrine()->getConnection();
         
-        $form = $this->createFormBuilder()
-            ->add('specialities', ChoiceType::class, [
-                'choices' => $allSpecialities,
-                'choice_label' => 'name',
-                'choice_value' => 'id',
-                'multiple' => true,
-                'expanded' => true,
-                'data' => [],  // Initially empty as we're not using relations yet
-                'label' => 'Specialities',
-                'required' => false,
-                'attr' => [
-                    'class' => 'form-control'
-                ]
-            ])
-            ->add('save', SubmitType::class, [
-                'label' => 'Save',
-                'attr' => [
-                    'class' => 'btn btn-primary'
-                ]
-            ])
-            ->getForm();
+        // Get user
+        $userQuery = 'SELECT * FROM kimai2_users WHERE id = :id';
+        $userStmt = $connection->prepare($userQuery);
+        $userResult = $userStmt->executeQuery(['id' => $id]);
+        $talent = $userResult->fetchAssociative();
+        
+        if (!$talent) {
+            throw $this->createNotFoundException('User not found');
+        }
 
-        $form->handleRequest($request);
+        // Get all specialities
+        $specialityQuery = 'SELECT * FROM lhg_speciality ORDER BY name';
+        $specialityStmt = $connection->prepare($specialityQuery);
+        $specialityResult = $specialityStmt->executeQuery();
+        $allSpecialities = $specialityResult->fetchAllAssociative();
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $selectedSpecialities = $form->get('specialities')->getData();
+        // Get user's current specialities
+        $userSpecialitiesQuery = 'SELECT speciality_id FROM lhg_user_speciality WHERE user_id = :user_id';
+        $userSpecialitiesStmt = $connection->prepare($userSpecialitiesQuery);
+        $userSpecialitiesResult = $userSpecialitiesStmt->executeQuery(['user_id' => $id]);
+        $currentSpecialities = array_column($userSpecialitiesResult->fetchAllAssociative(), 'speciality_id');
+
+        if ($request->isMethod('POST')) {
+            // Get selected specialities from form
+            $selectedSpecialities = $request->request->all()['specialities'] ?? [];
             
-            // Here you would handle saving the specialities
-            // For now, just redirect back
-            $this->addFlash('success', 'Specialities updated successfully');
-            
-            return $this->redirectToRoute('talent_view', ['id' => $talent->getId()]);
+            try {
+                // Start transaction
+                $connection->beginTransaction();
+                
+                // Delete all current specialities for user
+                $deleteQuery = 'DELETE FROM lhg_user_speciality WHERE user_id = :user_id';
+                $deleteStmt = $connection->prepare($deleteQuery);
+                $deleteStmt->executeQuery(['user_id' => $id]);
+                
+                // Insert new specialities
+                if (!empty($selectedSpecialities)) {
+                    $insertQuery = 'INSERT INTO lhg_user_speciality (user_id, speciality_id) VALUES (:user_id, :speciality_id)';
+                    $insertStmt = $connection->prepare($insertQuery);
+                    
+                    foreach ($selectedSpecialities as $specialityId) {
+                        $insertStmt->executeQuery([
+                            'user_id' => $id,
+                            'speciality_id' => $specialityId
+                        ]);
+                    }
+                }
+                
+                $connection->commit();
+                $this->addFlash('success', 'Specialities updated successfully');
+                
+                return $this->redirectToRoute('talent_view', ['id' => $id]);
+                
+            } catch (\Exception $e) {
+                $connection->rollBack();
+                $this->addFlash('error', 'Error updating specialities: ' . $e->getMessage());
+            }
         }
 
         return $this->render('@LhgPayroll/talent/specialities.html.twig', [
             'talent' => $talent,
-            'form' => $form->createView()
+            'specialities' => $allSpecialities,
+            'currentSpecialities' => $currentSpecialities
         ]);
     }
 }

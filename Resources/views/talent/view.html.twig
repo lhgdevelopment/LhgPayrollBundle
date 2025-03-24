@@ -72,6 +72,11 @@
             <div class="box box-primary">
                 <div class="box-header with-border">
                     <h3 class="box-title">{{ 'Specialities'|trans }}</h3>
+                    <div class="box-tools">
+                        <a href="{{ path('talent_specialities', {'id': talent.id}) }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-tags"></i> {{ 'Manage Specialities'|trans }}
+                        </a>
+                    </div>
                 </div>
                 <div class="box-body">
                     {% if specialities|length > 0 %}
@@ -82,7 +87,7 @@
                         </div>
                     {% else %}
                         <div class="alert alert-info">
-                            {{ 'No specialities available'|trans }}
+                            {{ 'No specialities assigned'|trans }}
                         </div>
                     {% endif %}
                 </div>
