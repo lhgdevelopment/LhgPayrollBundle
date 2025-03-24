@@ -349,6 +349,9 @@
                     <p class="mt-6" style="margin-tp: 10px;"><strong>Total Hours</strong>: {{
                         payrollData.total_hours|number_format(3) }} hrs</p>
                     <p><strong>Total Earnings</strong>: ${{ payrollData.total_earnings|number_format(3) }}</p>
+                    <button id="copyTextBtn"  type="button" class="btn btn-success">
+                        Copy for Clickup
+                    </button>
                 </div>
 
 
@@ -440,7 +443,7 @@
                                 <li>
                                     <div class="direction-l"> 
                                         <div class="flag-wrapper">
-                                            <span class="flag" style="border: 4px solid {{ 1|status_color }}">{{ approval.user.alias }}</span>
+                                            <span class="flag" style="border: 4px solid {{ 1|status_color }}">{{ approval.submittedBy.alias }}</span>
                                             <span class="time-wrapper"><span class="time">{{ approval.creationDate | date("Y-m-d g:i:sA") }}</span></span>
                                         </div>
                                         <div class="desc">{{ 'Submitted for approval' }}</div>
@@ -639,11 +642,12 @@
 {% endblock %}
 
 {% block javascripts %}
-    {# {{ parent() }} #}
+    {{ parent() }}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script> 
             document.addEventListener("DOMContentLoaded", function() { 
             // Get the buttons by their IDs
+            const copyTextBtn = document.getElementById("copyTextBtn");
             const prevButton = document.getElementById("prev_btn");
             const nextButton = document.getElementById("next_btn");
             const submitBtn = document.getElementById("submit_btn");
@@ -655,12 +659,19 @@
             //const startDate = document.getElementById("payroll_start_date");
             //const endDate = document.getElementById("payroll_end_date");
 
-            if(payRollUser != null){
-                payRollUser.addEventListener("change", function() {                
+            {# if(payRollUser != null){
+                console.log(payRollUser.value);
+                payRollUser.addEventListener("change", function() {
+                    console.log(this.value);
                     // Submit the form
                     document.querySelector("form").submit();
                 });
-            }
+            } #}
+
+            $(document.body).on("change","#payroll_user",function(){
+                console.log(this.value); 
+                document.querySelector("form").submit();
+            });
 
             if(submitBtn != null){
                 submitBtn.addEventListener("click", function() {
@@ -721,7 +732,21 @@
                 });
             }
 
-            // Add click event listeners to the buttons
+            // Add click event listeners to the buttons 
+            copyTextBtn.addEventListener("click", function(e) { 
+                // 10.09.2023 - 10.22.2023 - Raju Rayhan - 82.42  hours - $1,076.60  - Approved
+                const text = "{{ payrollDates.start }} to {{ payrollDates.end }} - {{ selectedUserName }} - {{ payrollData.total_hours|number_format(2) }} hours - ${{ payrollData.total_earnings|number_format(2) }} - Approved";
+                e.target.innerText = "Copied!";
+                try {
+                    navigator.clipboard.writeText(text);
+                    console.log('Content copied to clipboard');
+                } catch (err) {
+                    console.error('Failed to copy: ', err);
+                }
+                setTimeout(function() {
+                    e.target.innerText = "Copy for Clickup";
+                }, 500);
+            });
             prevButton.addEventListener("click", function() { 
                 const payrollEnddate = new Date('{{ payrollDates.end }}');
                 payrollEnddate.setDate(payrollEnddate.getDate() - 1); 

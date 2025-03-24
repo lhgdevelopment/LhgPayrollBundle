@@ -293,7 +293,7 @@
                     <li>
                         <div class="direction-l"> 
                             <div class="flag-wrapper">
-                                <span class="flag" style="border: 4px solid {{ 1|status_color }}">{{ approval.user.alias }}</span>
+                                <span class="flag" style="border: 4px solid {{ 1|status_color }}">{{ approval.submittedBy.alias }}</span>
                                 <span class="time-wrapper"><span class="time">{{ approval.creationDate | date("Y-m-d g:i:sA") }}</span></span>
                             </div>
                             <div class="desc">{{ 'Submitted for approval' }}</div>
@@ -325,8 +325,8 @@
                     <p class="mt-6" style="margin-tp: 10px;"><strong>Hourly Rate</strong>: ${{ hourlytRate  }}</p>
                     <p class="mt-6"><strong>Total Hours</strong>: {{ payrollData.total_hours|number_format(3) }} hrs</p>
                     <p><strong>Total Earnings</strong>: ${{ payrollData.total_earnings|number_format(3) }}</p>
-                    <p><strong>Salary</strong>: ${{ salary|number_format(3) }} (Difference ${{ salaryAndEarningDifference|number_format(3) }})</p>
-                    {% if approval.status == 4 %}
+                    <p><strong>Salary</strong>: ${{ salary|number_format(3) }} (Difference {{ salaryAndEarningDifference|number_format(3) }} USD)</p>
+                    {% if approval.status == 4 or approval.status == 5 %}
                     <hr>
                     <p><strong>Commission</strong>: ${{ approval.commission|number_format(3) }}</p>
                     <p><strong>Adjustment</strong>: ${{ approval.adjustment|number_format(3) }}</p>
@@ -350,15 +350,15 @@
                                         </button>
                                     </div>
                                     <div class="modal-body"> 
-                                        <p>Hourly rate:  ${{ hourlytRate }} || Total Earnings: ${{ payrollData.total_earnings|number_format(3) }} || Salary : ${{ salary|number_format(3) }}</p>
+                                        <p>Hourly rate:  ${{ hourlytRate }} || Total Earnings: ${{ payrollData.total_earnings|number_format(3) }} || Salary : ${{ salary|number_format(3) }} (Difference ${{ salaryAndEarningDifference|number_format(3) }})</p>
                                         <form id="updateForm" action="{{ path('lhg_payroll_approval_update', {'id': approval.id}) }}" method="POST">
                                             <label for="commission">Commission:</label>
-                                            <input type="number" value ="{{ approval.commission }}" name="commission" class="form-control">  
+                                            <input type="number" value ="{{ approval.commission }}" step="any" name="commission" class="form-control">  
                                             <label for="adjustment">Adjustment:</label>
-                                            <input type="number" value ="{{ approval.adjustment }}"  name="adjustment" class="form-control">
+                                            <input type="number" value ="{{ approval.adjustment }}"  step="any" name="adjustment" class="form-control">
 
                                             <label for="deduction">Deduction:</label>
-                                            <input type="number" value ="{{ approval.deduction }}"  name="deduction" class="form-control"> 
+                                            <input type="number" value ="{{ approval.deduction }}"  step="any" name="deduction" class="form-control"> 
 
                                             <label for="payment_method">Paid Through:</label>
                                             <select class="form-control " name="payment_method">
@@ -496,16 +496,16 @@
                                         </button>
                                     </div>
                                     <div class="modal-body"> 
-                                        <p>Hourly rate:  ${{ hourlytRate }} || Total Earnings: ${{ payrollData.total_earnings|number_format(3) }} || Salary : ${{ salary|number_format(3) }}</p>
+                                        <p>Hourly rate:  ${{ hourlytRate }} || Total Earnings: ${{ payrollData.total_earnings|number_format(3) }} || Salary : ${{ salary|number_format(3) }} (Difference ${{ salaryAndEarningDifference|number_format(3) }})</p>
                                         <form id="approvalForm">
                                             <label for="commission">Commission:</label>
-                                            <input type="number" id="commission" class="form-control"> 
+                                            <input type="number" step="any" id="commission" class="form-control"> 
 
                                             <label for="adjustment">Adjustment:</label>
-                                            <input type="number" id="adjustment" class="form-control">
+                                            <input type="number" step="any" id="adjustment" class="form-control">
 
                                             <label for="deduction">Deduction:</label>
-                                            <input type="number" id="deduction" class="form-control"> 
+                                            <input type="number" step="any" id="deduction" class="form-control"> 
 
                                             <label for="payment_method">Paid Through:</label>
                                             {# <input type="number" id="payment_method" class="form-control">  #}
@@ -565,13 +565,33 @@
 {% endblock %}
 
 {% block javascripts %} 
+    {# {{ parent() }} #}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script> 
         document.addEventListener("DOMContentLoaded", function() { 
         const approveBtn = document.getElementById("approve_btn");
+        const message = document.getElementById("message");
+        const rejectMessage = document.getElementById("rejectMessage");
         const rejectBtn = document.getElementById("reject_btn");
         const modal = document.getElementById("approveModal"); 
         const currentStatus = {{ approval.status }};
+
+        if(message){
+            message.addEventListener("keypress", function(e) {
+                if (event.keyCode === 13) { 
+                    event.preventDefault(); 
+                    document.getElementById("approveConfirmBtn").click(); 
+                }
+            });
+        }
+        if(rejectMessage){
+            rejectMessage.addEventListener("keypress", function(e) {
+                if (event.keyCode === 13) { 
+                    event.preventDefault(); 
+                    document.getElementById("rejectConfirmBtn").click(); 
+                }
+            });
+        }
 
         if(rejectBtn){
             rejectBtn.addEventListener("click", function() {
@@ -709,11 +729,20 @@
         function calculateNewTotal(commission, adjustment, deduction) {
             // Calculate the new total based on the given formula
             return {{ payrollData.total_earnings }} + commission + adjustment - deduction;
-        }
+        } 
     });
+
+    function clickButtonOnEnter(event) { 
+        if (event.keyCode === 13) {
+            console.log(e);
+            event.preventDefault(); 
+            document.getElementById("approve_btn").click(); 
+        }
+    }
 
 
 
     </script>
 
+    {{ parent() }}
 {% endblock %}

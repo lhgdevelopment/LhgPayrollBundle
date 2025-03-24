@@ -10,17 +10,17 @@
 
  namespace KimaiPlugin\LhgPayrollBundle\EventSubscriber;
 
-use App\Event\ThemeEvent;
-use KimaiPlugin\CustomCSSBundle\Repository\CustomCssRepository;
+use App\Event\ThemeEvent; 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;  
 
 class ThemeEventSubscriber implements EventSubscriberInterface
 {
-    private $repository;
+    private $session; 
 
-    public function __construct(CustomCssRepository $repository)
+    public function __construct(SessionInterface $session )
     {
-        $this->repository = $repository;
+        $this->session = $session; 
     }
 
     public static function getSubscribedEvents(): array
@@ -33,7 +33,111 @@ class ThemeEventSubscriber implements EventSubscriberInterface
     public function renderJavaScript(ThemeEvent $event): void
     {  
         $js = '<script type="text/javascript" src="https://www.bugherd.com/sidebarv2.js?apikey=ruk8bwzf6kbxlgd2fm0qjw" async="true"></script>';
-
+        
+        $event->addContent('<script>document.addEventListener("focus",e=>{e.srcElement?.tagName==="BUGHERD-SIDEBAR"&&e.stopImmediatePropagation()},!0);</script>');
         $event->addContent($js);
+
+        //Add Clock Javascript
+        $pstclockJs = "<script>
+                    setInterval(function() {
+                        const targetTimeZone = 'America/Los_Angeles';
+                        let timeString = new Date().toLocaleString('en-US', { timeZone: targetTimeZone });
+
+                        // Create a Date object using the obtained string
+                        let time = new Date(timeString); 
+                        let hour = time.getHours();
+                        let min = time.getMinutes();
+                        let sec = time.getSeconds();
+                        let am_pm = 'AM';
+
+                        if (hour >= 12) {
+                            if (hour > 12) {
+                                hour -= 12;
+                            }
+                            am_pm = 'PM';
+                        } else if (hour == 0) {
+                            hour = 12;
+                            am_pm = 'AM';
+                        }
+
+                        hour = hour < 10 ? '0' + hour : hour;
+                        min = min < 10 ? '0' + min : min;
+                        sec = sec < 10 ? '0' + sec : sec;
+
+                        let currentTime = hour + ':' + min + ':' + sec + am_pm;
+
+                        var pstClock = document.getElementById('pstclock');
+                        if(pstClock){
+                            pstClock.innerHTML = currentTime;
+                        }
+                    }, 1000); 
+                </script>";
+
+        $event->addContent($pstclockJs);  
+        $userclockJs = "<script>
+                    setInterval(function() {
+                        // Create a DateTimeFormat object
+                        const dateTimeFormat = new Intl.DateTimeFormat();
+
+                        // Extract the timezone from the format
+                        const userTimeZone = dateTimeFormat.resolvedOptions().timeZone;
+
+                        const yourClockTitle = document.getElementById('customTitleId');
+                        if(yourClockTitle != null){
+                            yourClockTitle.innerHTML = userTimeZone;
+                        } 
+
+                        let timeString = new Date().toLocaleString('en-US', { timeZone: userTimeZone });
+
+                        // Create a Date object using the obtained string
+                        let time = new Date(timeString); 
+                        let hour = time.getHours();
+                        let min = time.getMinutes();
+                        let sec = time.getSeconds();
+                        let am_pm = 'AM';
+
+                        if (hour >= 12) {
+                            if (hour > 12) {
+                                hour -= 12;
+                            }
+                            am_pm = 'PM';
+                        } else if (hour == 0) {
+                            hour = 12;
+                            am_pm = 'AM';
+                        }
+
+                        hour = hour < 10 ? '0' + hour : hour;
+                        min = min < 10 ? '0' + min : min;
+                        sec = sec < 10 ? '0' + sec : sec;
+
+                        let currentTime = hour + ':' + min + ':' + sec + am_pm;
+
+                        var pstClock = document.getElementById('yourclock');
+                        if(pstClock){
+                            pstClock.innerHTML = currentTime;
+                        }
+                    }, 1000); 
+                </script>";
+
+                $event->addContent($userclockJs);
+    }
+
+    private function getUserTimeZone(){ 
+        $userTimeZone   = $this->session->get('userTimeZone'); 
+
+        if(!$userTimeZone){
+            $userIP = $_SERVER['REMOTE_ADDR'];  
+            $ipInfo = file_get_contents("http://ipinfo.io/{$userIP}/json");
+            $ipInfo = json_decode($ipInfo);  
+            if(isset($ipInfo->timezone)){
+                $userTimezone = $ipInfo->timezone;
+                $this->session->set('userTimeZone', $userTimezone);
+            }
+            else{
+                $userTimeZone = 'America/Los_Angeles';
+            }
+        } 
+
+        return $userTimeZone;
     }
 }

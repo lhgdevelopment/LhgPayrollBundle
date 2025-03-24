@@ -360,14 +360,14 @@ class LhgPayrollApprovalController extends AbstractController
         }
 
         // Handle form submission
-        $commission = $request->request->get('commission');
-        $adjustment = $request->request->get('adjustment');
-        $deduction = $request->request->get('deduction');
+        $commission = (float) $request->request->get('commission');
+        $adjustment = (float) $request->request->get('adjustment');
+        $deduction = (float) $request->request->get('deduction');
         $paymentMethod = $request->request->get('payment_method');
         $status = $request->request->get('status');
         $message = $request->request->get('message');
 
-        $netPayable = $approval->getTotalAmount() + $commission + $adjustment - $deduction;
+        $netPayable = $approval->getTotalAmount() +  $commission +  $adjustment -  $deduction;
 
         // Update the entity with the new data
         $approval->setCommission($commission);

@@ -1,0 +1,34 @@
+
+{% set psttitle = options.psttitle %}
+{% set yourtitle = options.yourtitle %}
+{% set widgetId = options.id %}
+
+<div class="row">
+    <div class="col-md-6">
+        {% embed '@AdminLTE/Widgets/box-widget.html.twig' with {'border': false} %} 
+            {# {% block box_title %}{{ psttitle }}{% endblock %} #}
+            {% block box_title %}<span id="pstTitleId">{{ psttitle }}</span>{% endblock %}
+            {% block box_attributes %}id="{{ widgetId }}"{% endblock %}
+            {% block box_body_class %}no-padding box-body-scrollable{% endblock %}
+            {% block box_body %}
+                <div style="font-size: 80px; text-align: center;" id="pstclock">
+                    <!-- Your clock content goes here -->
+                </div>
+            {% endblock %}
+        {% endembed %}
+    </div>
+
+    <div class="col-md-6">
+        {% embed '@AdminLTE/Widgets/box-widget.html.twig' with {'border': false} %}
+            {# {% block box_title %}{{ yourtitle }}{% endblock %}  #}
+            {% block box_title %}<span id="customTitleId">{{ yourtitle }}</span>{% endblock %}
+            {% block box_attributes %}id="{{ widgetId }}"{% endblock %}
+            {% block box_body_class %}no-padding box-body-scrollable{% endblock %}
+            {% block box_body %}
+                <div style="font-size: 80px; text-align: center;" id="yourclock">
+                    <!-- Your clock content goes here -->
+                </div>
+            {% endblock %}
+        {% endembed %}
+    </div>
+</div> 
