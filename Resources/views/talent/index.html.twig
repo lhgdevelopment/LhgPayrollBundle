@@ -41,7 +41,11 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <input type="search" class="form-control" name="searchTerm" value="{{ searchTerm|default('') }}" placeholder="{{ 'search.placeholder'|trans }}">
+                                        <input type="search" 
+                                               class="form-control" 
+                                               name="searchTerm" 
+                                               value="{{ searchTerm|default('') }}" 
+                                               placeholder="{{ 'Search by username, alias, email or speciality'|trans }}">
                                     </div>
                                 </div>
                                 <div class="col-md-4">

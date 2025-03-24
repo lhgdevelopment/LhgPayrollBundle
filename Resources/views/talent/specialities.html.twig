@@ -2,6 +2,12 @@
 
 {% block page_title %}{{ 'Manage Specialities for'|trans }} {{ talent.alias }}{% endblock %}
 
+{% block page_actions %}
+    <a href="{{ path('talent_view', {'id': talent.id}) }}" class="btn btn-default">
+        <i class="fas fa-arrow-left"></i> {{ 'Back to details'|trans }}
+    </a>
+{% endblock %}
+
 {% block main %}
     <div class="row">
         <div class="col-md-12">
@@ -26,7 +32,6 @@
                             {% endfor %}
                         </div>
                         <button type="submit" class="btn btn-primary">{{ 'Save'|trans }}</button>
-                        <a href="{{ path('talent_view', {'id': talent.id}) }}" class="btn btn-default">{{ 'Cancel'|trans }}</a>
                     </form>
                 </div>
             </div>

@@ -2,6 +2,7 @@
 {% import "macros/widgets.html.twig" as widgets %}
 
 {% block page_title %}{{ 'LHG Payroll'|trans }}{% endblock %}
+
 {% block stylesheets %} 
     {{ parent() }}
     <style>
@@ -284,361 +285,363 @@
 {% endblock %}
 
 {% block main %}
-    {% block content %}
-        <ul class="nav nav-tabs">
-            <li class="active"><a data-toggle="tab" href="#myPayroll">My Payroll</a></li>
-            {% if submittedData|length > 0 %}
-                <li><a data-toggle="tab" href="#submittedData">Submitted</a></li>
-            {% endif %}
-            {% if approvedByTeamLead|length > 0 %}
-                <li><a data-toggle="tab" href="#approvedByTeamLead">Approved By Team Lead</a></li>
-            {% endif %}
-            {% if approvedData|length > 0 %}
-                <li><a data-toggle="tab" href="#approvedData">Approved By Finance</a></li>
-            {% endif %}
-            {% if notSubmittedUsers|length > 0 and is_granted('ROLE_SUPER_ADMIN') %}
-                <li><a data-toggle="tab" href="#notSubmittedYet">Not Submitted</a></li>
-            {% endif %}
-        </ul>
-
-        <div class="tab-content">
-        <div id="myPayroll" class="tab-pane fade in active">
-            <div class="mt-4">
-                <div class="mt-4">
-                    <form method="GET" action="{{ path('biweekly-payroll') }}" class="form-inline">
-                        <div class="form-group mb-2">
-                            {# <select name="user" class="form-control select2" id="payroll_user"> #} 
-                                {% if users|length > 0 %}
-                                <select name="user" id="payroll_user" class="selectpicker form-control select2 ">
-                                    {# <option {% if selectedUserId == app.user.id %} {{ 'selected' }} {% endif %} value="{{ app.user.id }}">{{
-                                            app.user.alias ?? app.user.username }}</option> #}
-                                    {% for user in users %}
-                                    <option {% if selectedUserId==user.id %} {{ 'selected' }} {% endif %} value="{{ user.id }}">{{
-                                        user.alias ?? user.username }}</option>
-                                    {% endfor %}
-                                </select>
-                                {% endif %}
-                        </div>
-                        <input type="hidden" name="date" class="form-control" id="payroll_date" value={{ selectedDate }}
-                            placeholder="">
-                        {# <input type="hidden" name="payroll_start_date" class="form-control" id="payroll_start_date" value={{
-                            payrollDates.start }} placeholder="">
-                        <input type="hidden" name="payroll_end_date" class="form-control" id="payroll_end_date" value={{
-                            payrollDates.end }} placeholder=""> #}
-
-                        <button id="prev_btn" type="button" class="btn btn-default">
-                            <i class="fas fa-arrow-left"></i> Previous
-                        </button>
-
-                        <button type="button" class="btn btn-default mb-2">{{ payrollDates.start }} to {{ payrollDates.end
-                            }}</button>
-
-                        <button id="next_btn" type="button" class="btn btn-default">
-                            Next <i class="fas fa-arrow-right"></i>
-                        </button>
-
-                        <button id="exportBtn" type="button" class="btn btn-success">
-                            <i class="fas fa-download"></i> PDF
-                        </button>
-
-                    </form>
-
-                    <p><strong>User</strong>: {{ selectedUserName }}</p>
-                    <p><strong>Hourly Rate</strong>: ${{ hourlytRate }}</p>
-                    <p><strong>Salary</strong>: ${{ salary|number_format(3) }}</p>
-                    <p class="mt-6" style="margin-tp: 10px;"><strong>Total Hours</strong>: {{
-                        payrollData.total_hours|number_format(3) }} hrs</p>
-                    <p><strong>Total Earnings</strong>: ${{ payrollData.total_earnings|number_format(3) }}</p>
-                    <button id="copyTextBtn"  type="button" class="btn btn-success">
-                        Copy for Clickup
-                    </button>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">{{ 'Payroll Details'|trans }}</h3>
                 </div>
-
-
-                <div class="table-responsive mt-4">
-                    <table class="table table-bordered">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th>Project</th>
-                                <th>Total Duration</th>
-                                <th>Total Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for projectId, projectData in projectWiseData %}
-                            <tr>
-                                <td>{{ projectData.projectName }}</td>
-                                <td>{{ projectData.totalDuration|number_format(3) }} hr</td>
-                                <td>${{ projectData.totalAmount|number_format(3) }}</td>
-                            </tr>
-                            <tr>
-                                <td colspan="3">
-                                    <table class="sub-table table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Date</th>
-                                                <th>Total Duration</th>
-                                                <th>Total Amount</th>
-                                                <th>Begin</th>
-                                                <th>End</th>
-                                                <th>Description</th>
-                                                {# <th>Warning</th> #}
-
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for date, timesheetData in projectData.timesheetsByDate %}
-                                            <tr>
-                                                <td><strong>{{ date }}</strong></td>
-                                                <td><strong>{{ timesheetData.totalDuration|number_format(3) }} hr</strong></td>
-                                                <td><strong>${{ timesheetData.totalAmount|number_format(3) }}</strong></td>
-                                            </tr>
-                                            {% for timesheet in timesheetData.timesheets %}
-                                            <tr>
-                                                <td>{{ timesheet.date }}</td>
-                                                <td>{{ timesheet.duration_in_hour|number_format(3) }} hr</td>
-                                                <td>${{ timesheet.rate|number_format(3) }}</td>
-                                                <td>{{ timesheet.begin }}</td>
-                                                <td>{{ timesheet.end }}</td>
-                                                <td>{{ timesheet.description | parse_links }}</td>
-                                                {# <td>
-                                                    <ul>
-                                                        {% for errorMessage in timesheet.error %}
-                                                        <li>{{ errorMessage }}</li>
-                                                        {% endfor %}
-                                                    </ul>
-                                                </td> #}
-                                            </tr>
-                                            {% endfor %}
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    
-                    {% if submittedByUser == false %}
-                    <p>
-                        <input type="checkbox" id="consent-checkbox"> I hereby <em>{{ app.user.alias }}</em> declare that I have checked above time entries are correct. 
-                    </p>
-                    <button id="submit_btn" type="button" class="btn btn-info">
-                        Submit
-                    </button>
-                    {% else %}  
-                        {% if approval.status == 3 or approval.status == 5 %}
-                        
-                                <button id="re_submit_btn" type="button" class="btn btn-info">
-                                    Re-Submit
-                                </button>
+                <div class="box-body">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#myPayroll">My Payroll</a></li>
+                        {% if submittedData|length > 0 %}
+                            <li><a data-toggle="tab" href="#submittedData">Submitted</a></li>
                         {% endif %}
-                    {% endif %}
+                        {% if approvedByTeamLead|length > 0 %}
+                            <li><a data-toggle="tab" href="#approvedByTeamLead">Approved By Team Lead</a></li>
+                        {% endif %}
+                        {% if approvedData|length > 0 %}
+                            <li><a data-toggle="tab" href="#approvedData">Approved By Finance</a></li>
+                        {% endif %}
+                        {% if notSubmittedUsers|length > 0 and is_granted('ROLE_SUPER_ADMIN') %}
+                            <li><a data-toggle="tab" href="#notSubmittedYet">Not Submitted</a></li>
+                        {% endif %}
+                    </ul>
 
-                    {% if approval != null %}
-                    <div class="mt-4 timeline-div">
-                        <div class="timeline">  
-                            <ul class="timeline">
-                                <!-- Item 1 -->
-                                <li>
-                                    <div class="direction-l"> 
-                                        <div class="flag-wrapper">
-                                            <span class="flag" style="border: 4px solid {{ 1|status_color }}">{{ approval.submittedBy.alias }}</span>
-                                            <span class="time-wrapper"><span class="time">{{ approval.creationDate | date("Y-m-d g:i:sA") }}</span></span>
-                                        </div>
-                                        <div class="desc">{{ 'Submitted for approval' }}</div>
+                    <div class="tab-content">
+                        <div id="myPayroll" class="tab-pane fade in active">
+                            <div class="mt-4">
+                                <form method="GET" action="{{ path('biweekly-payroll') }}" class="form-inline">
+                                    <div class="form-group mb-2">
+                                        {% if users|length > 0 %}
+                                            <select name="user" id="payroll_user" class="selectpicker form-control select2">
+                                                {% for user in users %}
+                                                    <option {% if selectedUserId == user.id %} {{ 'selected' }} {% endif %} value="{{ user.id }}">
+                                                        {{ user.alias ?? user.username }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        {% endif %}
                                     </div>
-                                </li> 
-                                {% for history in approvalHistory %}
-                                    <li>
-                                        <div class="direction-{% if loop.index is divisible by 2 %}l{% else %}r{% endif %}"> 
-                                            <div class="flag-wrapper">
-                                                <span class="flag" style="border: 4px solid {{ history.status|status_color }}">{{ history.user.alias }}</span>
-                                                <span class="time-wrapper"><span class="time">{{ history.date | date("Y-m-d g:i:sA") }}</span></span>
-                                            </div>
-                                            <div class="desc">{{ history.message }}</div>
-                                        </div>
-                                    </li> 
+                                    <input type="hidden" name="date" class="form-control" id="payroll_date" value={{ selectedDate }}>
+
+                                    <div class="btn-group">
+                                        <button id="prev_btn" type="button" class="btn btn-default">
+                                            <i class="fas fa-arrow-left"></i> Previous
+                                        </button>
+
+                                        <button type="button" class="btn btn-default">
+                                            {{ payrollDates.start }} to {{ payrollDates.end }}
+                                        </button>
+
+                                        <button id="next_btn" type="button" class="btn btn-default">
+                                            Next <i class="fas fa-arrow-right"></i>
+                                        </button>
+
+                                        <button id="exportBtn" type="button" class="btn btn-success">
+                                            <i class="fas fa-download"></i> PDF
+                                        </button>
+                                    </div>
+                                </form>
+
+                                <div class="mt-3">
+                                    <p><strong>User</strong>: {{ selectedUserName }}</p>
+                                    <p><strong>Hourly Rate</strong>: ${{ hourlytRate }}</p>
+                                    <p><strong>Salary</strong>: ${{ salary|number_format(3) }}</p>
+                                    <p class="mt-6" style="margin-tp: 10px;"><strong>Total Hours</strong>: {{
+                                        payrollData.total_hours|number_format(3) }} hrs</p>
+                                    <p><strong>Total Earnings</strong>: ${{ payrollData.total_earnings|number_format(3) }}</p>
+                                    <button id="copyTextBtn"  type="button" class="btn btn-success">
+                                        Copy for Clickup
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive mt-4">
+                                <table class="table table-bordered">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>Project</th>
+                                            <th>Total Duration</th>
+                                            <th>Total Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for projectId, projectData in projectWiseData %}
+                                        <tr>
+                                            <td>{{ projectData.projectName }}</td>
+                                            <td>{{ projectData.totalDuration|number_format(3) }} hr</td>
+                                            <td>${{ projectData.totalAmount|number_format(3) }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="3">
+                                                <table class="sub-table table table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Date</th>
+                                                            <th>Total Duration</th>
+                                                            <th>Total Amount</th>
+                                                            <th>Begin</th>
+                                                            <th>End</th>
+                                                            <th>Description</th>
+                                                            {# <th>Warning</th> #}
+
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for date, timesheetData in projectData.timesheetsByDate %}
+                                                        <tr>
+                                                            <td><strong>{{ date }}</strong></td>
+                                                            <td><strong>{{ timesheetData.totalDuration|number_format(3) }} hr</strong></td>
+                                                            <td><strong>${{ timesheetData.totalAmount|number_format(3) }}</strong></td>
+                                                        </tr>
+                                                        {% for timesheet in timesheetData.timesheets %}
+                                                        <tr>
+                                                            <td>{{ timesheet.date }}</td>
+                                                            <td>{{ timesheet.duration_in_hour|number_format(3) }} hr</td>
+                                                            <td>${{ timesheet.rate|number_format(3) }}</td>
+                                                            <td>{{ timesheet.begin }}</td>
+                                                            <td>{{ timesheet.end }}</td>
+                                                            <td>{{ timesheet.description | parse_links }}</td>
+                                                            {# <td>
+                                                                <ul>
+                                                                    {% for errorMessage in timesheet.error %}
+                                                                    <li>{{ errorMessage }}</li>
+                                                                    {% endfor %}
+                                                                </ul>
+                                                            </td> #}
+                                                        </tr>
+                                                        {% endfor %}
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                
+                                {% if submittedByUser == false %}
+                                <p>
+                                    <input type="checkbox" id="consent-checkbox"> I hereby <em>{{ app.user.alias }}</em> declare that I have checked above time entries are correct. 
+                                </p>
+                                <button id="submit_btn" type="button" class="btn btn-info">
+                                    Submit
+                                </button>
+                                {% else %}  
+                                    {% if approval.status == 3 or approval.status == 5 %}
                                     
-                                {% endfor %}
-                            </ul>
-                        </div> 
-                    </div>
-                    {% endif %}
+                                            <button id="re_submit_btn" type="button" class="btn btn-info">
+                                                Re-Submit
+                                            </button>
+                                    {% endif %}
+                                {% endif %}
+
+                                {% if approval != null %}
+                                <div class="mt-4 timeline-div">
+                                    <div class="timeline">  
+                                        <ul class="timeline">
+                                            <!-- Item 1 -->
+                                            <li>
+                                                <div class="direction-l"> 
+                                                    <div class="flag-wrapper">
+                                                        <span class="flag" style="border: 4px solid {{ 1|status_color }}">{{ approval.submittedBy.alias }}</span>
+                                                        <span class="time-wrapper"><span class="time">{{ approval.creationDate | date("Y-m-d g:i:sA") }}</span></span>
+                                                    </div>
+                                                    <div class="desc">{{ 'Submitted for approval' }}</div>
+                                                </div>
+                                            </li> 
+                                            {% for history in approvalHistory %}
+                                                <li>
+                                                    <div class="direction-{% if loop.index is divisible by 2 %}l{% else %}r{% endif %}"> 
+                                                        <div class="flag-wrapper">
+                                                            <span class="flag" style="border: 4px solid {{ history.status|status_color }}">{{ history.user.alias }}</span>
+                                                            <span class="time-wrapper"><span class="time">{{ history.date | date("Y-m-d g:i:sA") }}</span></span>
+                                                        </div>
+                                                        <div class="desc">{{ history.message }}</div>
+                                                    </div>
+                                                </li> 
+                                                
+                                            {% endfor %}
+                                        </ul>
+                                    </div> 
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div id="submittedData" class="tab-pane fade">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Sl</th>
+                                        <th>Name</th>
+                                        <th>Payroll Period dates</th>
+                                        <th>Status</th>
+                                        <th>Total hours</th>
+                                        <th>Total amount</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% set submittedNetTotalDuration = 0 %}  
+                                    {% set submittedNetTotalAmount = 0 %}  
+                                    {% set submittedNetTotalPayable = 0 %}
+                                    {% for index, submitted in submittedData %}
+                                        {% set submittedNetTotalDuration = submittedNetTotalDuration + submitted.totalDuration %}
+                                        {% set submittedNetTotalAmount = submittedNetTotalAmount + submitted.totalAmount %}
+                                        {% set submittedNetTotalPayable = submittedNetTotalPayable + submitted.netPayable %} 
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td>{{ submitted.user.alias }}</td>
+                                        <td>{{ payrollDates.start }} to {{ payrollDates.end }}</td>
+                                        <td>{{ statusArray[submitted.status] }}</td>
+                                        <td>{{ submitted.totalDuration|number_format(3) }}</td>
+                                        <td>${{ submitted.totalAmount|number_format(3) }}</td>
+                                        <td>
+                                            <a href="{{ path('lhg_payroll_approval_view', {'id': submitted.id}) }}" class="btn btn-primary">View</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    <tr>
+                                        <td><strong>Total</strong></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td> 
+                                        <td>{{ submittedNetTotalDuration|number_format(3) }}</td>
+                                        <td>${{ submittedNetTotalAmount|number_format(3) }}</td> 
+                                        <td></td>
+
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="approvedByTeamLead" class="tab-pane fade">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Sl</th>
+                                        <th>Name</th>
+                                        <th>Payroll Period dates</th>
+                                        <th>Status</th>
+                                        <th>Total hours</th>
+                                        <th>Total amount</th>
+                                        <th>Total Payable</th> 
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% set netTotalDuration = 0 %}  
+                                    {% set netTotalAmount = 0 %}  
+                                    {% set netTotalPayable = 0 %}
+                                    {% for index, teamLeadApproved in approvedByTeamLead %} 
+                                        {% set netTotalDuration = netTotalDuration + teamLeadApproved.totalDuration %}
+                                        {% set netTotalAmount = netTotalAmount + teamLeadApproved.totalAmount %}
+                                        {% set netTotalPayable = netTotalPayable + teamLeadApproved.netPayable ?? teamLeadApproved.totalAmount  %}
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td>{{ teamLeadApproved.user.alias }}</td>
+                                        <td>{{ payrollDates.start }} to {{ payrollDates.end }}</td>
+                                        <td>{{ statusArray[teamLeadApproved.status] }}</td>
+                                        <td>{{ teamLeadApproved.totalDuration|number_format(3) }}</td>
+                                        <td>${{ teamLeadApproved.totalAmount|number_format(3) }}</td>
+                                        <td>${{ teamLeadApproved.netPayable ?? teamLeadApproved.totalAmount|number_format(3) }}</td>
+                                        <td>
+                                            <a href="{{ path('lhg_payroll_approval_view', {'id': teamLeadApproved.id}) }}" class="btn btn-primary">View</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    <tr>
+                                        <td><strong>Total</strong></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td> 
+                                        <td>{{ netTotalDuration|number_format(3) }}</td>
+                                        <td>${{ netTotalAmount|number_format(3) }}</td>
+                                        <td>${{ netTotalPayable|number_format(3) }}</td> 
+                                        <td></td>
+
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="approvedData" class="tab-pane fade">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Sl</th>
+                                        <th>Name</th>
+                                        <th>Payroll Period dates</th>
+                                        <th>Status</th>
+                                        <th>Total hours</th>
+                                        <th>Total amount</th>
+                                        <th>Total Payable</th> 
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% set netTotalFinanceDuration = 0 %}  
+                                    {% set netFinanceTotalAmount = 0 %}  
+                                    {% set netFinanceTotalPayable = 0 %}
+                                    {% for index, financeApproved in approvedData %} 
+                                        {% set netTotalFinanceDuration = netTotalFinanceDuration + financeApproved.totalDuration %}
+                                        {% set netFinanceTotalAmount = netFinanceTotalAmount + financeApproved.totalAmount %}
+                                        {% set netFinanceTotalPayable = netFinanceTotalPayable + financeApproved.netPayable ?? financeApproved.totalAmount %}
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td>{{ financeApproved.user.alias }}</td>
+                                        <td>{{ payrollDates.start }} to {{ payrollDates.end }}</td>
+                                        <td>{{ statusArray[financeApproved.status] }}</td>
+                                        <td>{{ financeApproved.totalDuration|number_format(3) }}</td>
+                                        <td>${{ financeApproved.totalAmount|number_format(3) }}</td>
+                                        <td>${{ financeApproved.netPayable ?? financeApproved.totalAmount|number_format(3) }}</td>
+                                        <td>
+                                            <a href="{{ path('lhg_payroll_approval_view', {'id': financeApproved.id}) }}" class="btn btn-primary">View</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    <tr>
+                                        <td><strong>Total</strong></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td> 
+                                        <td>{{ netTotalFinanceDuration|number_format(3) }}</td>
+                                        <td>${{ netFinanceTotalAmount|number_format(3) }}</td>
+                                        <td>${{ netFinanceTotalPayable|number_format(3) }}</td> 
+                                        <td></td>
+
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="notSubmittedYet" class="tab-pane fade">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Sl</th>
+                                        <th>Name</th> 
+                                        <th>Taem Lead</th> 
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for index, notSubmitted in notSubmittedUsers %} 
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td>{{ notSubmitted.alias }}</td>
+                                        <td>{{ 'Team Lead Name' }}</td>
+                                        <td>
+                                            <a href="?user={{ notSubmitted.id }}&date={{ selectedDate }}" class="btn btn-primary">View</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div> 
                 </div>
             </div>
         </div>
-        <div id="submittedData" class="tab-pane fade">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Sl</th>
-                        <th>Name</th>
-                        <th>Payroll Period dates</th>
-                        <th>Status</th>
-                        <th>Total hours</th>
-                        <th>Total amount</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% set submittedNetTotalDuration = 0 %}  
-                    {% set submittedNetTotalAmount = 0 %}  
-                    {% set submittedNetTotalPayable = 0 %}
-                    {% for index, submitted in submittedData %}
-                        {% set submittedNetTotalDuration = submittedNetTotalDuration + submitted.totalDuration %}
-                        {% set submittedNetTotalAmount = submittedNetTotalAmount + submitted.totalAmount %}
-                        {% set submittedNetTotalPayable = submittedNetTotalPayable + submitted.netPayable %} 
-                    <tr>
-                        <td>{{ loop.index }}</td>
-                        <td>{{ submitted.user.alias }}</td>
-                        <td>{{ payrollDates.start }} to {{ payrollDates.end }}</td>
-                        <td>{{ statusArray[submitted.status] }}</td>
-                        <td>{{ submitted.totalDuration|number_format(3) }}</td>
-                        <td>${{ submitted.totalAmount|number_format(3) }}</td>
-                        <td>
-                            <a href="{{ path('lhg_payroll_approval_view', {'id': submitted.id}) }}" class="btn btn-primary">View</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                    <tr>
-                        <td><strong>Total</strong></td>
-                        <td></td>
-                        <td></td>
-                        <td></td> 
-                        <td>{{ submittedNetTotalDuration|number_format(3) }}</td>
-                        <td>${{ submittedNetTotalAmount|number_format(3) }}</td> 
-                        <td></td>
-
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <div id="approvedByTeamLead" class="tab-pane fade">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Sl</th>
-                        <th>Name</th>
-                        <th>Payroll Period dates</th>
-                        <th>Status</th>
-                        <th>Total hours</th>
-                        <th>Total amount</th>
-                        <th>Total Payable</th> 
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% set netTotalDuration = 0 %}  
-                    {% set netTotalAmount = 0 %}  
-                    {% set netTotalPayable = 0 %}
-                    {% for index, teamLeadApproved in approvedByTeamLead %} 
-                        {% set netTotalDuration = netTotalDuration + teamLeadApproved.totalDuration %}
-                        {% set netTotalAmount = netTotalAmount + teamLeadApproved.totalAmount %}
-                        {% set netTotalPayable = netTotalPayable + teamLeadApproved.netPayable ?? teamLeadApproved.totalAmount  %}
-                    <tr>
-                        <td>{{ loop.index }}</td>
-                        <td>{{ teamLeadApproved.user.alias }}</td>
-                        <td>{{ payrollDates.start }} to {{ payrollDates.end }}</td>
-                        <td>{{ statusArray[teamLeadApproved.status] }}</td>
-                        <td>{{ teamLeadApproved.totalDuration|number_format(3) }}</td>
-                        <td>${{ teamLeadApproved.totalAmount|number_format(3) }}</td>
-                        <td>${{ teamLeadApproved.netPayable ?? teamLeadApproved.totalAmount|number_format(3) }}</td>
-                        <td>
-                            <a href="{{ path('lhg_payroll_approval_view', {'id': teamLeadApproved.id}) }}" class="btn btn-primary">View</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                    <tr>
-                        <td><strong>Total</strong></td>
-                        <td></td>
-                        <td></td>
-                        <td></td> 
-                        <td>{{ netTotalDuration|number_format(3) }}</td>
-                        <td>${{ netTotalAmount|number_format(3) }}</td>
-                        <td>${{ netTotalPayable|number_format(3) }}</td> 
-                        <td></td>
-
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <div id="approvedData" class="tab-pane fade">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Sl</th>
-                        <th>Name</th>
-                        <th>Payroll Period dates</th>
-                        <th>Status</th>
-                        <th>Total hours</th>
-                        <th>Total amount</th>
-                        <th>Total Payable</th> 
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% set netTotalFinanceDuration = 0 %}  
-                    {% set netFinanceTotalAmount = 0 %}  
-                    {% set netFinanceTotalPayable = 0 %}
-                    {% for index, financeApproved in approvedData %} 
-                        {% set netTotalFinanceDuration = netTotalFinanceDuration + financeApproved.totalDuration %}
-                        {% set netFinanceTotalAmount = netFinanceTotalAmount + financeApproved.totalAmount %}
-                        {% set netFinanceTotalPayable = netFinanceTotalPayable + financeApproved.netPayable ?? financeApproved.totalAmount %}
-                    <tr>
-                        <td>{{ loop.index }}</td>
-                        <td>{{ financeApproved.user.alias }}</td>
-                        <td>{{ payrollDates.start }} to {{ payrollDates.end }}</td>
-                        <td>{{ statusArray[financeApproved.status] }}</td>
-                        <td>{{ financeApproved.totalDuration|number_format(3) }}</td>
-                        <td>${{ financeApproved.totalAmount|number_format(3) }}</td>
-                        <td>${{ financeApproved.netPayable ?? financeApproved.totalAmount|number_format(3) }}</td>
-                        <td>
-                            <a href="{{ path('lhg_payroll_approval_view', {'id': financeApproved.id}) }}" class="btn btn-primary">View</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                    <tr>
-                        <td><strong>Total</strong></td>
-                        <td></td>
-                        <td></td>
-                        <td></td> 
-                        <td>{{ netTotalFinanceDuration|number_format(3) }}</td>
-                        <td>${{ netFinanceTotalAmount|number_format(3) }}</td>
-                        <td>${{ netFinanceTotalPayable|number_format(3) }}</td> 
-                        <td></td>
-
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <div id="notSubmittedYet" class="tab-pane fade">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Sl</th>
-                        <th>Name</th> 
-                        <th>Taem Lead</th> 
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for index, notSubmitted in notSubmittedUsers %} 
-                    <tr>
-                        <td>{{ loop.index }}</td>
-                        <td>{{ notSubmitted.alias }}</td>
-                        <td>{{ 'Team Lead Name' }}</td>
-                        <td>
-                            <a href="?user={{ notSubmitted.id }}&date={{ selectedDate }}" class="btn btn-primary">View</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        </div> 
-
-    {% endblock %}
+    </div>
 {% endblock %}
 
 {% block javascripts %}

@@ -2,6 +2,12 @@
 
 {% block page_title %}{{ talent.displayName }}{% endblock %}
 
+{% block page_actions %}
+    <a href="{{ path('talent_index') }}" class="btn btn-default">
+        <i class="fas fa-arrow-left"></i> {{ 'Back to list'|trans }}
+    </a>
+{% endblock %}
+
 {% block main %}
     <div class="row">
         <div class="col-md-12">

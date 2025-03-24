@@ -13,6 +13,8 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use App\Entity\Project;
 use App\Entity\Timesheet;
 use App\Entity\User;
+use Pagerfanta\Adapter\ArrayAdapter;
+use Pagerfanta\Pagerfanta;
 
 /**
  * @Route(path="/admin/talent")
@@ -31,13 +33,59 @@ class TalentController extends AbstractController
 
         // Store search term in query object
         $searchString = $request->query->get('searchTerm');
-        if (!empty($searchString)) {
-            $searchTerm = new SearchTerm($searchString);
-            $query->setSearchTerm($searchTerm);
-        }
+        $connection = $this->getDoctrine()->getConnection();
 
-        $userRepository = $this->getDoctrine()->getRepository(User::class);
-        $talents = $userRepository->getPagerfantaForQuery($query);
+        if (!empty($searchString)) {
+            // Build the query to search users with their specialities
+            $searchQuery = '
+                SELECT DISTINCT u.* 
+                FROM kimai2_users u 
+                LEFT JOIN lhg_user_speciality us ON u.id = us.user_id 
+                LEFT JOIN lhg_speciality s ON us.speciality_id = s.id 
+                WHERE u.username LIKE :search 
+                OR u.alias LIKE :search 
+                OR u.email LIKE :search 
+                OR s.name LIKE :search
+            ';
+            
+            $stmt = $connection->prepare($searchQuery);
+            $searchParam = '%' . $searchString . '%';
+            $result = $stmt->executeQuery(['search' => $searchParam]);
+            $users = $result->fetchAllAssociative();
+            
+            // Count total results for pagination
+            $countQuery = '
+                SELECT COUNT(DISTINCT u.id) as count
+                FROM kimai2_users u 
+                LEFT JOIN lhg_user_speciality us ON u.id = us.user_id 
+                LEFT JOIN lhg_speciality s ON us.speciality_id = s.id 
+                WHERE u.username LIKE :search 
+                OR u.alias LIKE :search 
+                OR u.email LIKE :search 
+                OR s.name LIKE :search
+            ';
+            
+            $countStmt = $connection->prepare($countQuery);
+            $countResult = $countStmt->executeQuery(['search' => $searchParam]);
+            $totalResults = $countResult->fetchOne();
+            
+            // Calculate pagination
+            $maxResults = 25;
+            $offset = ($page - 1) * $maxResults;
+            
+            // Paginate results
+            $paginatedUsers = array_slice($users, $offset, $maxResults);
+            
+            // Create a custom Pagerfanta instance
+            $adapter = new ArrayAdapter($users);
+            $talents = new Pagerfanta($adapter);
+            $talents->setMaxPerPage($maxResults);
+            $talents->setCurrentPage($page);
+        } else {
+            // If no search term, use the default UserQuery
+            $userRepository = $this->getDoctrine()->getRepository(User::class);
+            $talents = $userRepository->getPagerfantaForQuery($query);
+        }
 
         // If the requested page is beyond the last page, redirect to page 1
         try {

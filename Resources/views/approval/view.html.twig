@@ -3,6 +3,12 @@
 
 {% block page_title %}{{ 'LHG Payroll'|trans }}{% endblock %}
 
+{% block page_actions %}
+    <a href="{{ path('biweekly-payroll') }}" class="btn btn-default">
+        <i class="fas fa-arrow-left"></i> {{ 'Back to list'|trans }}
+    </a>
+{% endblock %}
+
 {% block stylesheets %} 
     {{ parent() }}
     <style>
@@ -285,283 +291,368 @@
 {% endblock %}
 
 {% block main %}
-    {% block content %} 
-        <div class="mt-4 timeline-div">
-            <div class="timeline">  
-                <ul class="timeline">
-                    <!-- Item 1 -->
-                    <li>
-                        <div class="direction-l"> 
-                            <div class="flag-wrapper">
-                                <span class="flag" style="border: 4px solid {{ 1|status_color }}">{{ approval.submittedBy.alias }}</span>
-                                <span class="time-wrapper"><span class="time">{{ approval.creationDate | date("Y-m-d g:i:sA") }}</span></span>
-                            </div>
-                            <div class="desc">{{ 'Submitted for approval' }}</div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">{{ 'Approval Timeline'|trans }}</h3>
+                </div>
+                <div class="box-body">
+                    <div class="timeline-div">
+                        <div class="timeline">  
+                            <ul class="timeline">
+                                <!-- Item 1 -->
+                                <li>
+                                    <div class="direction-l"> 
+                                        <div class="flag-wrapper">
+                                            <span class="flag" style="border: 4px solid {{ 1|status_color }}">{{ approval.submittedBy.alias }}</span>
+                                            <span class="time-wrapper"><span class="time">{{ approval.creationDate | date("Y-m-d g:i:sA") }}</span></span>
+                                        </div>
+                                        <div class="desc">{{ 'Submitted for approval' }}</div>
+                                    </div>
+                                </li> 
+                                {% for history in approvalHistory %}
+                                    <li>
+                                        <div class="direction-{% if loop.index is divisible by 2 %}l{% else %}r{% endif %}"> 
+                                            <div class="flag-wrapper">
+                                                <span class="flag" style="border: 4px solid {{ history.status|status_color }}">{{ history.user.alias }}</span>
+                                                <span class="time-wrapper"><span class="time">{{ history.date | date("Y-m-d g:i:sA") }}</span></span>
+                                            </div>
+                                            <div class="desc">{{ history.message }}</div>
+                                        </div>
+                                    </li> 
+                                    
+                                {% endfor %}
+                            </ul>
                         </div>
-                    </li> 
-                    {% for history in approvalHistory %}
-                        <li>
-                            <div class="direction-{% if loop.index is divisible by 2 %}l{% else %}r{% endif %}"> 
-                                <div class="flag-wrapper">
-                                    <span class="flag" style="border: 4px solid {{ history.status|status_color }}">{{ history.user.alias }}</span>
-                                    <span class="time-wrapper"><span class="time">{{ history.date | date("Y-m-d g:i:sA") }}</span></span>
-                                </div>
-                                <div class="desc">{{ history.message }}</div>
-                            </div>
-                        </li> 
-                        
-                    {% endfor %}
-                </ul>
+                    </div>
+                </div>
             </div>
-
-            {# {% for history in approvalHistory %}
-                {{ history.date | date("Y-m-d g:i:sA") }}
-            {% endfor %} #}
         </div>
-        <div id="myPayroll" class="mt-4"> 
-            <div class="mt-4">
-                <div class="mt-4">                    
-                    <p class="mt-6" style="margin-tp: 10px;"><strong>Name</strong>: {{ approval.user.alias  }}</p>
-                    <p class="mt-6" style="margin-tp: 10px;"><strong>Hourly Rate</strong>: ${{ hourlytRate  }}</p>
-                    <p class="mt-6"><strong>Total Hours</strong>: {{ payrollData.total_hours|number_format(3) }} hrs</p>
-                    <p><strong>Total Earnings</strong>: ${{ payrollData.total_earnings|number_format(3) }}</p>
-                    <p><strong>Salary</strong>: ${{ salary|number_format(3) }} (Difference {{ salaryAndEarningDifference|number_format(3) }} USD)</p>
-                    {% if approval.status == 4 or approval.status == 5 %}
-                    <hr>
-                    <p><strong>Commission</strong>: ${{ approval.commission|number_format(3) }}</p>
-                    <p><strong>Adjustment</strong>: ${{ approval.adjustment|number_format(3) }}</p>
-                    <p><strong>Deduction</strong>: ${{ approval.deduction|number_format(3) }}</p>
-                    <hr>
-                    <p><strong>Net Payable</strong>: ${{ approval.netPayable|number_format(3) }}</p>
-                    <p><strong>Paid Through</strong>: {{ approval.paymentMethod }}</p>
-                    <p>
-                        <button id="updateBtn" type="button" class="btn btn-info" data-toggle="modal" data-target="#updateModal">
-                        Update
-                        </button>
-                        
-                        <!-- Modal -->
-                        <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="updateModalLabel">Update Payroll</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body"> 
-                                        <p>Hourly rate:  ${{ hourlytRate }} || Total Earnings: ${{ payrollData.total_earnings|number_format(3) }} || Salary : ${{ salary|number_format(3) }} (Difference ${{ salaryAndEarningDifference|number_format(3) }})</p>
-                                        <form id="updateForm" action="{{ path('lhg_payroll_approval_update', {'id': approval.id}) }}" method="POST">
-                                            <label for="commission">Commission:</label>
-                                            <input type="number" value ="{{ approval.commission }}" step="any" name="commission" class="form-control">  
-                                            <label for="adjustment">Adjustment:</label>
-                                            <input type="number" value ="{{ approval.adjustment }}"  step="any" name="adjustment" class="form-control">
+    </div>
 
-                                            <label for="deduction">Deduction:</label>
-                                            <input type="number" value ="{{ approval.deduction }}"  step="any" name="deduction" class="form-control"> 
-
-                                            <label for="payment_method">Paid Through:</label>
-                                            <select class="form-control " name="payment_method">
-                                                {% for paymentMethod in paymentMethods %}
-                                                    <option {% if approval.paymentMethod == paymentMethod %} selected {% endif %} value={{ paymentMethod }}>{{ paymentMethod }}</option>
-                                                {% endfor %}
-                                            </select>
-                                            <label for="status">Status</label>
-                                            <select class="form-control " name="status">
-                                                {% for key, status in statusArray %}
-                                                    <option {% if approval.status == key %} selected {% endif %} value={{ key }}>{{ status }}</option>
-                                                {% endfor %}
-                                            </select>
-
-                                            <label for="message">Note:</label>
-                                            <input type="text" name="message" class="form-control"> 
-                                        
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        <button type="submit" id="updateApprovalEntry" class="btn btn-success">Update</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                    </p>
-                    {% endif %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">{{ 'Payroll Details'|trans }}</h3>
                 </div>
-                <div class="table-responsive mt-4">
-                    <table class="table table-bordered">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th>Project</th>
-                                <th>Total Duration</th>
-                                <th>Total Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for projectId, projectData in projectWiseData %}
-                            <tr>
-                                <td>{{ projectData.projectName }}</td>
-                                <td>{{ projectData.totalDuration|number_format(3) }} hr</td>
-                                <td>${{ projectData.totalAmount|number_format(3) }}</td>
-                            </tr>
-                            <tr>
-                                <td colspan="3">
-                                    <table class="sub-table table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Date</th>
-                                                <th>Total Duration</th>
-                                                <th>Total Amount</th>
-                                                <th>Begin</th>
-                                                <th>End</th>
-                                                <th>Description</th> 
-
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for date, timesheetData in projectData.timesheetsByDate %}
-                                            <tr>
-                                                <td><strong>{{ date }}</strong></td>
-                                                <td><strong>{{ timesheetData.totalDuration|number_format(3) }} hr</strong></td>
-                                                <td><strong>${{ timesheetData.totalAmount|number_format(3) }}</strong></td> 
-                                            </tr>
-                                            {% for timesheet in timesheetData.timesheets %} 
-                                                <tr>
-                                                    <td><a href="{{ path('timesheet_edit', {'id': timesheet.id}) }}" target="_blank">{{ timesheet.date }}</a></td>
-                                                    <td>{{ timesheet.duration_in_hour|number_format(3) }} hr</td>
-                                                    <td>${{ timesheet.rate|number_format(3) }}</td>
-                                                    <td>{{ timesheet.begin }}</td>
-                                                    <td>{{ timesheet.end }}</td>
-                                                    <td>{{ timesheet.description | parse_links }}</td> 
-                                                </tr>
-                                            {% endfor %}
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-
-                    {# 1 = pending. team lead to approve / reject #}
-                    {% if approval.status == 1 %}
-                    <button id="approve_btn" type="button" class="btn btn-success" data-toggle="modal" data-target="#approveModal">
-                        Team Lead Approve 
-                    </button>
-
-                    <button id="reject_btn" type="button" data-role="team_lead" class="btn btn-danger" data-toggle="modal" data-target="#rejectModal">
-                        Team Lead Reject
-                    </button>
-
-                    <div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-labelledby="approveModalLabel" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="approveModalLabel">Approve Payroll</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
+                <div class="box-body">
+                    <div id="myPayroll">
+                        <div class="mt-4">
+                            <div class="mt-4">                    
+                                <p class="mt-6" style="margin-tp: 10px;"><strong>Name</strong>: {{ approval.user.alias  }}</p>
+                                <p class="mt-6" style="margin-tp: 10px;"><strong>Hourly Rate</strong>: ${{ hourlytRate  }}</p>
+                                <p class="mt-6"><strong>Total Hours</strong>: {{ payrollData.total_hours|number_format(3) }} hrs</p>
+                                <p><strong>Total Earnings</strong>: ${{ payrollData.total_earnings|number_format(3) }}</p>
+                                <p><strong>Salary</strong>: ${{ salary|number_format(3) }} (Difference {{ salaryAndEarningDifference|number_format(3) }} USD)</p>
+                                {% if approval.status == 4 or approval.status == 5 %}
+                                <hr>
+                                <p><strong>Commission</strong>: ${{ approval.commission|number_format(3) }}</p>
+                                <p><strong>Adjustment</strong>: ${{ approval.adjustment|number_format(3) }}</p>
+                                <p><strong>Deduction</strong>: ${{ approval.deduction|number_format(3) }}</p>
+                                <hr>
+                                <p><strong>Net Payable</strong>: ${{ approval.netPayable|number_format(3) }}</p>
+                                <p><strong>Paid Through</strong>: {{ approval.paymentMethod }}</p>
+                                <p>
+                                    <button id="updateBtn" type="button" class="btn btn-info" data-toggle="modal" data-target="#updateModal">
+                                    Update
                                     </button>
-                                </div>
-                                <div class="modal-body">
-                                    <form id="approvalForm">
-                                        <label for="message">Note:</label>
-                                        <input type="text" id="message" class="form-control"> 
-                                    </form>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                    <button type="button" id="approveConfirmBtn" class="btn btn-success">Approve</button>
-                                </div>
+                                    
+                                    <!-- Modal -->
+                                    <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="updateModalLabel">Update Payroll</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body"> 
+                                                    <p>Hourly rate:  ${{ hourlytRate }} || Total Earnings: ${{ payrollData.total_earnings|number_format(3) }} || Salary : ${{ salary|number_format(3) }} (Difference ${{ salaryAndEarningDifference|number_format(3) }})</p>
+                                                    <form id="updateForm" action="{{ path('lhg_payroll_approval_update', {'id': approval.id}) }}" method="POST">
+                                                        <label for="commission">Commission:</label>
+                                                        <input type="number" value ="{{ approval.commission }}" step="any" name="commission" class="form-control">  
+                                                        <label for="adjustment">Adjustment:</label>
+                                                        <input type="number" value ="{{ approval.adjustment }}"  step="any" name="adjustment" class="form-control">
+
+                                                        <label for="deduction">Deduction:</label>
+                                                        <input type="number" value ="{{ approval.deduction }}"  step="any" name="deduction" class="form-control"> 
+
+                                                        <label for="payment_method">Paid Through:</label>
+                                                        <select class="form-control " name="payment_method">
+                                                            {% for paymentMethod in paymentMethods %}
+                                                                <option {% if approval.paymentMethod == paymentMethod %} selected {% endif %} value={{ paymentMethod }}>{{ paymentMethod }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        <label for="status">Status</label>
+                                                        <select class="form-control " name="status">
+                                                            {% for key, status in statusArray %}
+                                                                <option {% if approval.status == key %} selected {% endif %} value={{ key }}>{{ status }}</option>
+                                                            {% endfor %}
+                                                        </select>
+
+                                                        <label for="message">Note:</label>
+                                                        <input type="text" name="message" class="form-control"> 
+                                                    
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                    <button type="submit" id="updateApprovalEntry" class="btn btn-success">Update</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </p>
+                                {% endif %}
                             </div>
-                        </div>
-                    </div>
+                            <div class="table-responsive mt-4">
+                                <table class="table table-bordered">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>Project</th>
+                                            <th>Total Duration</th>
+                                            <th>Total Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for projectId, projectData in projectWiseData %}
+                                        <tr>
+                                            <td>{{ projectData.projectName }}</td>
+                                            <td>{{ projectData.totalDuration|number_format(3) }} hr</td>
+                                            <td>${{ projectData.totalAmount|number_format(3) }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="3">
+                                                <table class="sub-table table table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Date</th>
+                                                            <th>Total Duration</th>
+                                                            <th>Total Amount</th>
+                                                            <th>Begin</th>
+                                                            <th>End</th>
+                                                            <th>Description</th> 
 
-                    {# 2 = approved by teamlead and finance to approve / reject #}
-                    {% elseif approval.status == 2 and is_granted('ROLE_SUPER_ADMIN') %}
-                        <!-- Add this button inside the if statement for admins -->
-                        <button id="approve_btn" type="button" class="btn btn-success" data-toggle="modal" data-target="#approveModal">
-                            Finance Lead Approve
-                        </button>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for date, timesheetData in projectData.timesheetsByDate %}
+                                                        <tr>
+                                                            <td><strong>{{ date }}</strong></td>
+                                                            <td><strong>{{ timesheetData.totalDuration|number_format(3) }} hr</strong></td>
+                                                            <td><strong>${{ timesheetData.totalAmount|number_format(3) }}</strong></td> 
+                                                        </tr>
+                                                        {% for timesheet in timesheetData.timesheets %} 
+                                                            <tr>
+                                                                <td><a href="{{ path('timesheet_edit', {'id': timesheet.id}) }}" target="_blank">{{ timesheet.date }}</a></td>
+                                                                <td>{{ timesheet.duration_in_hour|number_format(3) }} hr</td>
+                                                                <td>${{ timesheet.rate|number_format(3) }}</td>
+                                                                <td>{{ timesheet.begin }}</td>
+                                                                <td>{{ timesheet.end }}</td>
+                                                                <td>{{ timesheet.description | parse_links }}</td> 
+                                                            </tr>
+                                                        {% endfor %}
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
 
-                        <!-- Modal -->
-                        <div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-labelledby="approveModalLabel" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="approveModalLabel">Approve Payroll</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body"> 
-                                        <p>Hourly rate:  ${{ hourlytRate }} || Total Earnings: ${{ payrollData.total_earnings|number_format(3) }} || Salary : ${{ salary|number_format(3) }} (Difference ${{ salaryAndEarningDifference|number_format(3) }})</p>
-                                        <form id="approvalForm">
-                                            <label for="commission">Commission:</label>
-                                            <input type="number" step="any" id="commission" class="form-control"> 
+                                {# 1 = pending. team lead to approve / reject #}
+                                {% if approval.status == 1 %}
+                                <button id="approve_btn" type="button" class="btn btn-success" data-toggle="modal" data-target="#approveModal">
+                                    Team Lead Approve 
+                                </button>
 
-                                            <label for="adjustment">Adjustment:</label>
-                                            <input type="number" step="any" id="adjustment" class="form-control">
+                                <button id="reject_btn" type="button" data-role="team_lead" class="btn btn-danger" data-toggle="modal" data-target="#rejectModal">
+                                    Team Lead Reject
+                                </button>
 
-                                            <label for="deduction">Deduction:</label>
-                                            <input type="number" step="any" id="deduction" class="form-control"> 
-
-                                            <label for="payment_method">Paid Through:</label>
-                                            {# <input type="number" id="payment_method" class="form-control">  #}
-                                            <select class="form-control " id="payment_method">
-                                                {% for paymentMethod in paymentMethods %}
-                                                    <option value={{ paymentMethod }}>{{ paymentMethod }}</option>
-                                                {% endfor %}
-                                            
-                                                {# <option value="Payoneer">Payoneer</option>
-                                                <option value="Paypal">Paypal</option>
-                                                <option value="Upwork">Upwork</option> #}
-                                            </select>
-
-                                            <label for="message">Note:</label>
-                                            <input type="text" id="message" class="form-control"> 
-                                        </form>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        <button type="button" id="approveConfirmBtn" class="btn btn-success">Approve</button>
+                                <div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-labelledby="approveModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="approveModalLabel">Approve Payroll</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form id="approvalForm">
+                                                    <label for="message">Note:</label>
+                                                    <input type="text" id="message" class="form-control"> 
+                                                </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                <button type="button" id="approveConfirmBtn" class="btn btn-success">Approve</button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <button id="reject_btn" type="button" data-role="finance_lead" class="btn btn-danger" data-toggle="modal" data-target="#rejectModal">
-                            Finance Lead Reject
-                        </button>
-                    {% endif %}
-                    {# Reject modal  #}
-                    <div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="rejectModalLabel">Reject Payroll</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
+                                {# 2 = approved by teamlead and finance to approve / reject #}
+                                {% elseif approval.status == 2 and is_granted('ROLE_SUPER_ADMIN') %}
+                                    <!-- Add this button inside the if statement for admins -->
+                                    <button id="approve_btn" type="button" class="btn btn-success" data-toggle="modal" data-target="#approveModal">
+                                        Finance Lead Approve
                                     </button>
-                                </div>
-                                <div class="modal-body">
-                                    <form id="rejectForm">
-                                        <label for="message">Note:</label>
-                                        <input type="text" id="rejectMessage" class="form-control"> 
-                                    </form>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                    <button type="button" id="rejectConfirmBtn" class="btn btn-warning">Reject</button>
+
+                                    <!-- Modal -->
+                                    <div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-labelledby="approveModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="approveModalLabel">Approve Payroll</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body"> 
+                                                    <p>Hourly rate:  ${{ hourlytRate }} || Total Earnings: ${{ payrollData.total_earnings|number_format(3) }} || Salary : ${{ salary|number_format(3) }} (Difference ${{ salaryAndEarningDifference|number_format(3) }})</p>
+                                                    <form id="approvalForm">
+                                                        <label for="commission">Commission:</label>
+                                                        <input type="number" step="any" id="commission" class="form-control"> 
+
+                                                        <label for="adjustment">Adjustment:</label>
+                                                        <input type="number" step="any" id="adjustment" class="form-control">
+
+                                                        <label for="deduction">Deduction:</label>
+                                                        <input type="number" step="any" id="deduction" class="form-control"> 
+
+                                                        <label for="payment_method">Paid Through:</label>
+                                                        {# <input type="number" id="payment_method" class="form-control">  #}
+                                                        <select class="form-control " id="payment_method">
+                                                            {% for paymentMethod in paymentMethods %}
+                                                                <option value={{ paymentMethod }}>{{ paymentMethod }}</option>
+                                                            {% endfor %}
+                                                        
+                                                            {# <option value="Payoneer">Payoneer</option>
+                                                            <option value="Paypal">Paypal</option>
+                                                            <option value="Upwork">Upwork</option> #}
+                                                        </select>
+
+                                                        <label for="message">Note:</label>
+                                                        <input type="text" id="message" class="form-control"> 
+                                                    </form>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                    <button type="button" id="approveConfirmBtn" class="btn btn-success">Approve</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button id="reject_btn" type="button" data-role="finance_lead" class="btn btn-danger" data-toggle="modal" data-target="#rejectModal">
+                                        Finance Lead Reject
+                                    </button>
+                                {% endif %}
+                                {# Reject modal  #}
+                                <div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="rejectModalLabel">Reject Payroll</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form id="rejectForm">
+                                                    <label for="message">Note:</label>
+                                                    <input type="text" id="rejectMessage" class="form-control"> 
+                                                </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                <button type="button" id="rejectConfirmBtn" class="btn btn-warning">Reject</button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div> 
-    {% endblock %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">{{ 'Project Details'|trans }}</h3>
+                </div>
+                <div class="box-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Project</th>
+                                    <th>Total Duration</th>
+                                    <th>Total Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for projectId, projectData in projectWiseData %}
+                                <tr>
+                                    <td>{{ projectData.projectName }}</td>
+                                    <td>{{ projectData.totalDuration|number_format(3) }} hr</td>
+                                    <td>${{ projectData.totalAmount|number_format(3) }}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3">
+                                        <table class="sub-table table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Total Duration</th>
+                                                    <th>Total Amount</th>
+                                                    <th>Begin</th>
+                                                    <th>End</th>
+                                                    <th>Description</th> 
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for date, timesheetData in projectData.timesheetsByDate %}
+                                                <tr>
+                                                    <td><strong>{{ date }}</strong></td>
+                                                    <td><strong>{{ timesheetData.totalDuration|number_format(3) }} hr</strong></td>
+                                                    <td><strong>${{ timesheetData.totalAmount|number_format(3) }}</strong></td> 
+                                                </tr>
+                                                {% for timesheet in timesheetData.timesheets %} 
+                                                    <tr>
+                                                        <td><a href="{{ path('timesheet_edit', {'id': timesheet.id}) }}" target="_blank">{{ timesheet.date }}</a></td>
+                                                        <td>{{ timesheet.duration_in_hour|number_format(3) }} hr</td>
+                                                        <td>${{ timesheet.rate|number_format(3) }}</td>
+                                                        <td>{{ timesheet.begin }}</td>
+                                                        <td>{{ timesheet.end }}</td>
+                                                        <td>{{ timesheet.description | parse_links }}</td> 
+                                                    </tr>
+                                                {% endfor %}
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block javascripts %} 
