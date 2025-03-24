@@ -1,0 +1,27 @@
+# Talent module
+Talents: 'Talente'
+Talent details: 'Talent Details'
+
+# Labels
+label:
+    username: 'Benutzername'
+    alias: 'Alias'
+    email: 'E-Mail'
+    title: 'Titel'
+    registration_date: 'Registrierungsdatum'
+    roles: 'Rollen'
+
+# Actions
+actions: 'Aktionen'
+action:
+    view: 'Ansehen'
+    search: 'Suchen'
+    reset: 'Zurücksetzen'
+
+# Search
+search:
+    placeholder: 'Suche nach Benutzername, Alias oder E-Mail'
+
+# Messages
+message:
+    nothing_found: 'Keine Einträge gefunden' 

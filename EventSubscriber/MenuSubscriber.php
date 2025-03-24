@@ -48,15 +48,15 @@
  
          // Check if the user has a certain role (e.g., ROLE_SUPER_ADMIN) to determine if they can access the submenu items
          if ($auth->isGranted('ROLE_SUPER_ADMIN')) {
-            $vendorMenuItem = new MenuItemModel('vendor', 'Vendor', 'vendor_index', [], 'fas fa-industry');
+            $vendorMenuItem = new MenuItemModel('talent', 'Talent', 'talent_index', [], 'fas fa-users');
             $menu->addChild($vendorMenuItem);
     
             // Add the "Vendor" submenu item under "Payroll"
-            $vendorMenuSubItem = new MenuItemModel('vendor', 'Vendor', 'vendor_index'); // Customize the route and label
+            $vendorMenuSubItem = new MenuItemModel('talent', 'Talent', 'talent_index'); // Customize the route and label
             $vendorMenuItem->addChild($vendorMenuSubItem);
     
             // Add the "Vendor Payment" submenu item under "Payroll"
-            $vendorPaymentMenuItem = new MenuItemModel('vendor_payment', 'Vendor Payment', 'vendor_payment_index'); // Customize the route and label
+            $vendorPaymentMenuItem = new MenuItemModel('speciality_list', 'Speciality', 'speciality_list'); // Customize the route and label
             $vendorMenuItem->addChild($vendorPaymentMenuItem);
          }
      }

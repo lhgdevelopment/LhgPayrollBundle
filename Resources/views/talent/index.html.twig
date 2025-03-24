@@ -1,0 +1,136 @@
+{% extends 'base.html.twig' %}
+
+{% set paginationRoute = 'talent_index_paginated' %}
+
+{% import "macros/datatables.html.twig" as tables %}
+{% import "macros/search.html.twig" as search %}
+{% import "macros/widgets.html.twig" as widgets %}
+
+{% set columns = {
+    'username': {'class': 'alwaysVisible', 'title': 'label.username'|trans},
+    'alias': {'class': 'alwaysVisible', 'title': 'label.alias'|trans},
+    'email': {'class': 'hidden-xs', 'title': 'label.email'|trans},
+    'actions': {'class': 'actions alwaysVisible', 'title': 'actions'|trans},
+} %}
+
+{% set widgetOptions = {'search': {'modal': '#modal_search', 'label': ''}} %}
+
+{% block page_actions %}{{ widgets.page_actions(widgetOptions) }}{% endblock %}
+
+{% block page_title %}{{ 'Talents'|trans }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .table tbody tr {
+            cursor: pointer;
+        }
+        .table tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
+{% endblock %}
+
+{% block main %}
+    <div class="row">
+        <div class="col-md-12">
+            <form class="form-search" method="get">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="search-form">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <input type="search" class="form-control" name="searchTerm" value="{{ searchTerm|default('') }}" placeholder="{{ 'search.placeholder'|trans }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-primary" title="{{ 'action.search'|trans }}">
+                                            <i class="fa fa-search"></i> {{ 'action.search'|trans }}
+                                        </button>
+                                        <a href="{{ path('talent_index') }}" class="btn btn-default" title="{{ 'action.reset'|trans }}">
+                                            <i class="fa fa-refresh"></i> {{ 'action.reset'|trans }}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if talents.count == 0 %}
+        {{ widgets.nothing_found() }}
+    {% else %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-hover dataTable">
+                            <thead>
+                                <tr>
+                                    {% for field, column in columns %}
+                                        <th{% if column.class is defined %} class="{{ column.class }}"{% endif %}>
+                                            {{ column.title }}
+                                        </th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for talent in talents %}
+                                <tr class="clickable-row" data-href="{{ path('talent_view', {'id': talent.id}) }}">
+                                    <td class="{{ columns.username.class }}">{{ talent.username }}</td>
+                                    <td class="{{ columns.alias.class }}">{{ talent.alias }}</td>
+                                    <td class="{{ columns.email.class }}">{{ talent.email }}</td>
+                                    <td class="{{ columns.actions.class }}">
+                                        {% set actionButtons = {} %}
+                                        {% if is_granted('view', talent) %}
+                                            {% set actionButtons = actionButtons|merge({
+                                                'view': {
+                                                    'url': path('talent_view', {'id': talent.id}),
+                                                    'title': 'action.view'|trans,
+                                                    'class': 'btn btn-default btn-sm'
+                                                }
+                                            }) %}
+                                        {% endif %}
+                                        {{ widgets.button_group(actionButtons) }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if talents.haveToPaginate %}
+            <div class="navigation text-center">
+                {{ pagerfanta(talents, 'twitter_bootstrap4', {
+                    'routeName': 'talent_index_paginated',
+                    'routeParams': routeParams
+                }) }}
+            </div>
+        {% endif %}
+    {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.clickable-row').forEach(row => {
+                row.addEventListener('click', function(e) {
+                    // Don't trigger if they clicked the actions column
+                    if (e.target.closest('.actions')) {
+                        return;
+                    }
+                    window.location.href = this.dataset.href;
+                });
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}Specialities{% endblock %}
+{% block page_actions %}
+    <a href="{{ path('speciality_create') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Create Speciality
+    </a>
+{% endblock %}
+
+{% block main %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for speciality in specialities %}
+                                    <tr>
+                                        <td>{{ speciality.name }}</td>
+                                        <td>{{ speciality.description }}</td>
+                                        <td>
+                                            <a href="{{ path('speciality_edit', {'id': speciality.id}) }}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %} 

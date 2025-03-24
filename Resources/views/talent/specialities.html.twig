@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}{{ 'Manage Specialities for'|trans }} {{ talent.displayName }}{% endblock %}
+
+{% block main %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">{{ 'Manage Specialities'|trans }}</h3>
+                </div>
+                <div class="box-body">
+                    {{ form(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %} 

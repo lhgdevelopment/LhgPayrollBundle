@@ -25,3 +25,6 @@ services:
  
         # arguments:
         #     $dataDirectory: "%kimai.data_dir%" 
+
+    App\Entity\User:
+        class: KimaiPlugin\LhgPayrollBundle\Entity\User 

@@ -1,0 +1,40 @@
+# Talent module
+Talents: 'Talents'
+Talent details: 'Talent details'
+
+# Labels
+label:
+    username: 'Username'
+    alias: 'Alias'
+    email: 'Email'
+    title: 'Title'
+    registration_date: 'Registration Date'
+    roles: 'Roles'
+    specialities: 'Specialities'
+
+# Actions
+actions: 'Actions'
+action:
+    view: 'View'
+    search: 'Search'
+    reset: 'Reset'
+
+# Search
+search:
+    placeholder: 'Search by username, alias or email'
+
+# Messages
+message:
+    nothing_found: 'No records found'
+
+# Speciality related
+Specialities: 'Specialities'
+Create Speciality: 'Create Speciality'
+Edit Speciality: 'Edit Speciality'
+Manage Specialities: 'Manage Specialities'
+Manage Specialities for: 'Manage Specialities for'
+No specialities assigned: 'No specialities assigned'
+Speciality created successfully: 'Speciality created successfully'
+Speciality updated successfully: 'Speciality updated successfully'
+Speciality deleted successfully: 'Speciality deleted successfully'
+Specialities updated successfully: 'Specialities updated successfully' 

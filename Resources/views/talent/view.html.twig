@@ -1,0 +1,92 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}{{ talent.displayName }}{% endblock %}
+
+{% block main %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">{{ 'Talent details'|trans }}</h3>
+                </div>
+                <div class="box-body">
+                    <table class="table table-hover">
+                        <tbody>
+                            <tr>
+                                <th>{{ 'label.username'|trans }}</th>
+                                <td>{{ talent.username }}</td>
+                            </tr>
+                            <tr>
+                                <th>{{ 'label.alias'|trans }}</th>
+                                <td>{{ talent.alias }}</td>
+                            </tr>
+                            <tr>
+                                <th>{{ 'label.email'|trans }}</th>
+                                <td>{{ talent.email }}</td>
+                            </tr>
+                            <tr>
+                                <th>{{ 'label.title'|trans }}</th>
+                                <td>{{ talent.title }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">{{ 'Projects'|trans }}</h3>
+                </div>
+                <div class="box-body">
+                    {% if projects|length > 0 %}
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>{{ 'label.project'|trans }}</th>
+                                    <th>{{ 'label.customer'|trans }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for project in projects %}
+                                    <tr>
+                                        <td>{{ project.name }}</td>
+                                        <td>{{ project.customer.name }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="alert alert-info">
+                            {{ 'message.no_projects'|trans }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">{{ 'Specialities'|trans }}</h3>
+                </div>
+                <div class="box-body">
+                    {% if specialities|length > 0 %}
+                        <div class="specialities-list">
+                            {% for speciality in specialities %}
+                                <span class="label label-info">{{ speciality.name }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            {{ 'No specialities available'|trans }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %} 
