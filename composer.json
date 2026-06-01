@@ -3,7 +3,7 @@
     "description": "LhgPayrollBundle is a custom plugin for Light House Graphics payroll management",
     "homepage": "https://github.com/raju-lhg/LhgPayrollBundle",
     "type": "kimai-plugin",
-    "version": "0.1",
+    "version": "0.2.0",
     "keywords": [
         "kimai",
         "kimai-plugin"
@@ -50,6 +50,9 @@
             "@codestyle-check",
             "@phpstan"
         ]
+    },
+    "suggest": {
+        "kevinpapst/kimai2-approval-bundle": "Required for break-time validation (BreakTimeCheckToolGER) in payroll timesheets"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.0",

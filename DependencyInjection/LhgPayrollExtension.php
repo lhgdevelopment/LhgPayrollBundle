@@ -31,20 +31,43 @@ class LhgPayrollExtension extends Extension implements PrependExtensionInterface
 
     public function prepend(ContainerBuilder $container): void
     {
-        /*
-         * @CloudRequired adapt if new permissions are added
-         */
-        // $container->prependExtensionConfig('kimai', [
-        //     'permissions' => [
-        //         'roles' => [
-        //             'ROLE_SUPER_ADMIN' => [
-        //                 'switch-user'
-        //             ],
-        //             'ROLE_ADMIN' => [
-        //                 'switch-user'
-        //             ],
-        //         ],
-        //     ],
-        // ]);
+        $container->prependExtensionConfig('kimai', [
+            'permissions' => [
+                'sets' => [
+                    'api_payroll_view_own' => ['ROLE_USER'],
+                    'api_payroll_view_team' => ['ROLE_TEAMLEAD', 'ROLE_ADMIN'],
+                    'api_payroll_view_all' => ['ROLE_SUPER_ADMIN'],
+                    'api_payroll_approve_team' => ['ROLE_TEAMLEAD', 'ROLE_ADMIN'],
+                    'api_payroll_approve_finance' => ['ROLE_SUPER_ADMIN'],
+                    'api_payroll_talent' => ['ROLE_SUPER_ADMIN'],
+                    'api_payroll_vendor' => ['ROLE_SUPER_ADMIN'],
+                ],
+                'roles' => [
+                    'ROLE_USER' => [
+                        'api_payroll_view_own',
+                    ],
+                    'ROLE_TEAMLEAD' => [
+                        'api_payroll_view_own',
+                        'api_payroll_view_team',
+                        'api_payroll_approve_team',
+                    ],
+                    'ROLE_ADMIN' => [
+                        'api_payroll_view_own',
+                        'api_payroll_view_team',
+                        'api_payroll_approve_team',
+                        'api_payroll_talent',
+                    ],
+                    'ROLE_SUPER_ADMIN' => [
+                        'api_payroll_view_own',
+                        'api_payroll_view_team',
+                        'api_payroll_view_all',
+                        'api_payroll_approve_team',
+                        'api_payroll_approve_finance',
+                        'api_payroll_talent',
+                        'api_payroll_vendor',
+                    ],
+                ],
+            ],
+        ]);
     }
 }

@@ -21,6 +21,11 @@ services:
     
     KimaiPlugin\LhgPayrollBundle\Controller\:
         resource: '../../Controller'
+        exclude: '../../Controller/API'
+        tags: ['controller.service_arguments']
+
+    KimaiPlugin\LhgPayrollBundle\Controller\API\:
+        resource: '../../Controller/API'
         tags: ['controller.service_arguments']
  
         # arguments:
