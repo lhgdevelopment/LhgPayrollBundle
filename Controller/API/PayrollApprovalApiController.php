@@ -9,51 +9,36 @@ use KimaiPlugin\LhgPayrollBundle\Entity\LhgPayrollApproval;
 use KimaiPlugin\LhgPayrollBundle\Service\PayrollApprovalService;
 use KimaiPlugin\LhgPayrollBundle\Service\PayrollBiweeklyService;
 use KimaiPlugin\LhgPayrollBundle\Service\StatusEnum;
-use Nelmio\ApiDocBundle\Annotation\Security as ApiSecurity;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Swagger\Annotations as SWG;
+use Nelmio\ApiDocBundle\Attribute\Security as ApiSecurity;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-/**
- * @Route(path="/api/payroll/approvals")
- * @SWG\Tag(name="LHG Payroll Approvals")
- *
- * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED')")
- * @ApiSecurity(name="apiUser")
- * @ApiSecurity(name="apiToken")
- */
+#[Route(path: '/payroll/approvals')]
+#[OA\Tag(name: 'LHG Payroll Approvals')]
+#[IsGranted('IS_AUTHENTICATED_REMEMBERED')]
+#[ApiSecurity(name: 'apiUser')]
+#[ApiSecurity(name: 'apiToken')]
 class PayrollApprovalApiController extends BaseApiController
 {
-    private $entityManager;
-    private $payrollApprovalService;
-    private $payrollBiweeklyService;
-
     public function __construct(
-        EntityManagerInterface $entityManager,
-        PayrollApprovalService $payrollApprovalService,
-        PayrollBiweeklyService $payrollBiweeklyService
+        private readonly EntityManagerInterface $entityManager,
+        private readonly PayrollApprovalService $payrollApprovalService,
+        private readonly PayrollBiweeklyService $payrollBiweeklyService
     ) {
-        $this->entityManager = $entityManager;
-        $this->payrollApprovalService = $payrollApprovalService;
-        $this->payrollBiweeklyService = $payrollBiweeklyService;
     }
 
-    /**
-     * @Route(path="", name="api_payroll_approvals_list", methods={"GET"})
-     * @Security("is_granted('api_payroll_view_own')")
-     * @SWG\Parameter(name="status", in="query", type="integer")
-     * @SWG\Parameter(name="start_date", in="query", type="string", description="Period start Y-m-d")
-     * @SWG\Response(response=200, description="List of approvals visible to the current user")
-     */
+    #[Route(path: '', name: 'api_payroll_approvals_list', methods: ['GET'])]
+    #[IsGranted('api_payroll_view_own')]
+    #[OA\Parameter(name: 'status', in: 'query', schema: new OA\Schema(type: 'integer'))]
+    #[OA\Parameter(name: 'start_date', in: 'query', schema: new OA\Schema(type: 'string'), description: 'Period start Y-m-d')]
+    #[OA\Response(response: 200, description: 'List of approvals visible to the current user')]
     public function listAction(Request $request): JsonResponse
     {
         $actor = $this->getUser();
-        if (!$actor instanceof User) {
-            return $this->errorResponse('Unauthorized', Response::HTTP_UNAUTHORIZED);
-        }
 
         $criteria = [];
         if ($request->query->has('status')) {
@@ -81,20 +66,16 @@ class PayrollApprovalApiController extends BaseApiController
         return $this->jsonResponse(['approvals' => $visible]);
     }
 
-    /**
-     * @Route(path="/{id}", name="api_payroll_approval_get", methods={"GET"}, requirements={"id": "\d+"})
-     * @Security("is_granted('api_payroll_view_own')")
-     * @SWG\Response(response=200, description="Approval detail with timesheets")
-     */
+    #[Route(path: '/{id}', name: 'api_payroll_approval_get', methods: ['GET'], requirements: ['id' => '\d+'])]
+    #[IsGranted('api_payroll_view_own')]
+    #[OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))]
+    #[OA\Response(response: 200, description: 'Approval detail with timesheets')]
+    #[OA\Response(response: 403, description: 'Access denied')]
+    #[OA\Response(response: 404, description: 'Not found')]
     public function getAction(int $id): JsonResponse
     {
-        $actor = $this->getUser();
-        if (!$actor instanceof User) {
-            return $this->errorResponse('Unauthorized', Response::HTTP_UNAUTHORIZED);
-        }
-
         try {
-            $data = $this->payrollBiweeklyService->getApprovalDetail($id, $actor);
+            $data = $this->payrollBiweeklyService->getApprovalDetail($id, $this->getUser());
         } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
             return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
@@ -102,18 +83,23 @@ class PayrollApprovalApiController extends BaseApiController
         return $this->jsonResponse($data);
     }
 
-    /**
-     * @Route(path="", name="api_payroll_approval_submit", methods={"POST"})
-     * @Security("is_granted('api_payroll_view_own')")
-     * @SWG\Response(response=201, description="Approval submitted")
-     */
+    #[Route(path: '', name: 'api_payroll_approval_submit', methods: ['POST'])]
+    #[IsGranted('api_payroll_view_own')]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            required: ['userId', 'startDate', 'endDate'],
+            properties: [
+                new OA\Property(property: 'userId', type: 'integer'),
+                new OA\Property(property: 'startDate', type: 'string', format: 'date'),
+                new OA\Property(property: 'endDate', type: 'string', format: 'date'),
+            ]
+        )
+    )]
+    #[OA\Response(response: 201, description: 'Approval submitted')]
+    #[OA\Response(response: 409, description: 'Duplicate approval')]
     public function submitAction(Request $request): JsonResponse
     {
-        $actor = $this->getUser();
-        if (!$actor instanceof User) {
-            return $this->errorResponse('Unauthorized', Response::HTTP_UNAUTHORIZED);
-        }
-
         $payload = json_decode($request->getContent(), true);
         if (!is_array($payload)) {
             return $this->errorResponse('Invalid JSON body', Response::HTTP_BAD_REQUEST);
@@ -130,7 +116,7 @@ class PayrollApprovalApiController extends BaseApiController
                 (int) $payload['userId'],
                 $payload['startDate'],
                 $payload['endDate'],
-                $actor
+                $this->getUser()
             );
         } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
             return $this->errorResponse($e->getMessage(), $e->getStatusCode());
@@ -139,18 +125,28 @@ class PayrollApprovalApiController extends BaseApiController
         return $this->jsonResponse($result, Response::HTTP_CREATED);
     }
 
-    /**
-     * @Route(path="/{id}/status", name="api_payroll_approval_status", methods={"POST"}, requirements={"id": "\d+"})
-     * @Security("is_granted('api_payroll_view_own')")
-     * @SWG\Response(response=200, description="Approval status updated (team lead / finance enforced in service)")
-     */
+    #[Route(path: '/{id}/status', name: 'api_payroll_approval_status', methods: ['POST'], requirements: ['id' => '\d+'])]
+    #[IsGranted('api_payroll_view_own')]
+    #[OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            required: ['status'],
+            properties: [
+                new OA\Property(property: 'status', type: 'integer', description: 'StatusEnum value'),
+                new OA\Property(property: 'message', type: 'string'),
+                new OA\Property(property: 'commission', type: 'number'),
+                new OA\Property(property: 'adjustment', type: 'number'),
+                new OA\Property(property: 'deduction', type: 'number'),
+                new OA\Property(property: 'netPayable', type: 'number'),
+                new OA\Property(property: 'paymentMethod', type: 'string'),
+            ]
+        )
+    )]
+    #[OA\Response(response: 200, description: 'Approval status updated')]
+    #[OA\Response(response: 403, description: 'Access denied')]
     public function updateStatusAction(Request $request, int $id): JsonResponse
     {
-        $actor = $this->getUser();
-        if (!$actor instanceof User) {
-            return $this->errorResponse('Unauthorized', Response::HTTP_UNAUTHORIZED);
-        }
-
         $payload = json_decode($request->getContent(), true);
         if (!is_array($payload) || !isset($payload['status'])) {
             return $this->errorResponse('Missing required field: status', Response::HTTP_BAD_REQUEST);
@@ -172,7 +168,7 @@ class PayrollApprovalApiController extends BaseApiController
                 $id,
                 (int) $payload['status'],
                 $payload['message'] ?? null,
-                $actor,
+                $this->getUser(),
                 $financeData
             );
         } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
@@ -182,20 +178,14 @@ class PayrollApprovalApiController extends BaseApiController
         return $this->jsonResponse($result);
     }
 
-    /**
-     * @Route(path="/{id}/resubmit", name="api_payroll_approval_resubmit", methods={"POST"}, requirements={"id": "\d+"})
-     * @Security("is_granted('api_payroll_view_own')")
-     * @SWG\Response(response=200, description="Approval re-submitted")
-     */
+    #[Route(path: '/{id}/resubmit', name: 'api_payroll_approval_resubmit', methods: ['POST'], requirements: ['id' => '\d+'])]
+    #[IsGranted('api_payroll_view_own')]
+    #[OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))]
+    #[OA\Response(response: 200, description: 'Approval re-submitted')]
     public function resubmitAction(int $id): JsonResponse
     {
-        $actor = $this->getUser();
-        if (!$actor instanceof User) {
-            return $this->errorResponse('Unauthorized', Response::HTTP_UNAUTHORIZED);
-        }
-
         try {
-            $result = $this->payrollApprovalService->resubmit($id, $actor);
+            $result = $this->payrollApprovalService->resubmit($id, $this->getUser());
         } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
             return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }

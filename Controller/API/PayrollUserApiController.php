@@ -7,45 +7,32 @@ use App\Entity\User;
 use App\Entity\UserPreference;
 use Doctrine\ORM\EntityManagerInterface;
 use KimaiPlugin\LhgPayrollBundle\Service\TeamLeadAndFinanceService;
-use Nelmio\ApiDocBundle\Annotation\Security as ApiSecurity;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Component\Security\Core\Security as SecurityFacade;
-use Swagger\Annotations as SWG;
+use Nelmio\ApiDocBundle\Attribute\Security as ApiSecurity;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Security;
+use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-/**
- * @Route(path="/api/payroll")
- * @SWG\Tag(name="LHG Payroll Users")
- *
- * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED')")
- * @ApiSecurity(name="apiUser")
- * @ApiSecurity(name="apiToken")
- */
+#[Route(path: '/payroll')]
+#[OA\Tag(name: 'LHG Payroll Users')]
+#[IsGranted('IS_AUTHENTICATED_REMEMBERED')]
+#[ApiSecurity(name: 'apiUser')]
+#[ApiSecurity(name: 'apiToken')]
 class PayrollUserApiController extends BaseApiController
 {
-    private $entityManager;
-    private $teamLeadAndFinanceService;
-    private $security;
-
     public function __construct(
-        EntityManagerInterface $entityManager,
-        TeamLeadAndFinanceService $teamLeadAndFinanceService,
-        SecurityFacade $security
+        private readonly EntityManagerInterface $entityManager,
+        private readonly TeamLeadAndFinanceService $teamLeadAndFinanceService,
+        private readonly Security $security
     ) {
-        $this->entityManager = $entityManager;
-        $this->teamLeadAndFinanceService = $teamLeadAndFinanceService;
-        $this->security = $security;
     }
 
-    /**
-     * Returns users with hourly rates (for payroll integrations / MCP).
-     *
-     * @Route(path="/users", name="api_payroll_users", methods={"GET"})
-     * @Security("is_granted('view_user') or is_granted('api_payroll_view_all')")
-     * @SWG\Response(response=200, description="Users with non-zero hourly rates")
-     */
+    #[Route(path: '/users', name: 'api_payroll_users', methods: ['GET'])]
+    #[IsGranted(new Expression('is_granted("view_user") or is_granted("api_payroll_view_all")'))]
+    #[OA\Response(response: 200, description: 'Users with non-zero hourly rates')]
     public function usersAction(): JsonResponse
     {
         $usersData = $this->entityManager->createQueryBuilder()
@@ -64,13 +51,9 @@ class PayrollUserApiController extends BaseApiController
         ], Response::HTTP_OK);
     }
 
-    /**
-     * Users the current actor may view payroll for (self, team, or all).
-     *
-     * @Route(path="/users/accessible", name="api_payroll_users_accessible", methods={"GET"})
-     * @Security("is_granted('api_payroll_view_own')")
-     * @SWG\Response(response=200, description="Users accessible for payroll context")
-     */
+    #[Route(path: '/users/accessible', name: 'api_payroll_users_accessible', methods: ['GET'])]
+    #[IsGranted('api_payroll_view_own')]
+    #[OA\Response(response: 200, description: 'Users accessible for payroll context')]
     public function accessibleUsersAction(): JsonResponse
     {
         $users = $this->teamLeadAndFinanceService->getTeamUsers();

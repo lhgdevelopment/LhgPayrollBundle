@@ -157,10 +157,28 @@ Payment methods: `Payoneer`, `Paypal`, `Patriot Software`, `Wise`, `Upwork`, `Ze
 
 ## Install / routes
 
-After deploying the plugin, clear cache:
+After deploying the plugin, reload Kimai:
 
 ```bash
-bin/console cache:clear --env=prod
+bin/console kimai:reload
 ```
 
-API routes load from `Resources/config/routes-api.yaml` (no locale prefix).
+API routes load from `Resources/config/routes-api.yaml` with prefix `/api` (final paths: `/api/payroll/...`).
+
+## Swagger / API documentation (Kimai UI)
+
+Endpoints are documented with **OpenAPI 3 attributes** (required for Kimai 2.x). After deploy, open **Profile → API access → API documentation** (or `/api/doc`).
+
+If payroll routes are missing or "Try it out" uses the wrong host on **Cloudron**, add to `/app/data/local.yaml` and restart the app:
+
+```yaml
+parameters:
+    router.request_context.host: 'your-kimai.example.com'
+    router.request_context.scheme: 'https'
+
+nelmio_api_doc:
+    documentation:
+        host: '%router.request_context.host%'
+```
+
+Then run `kimai:reload` again.
