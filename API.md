@@ -163,7 +163,19 @@ After deploying the plugin, reload Kimai:
 bin/console kimai:reload
 ```
 
-API routes load from `Resources/config/routes-api.yaml` (annotation routes with full paths `/api/payroll/...`).
+API routes are registered in [`Resources/config/routes.yaml`](Resources/config/routes.yaml) under `lhg_payroll_api` (full paths `/api/payroll/...`). Kimai plugins only auto-import `routes.yaml` / `routes.php`, **not** `routes-api.yaml`.
+
+### Verify routes after deploy
+
+```bash
+sudo -u www-data bin/console debug:router | grep api_payroll
+curl -s -H "X-AUTH-USER: you@example.com" -H "X-AUTH-TOKEN: your-token" \
+  "https://time.cloud.lhgdev.com/api/payroll/ping"
+```
+
+### API docs require login
+
+`/api/doc` and `/api/doc.json` require a **logged-in Kimai session** (API tokens alone often do not work for the doc UI). Open the docs from **Profile → API access** while logged in, or log in at https://time.cloud.lhgdev.com first, then revisit `/api/doc`.
 
 ## Swagger / API documentation (Kimai UI)
 

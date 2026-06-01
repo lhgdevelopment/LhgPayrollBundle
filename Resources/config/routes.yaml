@@ -7,3 +7,8 @@ controllers:
         _locale: '%app_locales%'
     defaults:
         _locale: '%locale%'
+
+# API routes (must live in routes.yaml — Kimai only auto-loads routes.{yaml,php}, not routes-api.yaml)
+lhg_payroll_api:
+    resource: '../../Controller/API/'
+    type: annotation

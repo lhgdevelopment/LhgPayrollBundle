@@ -1,3 +1,0 @@
-lhg_payroll_api:
-    resource: '../../Controller/API/'
-    type: annotation
