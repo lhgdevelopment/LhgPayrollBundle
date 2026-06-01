@@ -1,4 +1,3 @@
 lhg_payroll_api:
     resource: '../../Controller/API/'
-    type: attribute
-    prefix: /api
+    type: annotation

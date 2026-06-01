@@ -3,39 +3,50 @@
 namespace KimaiPlugin\LhgPayrollBundle\Controller\API;
 
 use App\API\BaseApiController;
-use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use KimaiPlugin\LhgPayrollBundle\Entity\LhgPayrollApproval;
 use KimaiPlugin\LhgPayrollBundle\Service\PayrollApprovalService;
 use KimaiPlugin\LhgPayrollBundle\Service\PayrollBiweeklyService;
 use KimaiPlugin\LhgPayrollBundle\Service\StatusEnum;
-use Nelmio\ApiDocBundle\Attribute\Security as ApiSecurity;
-use OpenApi\Attributes as OA;
+use Nelmio\ApiDocBundle\Annotation\Security as ApiSecurity;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Routing\Annotation\Route;
 
-#[Route(path: '/payroll/approvals')]
-#[OA\Tag(name: 'LHG Payroll Approvals')]
-#[IsGranted('IS_AUTHENTICATED_REMEMBERED')]
-#[ApiSecurity(name: 'apiUser')]
-#[ApiSecurity(name: 'apiToken')]
 class PayrollApprovalApiController extends BaseApiController
 {
+    private $entityManager;
+    private $payrollApprovalService;
+    private $payrollBiweeklyService;
+
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly PayrollApprovalService $payrollApprovalService,
-        private readonly PayrollBiweeklyService $payrollBiweeklyService
+        EntityManagerInterface $entityManager,
+        PayrollApprovalService $payrollApprovalService,
+        PayrollBiweeklyService $payrollBiweeklyService
     ) {
+        $this->entityManager = $entityManager;
+        $this->payrollApprovalService = $payrollApprovalService;
+        $this->payrollBiweeklyService = $payrollBiweeklyService;
     }
 
-    #[Route(path: '', name: 'api_payroll_approvals_list', methods: ['GET'])]
-    #[IsGranted('api_payroll_view_own')]
-    #[OA\Parameter(name: 'status', in: 'query', schema: new OA\Schema(type: 'integer'))]
-    #[OA\Parameter(name: 'start_date', in: 'query', schema: new OA\Schema(type: 'string'), description: 'Period start Y-m-d')]
-    #[OA\Response(response: 200, description: 'List of approvals visible to the current user')]
+    /**
+     * @Route(path="/api/payroll/approvals", name="api_payroll_approvals_list", methods={"GET"})
+     *
+     * @SWG\Get(
+     *     tags={"LHG Payroll API"},
+     *     summary="Lists payroll approvals visible to the current user",
+     *     @SWG\Parameter(name="status", in="query", type="integer", required=false),
+     *     @SWG\Parameter(name="start_date", in="query", type="string", required=false, description="Period start Y-m-d")
+     * )
+     * @SWG\Response(response=200, description="List of approvals")
+     *
+     * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED') and is_granted('api_payroll_view_own')")
+     * @ApiSecurity(name="apiUser")
+     * @ApiSecurity(name="apiToken")
+     */
     public function listAction(Request $request): JsonResponse
     {
         $actor = $this->getUser();
@@ -66,12 +77,22 @@ class PayrollApprovalApiController extends BaseApiController
         return $this->jsonResponse(['approvals' => $visible]);
     }
 
-    #[Route(path: '/{id}', name: 'api_payroll_approval_get', methods: ['GET'], requirements: ['id' => '\d+'])]
-    #[IsGranted('api_payroll_view_own')]
-    #[OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))]
-    #[OA\Response(response: 200, description: 'Approval detail with timesheets')]
-    #[OA\Response(response: 403, description: 'Access denied')]
-    #[OA\Response(response: 404, description: 'Not found')]
+    /**
+     * @Route(path="/api/payroll/approvals/{id}", name="api_payroll_approval_get", methods={"GET"}, requirements={"id": "\d+"})
+     *
+     * @SWG\Get(
+     *     tags={"LHG Payroll API"},
+     *     summary="Returns approval detail with timesheets and history",
+     *     @SWG\Parameter(name="id", in="path", type="integer", required=true, description="Approval ID")
+     * )
+     * @SWG\Response(response=200, description="Approval detail")
+     * @SWG\Response(response=403, description="Access denied")
+     * @SWG\Response(response=404, description="Not found")
+     *
+     * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED') and is_granted('api_payroll_view_own')")
+     * @ApiSecurity(name="apiUser")
+     * @ApiSecurity(name="apiToken")
+     */
     public function getAction(int $id): JsonResponse
     {
         try {
@@ -83,21 +104,32 @@ class PayrollApprovalApiController extends BaseApiController
         return $this->jsonResponse($data);
     }
 
-    #[Route(path: '', name: 'api_payroll_approval_submit', methods: ['POST'])]
-    #[IsGranted('api_payroll_view_own')]
-    #[OA\RequestBody(
-        required: true,
-        content: new OA\JsonContent(
-            required: ['userId', 'startDate', 'endDate'],
-            properties: [
-                new OA\Property(property: 'userId', type: 'integer'),
-                new OA\Property(property: 'startDate', type: 'string', format: 'date'),
-                new OA\Property(property: 'endDate', type: 'string', format: 'date'),
-            ]
-        )
-    )]
-    #[OA\Response(response: 201, description: 'Approval submitted')]
-    #[OA\Response(response: 409, description: 'Duplicate approval')]
+    /**
+     * @Route(path="/api/payroll/approvals", name="api_payroll_approval_submit", methods={"POST"})
+     *
+     * @SWG\Post(
+     *     tags={"LHG Payroll API"},
+     *     summary="Submits a biweekly payroll period for approval",
+     *     @SWG\Parameter(
+     *         name="body",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema(
+     *             type="object",
+     *             required={"userId", "startDate", "endDate"},
+     *             @SWG\Property(property="userId", type="integer", example=5),
+     *             @SWG\Property(property="startDate", type="string", format="date", example="2026-05-18"),
+     *             @SWG\Property(property="endDate", type="string", format="date", example="2026-05-31")
+     *         )
+     *     )
+     * )
+     * @SWG\Response(response=201, description="Approval submitted")
+     * @SWG\Response(response=409, description="Duplicate approval")
+     *
+     * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED') and is_granted('api_payroll_view_own')")
+     * @ApiSecurity(name="apiUser")
+     * @ApiSecurity(name="apiToken")
+     */
     public function submitAction(Request $request): JsonResponse
     {
         $payload = json_decode($request->getContent(), true);
@@ -125,26 +157,37 @@ class PayrollApprovalApiController extends BaseApiController
         return $this->jsonResponse($result, Response::HTTP_CREATED);
     }
 
-    #[Route(path: '/{id}/status', name: 'api_payroll_approval_status', methods: ['POST'], requirements: ['id' => '\d+'])]
-    #[IsGranted('api_payroll_view_own')]
-    #[OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))]
-    #[OA\RequestBody(
-        required: true,
-        content: new OA\JsonContent(
-            required: ['status'],
-            properties: [
-                new OA\Property(property: 'status', type: 'integer', description: 'StatusEnum value'),
-                new OA\Property(property: 'message', type: 'string'),
-                new OA\Property(property: 'commission', type: 'number'),
-                new OA\Property(property: 'adjustment', type: 'number'),
-                new OA\Property(property: 'deduction', type: 'number'),
-                new OA\Property(property: 'netPayable', type: 'number'),
-                new OA\Property(property: 'paymentMethod', type: 'string'),
-            ]
-        )
-    )]
-    #[OA\Response(response: 200, description: 'Approval status updated')]
-    #[OA\Response(response: 403, description: 'Access denied')]
+    /**
+     * @Route(path="/api/payroll/approvals/{id}/status", name="api_payroll_approval_status", methods={"POST"}, requirements={"id": "\d+"})
+     *
+     * @SWG\Post(
+     *     tags={"LHG Payroll API"},
+     *     summary="Updates approval status (team lead or finance approve/reject)",
+     *     @SWG\Parameter(name="id", in="path", type="integer", required=true, description="Approval ID"),
+     *     @SWG\Parameter(
+     *         name="body",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema(
+     *             type="object",
+     *             required={"status"},
+     *             @SWG\Property(property="status", type="integer", example=2, description="StatusEnum value"),
+     *             @SWG\Property(property="message", type="string", example="Approved"),
+     *             @SWG\Property(property="commission", type="number", example=0),
+     *             @SWG\Property(property="adjustment", type="number", example=50),
+     *             @SWG\Property(property="deduction", type="number", example=0),
+     *             @SWG\Property(property="netPayable", type="number", example=1250.5),
+     *             @SWG\Property(property="paymentMethod", type="string", example="Wise")
+     *         )
+     *     )
+     * )
+     * @SWG\Response(response=200, description="Status updated")
+     * @SWG\Response(response=403, description="Access denied")
+     *
+     * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED') and is_granted('api_payroll_view_own')")
+     * @ApiSecurity(name="apiUser")
+     * @ApiSecurity(name="apiToken")
+     */
     public function updateStatusAction(Request $request, int $id): JsonResponse
     {
         $payload = json_decode($request->getContent(), true);
@@ -178,10 +221,20 @@ class PayrollApprovalApiController extends BaseApiController
         return $this->jsonResponse($result);
     }
 
-    #[Route(path: '/{id}/resubmit', name: 'api_payroll_approval_resubmit', methods: ['POST'], requirements: ['id' => '\d+'])]
-    #[IsGranted('api_payroll_view_own')]
-    #[OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))]
-    #[OA\Response(response: 200, description: 'Approval re-submitted')]
+    /**
+     * @Route(path="/api/payroll/approvals/{id}/resubmit", name="api_payroll_approval_resubmit", methods={"POST"}, requirements={"id": "\d+"})
+     *
+     * @SWG\Post(
+     *     tags={"LHG Payroll API"},
+     *     summary="Re-submits a rejected payroll approval",
+     *     @SWG\Parameter(name="id", in="path", type="integer", required=true, description="Approval ID")
+     * )
+     * @SWG\Response(response=200, description="Approval re-submitted")
+     *
+     * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED') and is_granted('api_payroll_view_own')")
+     * @ApiSecurity(name="apiUser")
+     * @ApiSecurity(name="apiToken")
+     */
     public function resubmitAction(int $id): JsonResponse
     {
         try {

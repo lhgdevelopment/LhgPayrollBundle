@@ -5,27 +5,48 @@ namespace KimaiPlugin\LhgPayrollBundle\Controller\API;
 use App\API\BaseApiController;
 use KimaiPlugin\LhgPayrollBundle\Service\PayrollBiweeklyService;
 use KimaiPlugin\LhgPayrollBundle\Service\StatusEnum;
-use Nelmio\ApiDocBundle\Attribute\Security as ApiSecurity;
-use OpenApi\Attributes as OA;
+use Nelmio\ApiDocBundle\Annotation\Security as ApiSecurity;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Routing\Annotation\Route;
 
-#[Route(path: '/payroll')]
-#[OA\Tag(name: 'LHG Payroll')]
-#[IsGranted('IS_AUTHENTICATED_REMEMBERED')]
-#[ApiSecurity(name: 'apiUser')]
-#[ApiSecurity(name: 'apiToken')]
 class PayrollApiController extends BaseApiController
 {
-    public function __construct(private readonly PayrollBiweeklyService $payrollBiweeklyService)
+    private $payrollBiweeklyService;
+
+    public function __construct(PayrollBiweeklyService $payrollBiweeklyService)
     {
+        $this->payrollBiweeklyService = $payrollBiweeklyService;
     }
 
-    #[Route(path: '/ping', name: 'api_payroll_ping', methods: ['GET'])]
-    #[OA\Response(response: 200, description: 'Plugin API is reachable')]
+    /**
+     * @Route(path="/api/payroll/ping", name="api_payroll_ping", methods={"GET"})
+     *
+     * @SWG\Get(
+     *     tags={"LHG Payroll API"},
+     *     summary="Health check for the payroll plugin API"
+     * )
+     * @SWG\Response(
+     *     response=200,
+     *     description="Plugin API is reachable",
+     *     @SWG\Schema(
+     *         type="object",
+     *         @SWG\Property(property="code", type="integer", example=200),
+     *         @SWG\Property(
+     *             property="data",
+     *             type="object",
+     *             @SWG\Property(property="status", type="string", example="ok"),
+     *             @SWG\Property(property="plugin", type="string", example="LhgPayrollBundle")
+     *         )
+     *     )
+     * )
+     *
+     * @ApiSecurity(name="apiUser")
+     * @ApiSecurity(name="apiToken")
+     */
     public function pingAction(): JsonResponse
     {
         return $this->jsonResponse([
@@ -34,9 +55,39 @@ class PayrollApiController extends BaseApiController
         ]);
     }
 
-    #[Route(path: '/statuses', name: 'api_payroll_statuses', methods: ['GET'])]
-    #[IsGranted('api_payroll_view_own')]
-    #[OA\Response(response: 200, description: 'Payroll approval status codes')]
+    /**
+     * @Route(path="/api/payroll/statuses", name="api_payroll_statuses", methods={"GET"})
+     *
+     * @SWG\Get(
+     *     tags={"LHG Payroll API"},
+     *     summary="Returns payroll approval status codes"
+     * )
+     * @SWG\Response(
+     *     response=200,
+     *     description="List of status values and names",
+     *     @SWG\Schema(
+     *         type="object",
+     *         @SWG\Property(property="code", type="integer", example=200),
+     *         @SWG\Property(
+     *             property="data",
+     *             type="object",
+     *             @SWG\Property(
+     *                 property="statuses",
+     *                 type="array",
+     *                 @SWG\Items(
+     *                     type="object",
+     *                     @SWG\Property(property="value", type="integer", example=1),
+     *                     @SWG\Property(property="name", type="string", example="PENDING")
+     *                 )
+     *             )
+     *         )
+     *     )
+     * )
+     *
+     * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED') and is_granted('api_payroll_view_own')")
+     * @ApiSecurity(name="apiUser")
+     * @ApiSecurity(name="apiToken")
+     */
     public function statusesAction(): JsonResponse
     {
         $reflection = new \ReflectionClass(StatusEnum::class);
@@ -51,10 +102,44 @@ class PayrollApiController extends BaseApiController
         return $this->jsonResponse(['statuses' => $statuses]);
     }
 
-    #[Route(path: '/period', name: 'api_payroll_period', methods: ['GET'])]
-    #[IsGranted('api_payroll_view_own')]
-    #[OA\Parameter(name: 'date', in: 'query', schema: new OA\Schema(type: 'string'), description: 'Reference date (Y-m-d)')]
-    #[OA\Response(response: 200, description: 'Biweekly period boundaries')]
+    /**
+     * @Route(path="/api/payroll/period", name="api_payroll_period", methods={"GET"})
+     *
+     * @SWG\Get(
+     *     tags={"LHG Payroll API"},
+     *     summary="Returns biweekly period start and end for a reference date",
+     *     @SWG\Parameter(
+     *         name="date",
+     *         in="query",
+     *         type="string",
+     *         required=false,
+     *         description="Reference date (Y-m-d), defaults to today"
+     *     )
+     * )
+     * @SWG\Response(
+     *     response=200,
+     *     description="Biweekly period boundaries",
+     *     @SWG\Schema(
+     *         type="object",
+     *         @SWG\Property(property="code", type="integer", example=200),
+     *         @SWG\Property(
+     *             property="data",
+     *             type="object",
+     *             @SWG\Property(
+     *                 property="period",
+     *                 type="object",
+     *                 @SWG\Property(property="selectedDate", type="string", example="2026-06-01"),
+     *                 @SWG\Property(property="start", type="string", example="2026-05-18"),
+     *                 @SWG\Property(property="end", type="string", example="2026-05-31")
+     *             )
+     *         )
+     *     )
+     * )
+     *
+     * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED') and is_granted('api_payroll_view_own')")
+     * @ApiSecurity(name="apiUser")
+     * @ApiSecurity(name="apiToken")
+     */
     public function periodAction(Request $request): JsonResponse
     {
         $period = $this->payrollBiweeklyService->resolvePeriod($request->query->get('date'));
@@ -68,12 +153,34 @@ class PayrollApiController extends BaseApiController
         ]);
     }
 
-    #[Route(path: '/biweekly', name: 'api_payroll_biweekly', methods: ['GET'])]
-    #[IsGranted('api_payroll_view_own')]
-    #[OA\Parameter(name: 'date', in: 'query', schema: new OA\Schema(type: 'string'), description: 'Reference date (Y-m-d)')]
-    #[OA\Parameter(name: 'user_id', in: 'query', schema: new OA\Schema(type: 'integer'), description: 'Target user (team lead / admin only)')]
-    #[OA\Response(response: 200, description: 'Biweekly payroll detail for a user')]
-    #[OA\Response(response: 403, description: 'Access denied')]
+    /**
+     * @Route(path="/api/payroll/biweekly", name="api_payroll_biweekly", methods={"GET"})
+     *
+     * @SWG\Get(
+     *     tags={"LHG Payroll API"},
+     *     summary="Returns biweekly payroll data for a user",
+     *     @SWG\Parameter(
+     *         name="date",
+     *         in="query",
+     *         type="string",
+     *         required=false,
+     *         description="Reference date (Y-m-d)"
+     *     ),
+     *     @SWG\Parameter(
+     *         name="user_id",
+     *         in="query",
+     *         type="integer",
+     *         required=false,
+     *         description="Target user ID (team lead / super admin only; omit for self)"
+     *     )
+     * )
+     * @SWG\Response(response=200, description="Biweekly payroll detail")
+     * @SWG\Response(response=403, description="Access denied")
+     *
+     * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED') and is_granted('api_payroll_view_own')")
+     * @ApiSecurity(name="apiUser")
+     * @ApiSecurity(name="apiToken")
+     */
     public function biweeklyAction(Request $request): JsonResponse
     {
         $userId = $request->query->get('user_id');
@@ -91,11 +198,27 @@ class PayrollApiController extends BaseApiController
         return $this->jsonResponse($data);
     }
 
-    #[Route(path: '/queues', name: 'api_payroll_queues', methods: ['GET'])]
-    #[IsGranted('api_payroll_view_own')]
-    #[OA\Parameter(name: 'date', in: 'query', schema: new OA\Schema(type: 'string'), description: 'Reference date (Y-m-d)')]
-    #[OA\Response(response: 200, description: 'Approval queues for the biweekly period (team lead / admin)')]
-    #[OA\Response(response: 403, description: 'Access denied')]
+    /**
+     * @Route(path="/api/payroll/queues", name="api_payroll_queues", methods={"GET"})
+     *
+     * @SWG\Get(
+     *     tags={"LHG Payroll API"},
+     *     summary="Returns approval queues for the biweekly period",
+     *     @SWG\Parameter(
+     *         name="date",
+     *         in="query",
+     *         type="string",
+     *         required=false,
+     *         description="Reference date (Y-m-d)"
+     *     )
+     * )
+     * @SWG\Response(response=200, description="Submitted, approved, and not-submitted lists")
+     * @SWG\Response(response=403, description="Access denied")
+     *
+     * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED') and is_granted('api_payroll_view_own')")
+     * @ApiSecurity(name="apiUser")
+     * @ApiSecurity(name="apiToken")
+     */
     public function queuesAction(Request $request): JsonResponse
     {
         try {

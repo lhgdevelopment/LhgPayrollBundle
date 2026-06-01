@@ -163,11 +163,11 @@ After deploying the plugin, reload Kimai:
 bin/console kimai:reload
 ```
 
-API routes load from `Resources/config/routes-api.yaml` with prefix `/api` (final paths: `/api/payroll/...`).
+API routes load from `Resources/config/routes-api.yaml` (annotation routes with full paths `/api/payroll/...`).
 
 ## Swagger / API documentation (Kimai UI)
 
-Endpoints are documented with **OpenAPI 3 attributes** (required for Kimai 2.x). After deploy, open **Profile → API access → API documentation** (or `/api/doc`).
+Endpoints use **Swagger annotations** (`@SWG\Get`, `@SWG\Post`, …) under the tag **LHG Payroll API**, matching the HiveBundle pattern. After deploy, open **Profile → API access → API documentation** (or `/api/doc`).
 
 If payroll routes are missing or "Try it out" uses the wrong host on **Cloudron**, add to `/app/data/local.yaml` and restart the app:
 
