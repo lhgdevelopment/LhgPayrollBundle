@@ -8,8 +8,8 @@ use App\Entity\UserPreference;
 use Doctrine\ORM\EntityManagerInterface;
 use KimaiPlugin\LhgPayrollBundle\Service\TeamLeadAndFinanceService;
 use Nelmio\ApiDocBundle\Annotation\Security as ApiSecurity;
-use Symfony\Component\Security\Core\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Core\Security as SecurityFacade;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,7 +32,7 @@ class PayrollUserApiController extends BaseApiController
     public function __construct(
         EntityManagerInterface $entityManager,
         TeamLeadAndFinanceService $teamLeadAndFinanceService,
-        Security $security
+        SecurityFacade $security
     ) {
         $this->entityManager = $entityManager;
         $this->teamLeadAndFinanceService = $teamLeadAndFinanceService;
