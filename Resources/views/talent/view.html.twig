@@ -34,6 +34,10 @@
                                 <th>{{ 'label.title'|trans }}</th>
                                 <td>{{ talent.title }}</td>
                             </tr>
+                            <tr>
+                                <th>{{ 'label.hourly_rate'|trans }}</th>
+                                <td>${{ talent.getPreferenceValue('hourly_rate') }}</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
